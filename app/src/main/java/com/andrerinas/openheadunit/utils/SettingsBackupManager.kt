@@ -79,6 +79,7 @@ object SettingsBackupManager {
         "gps-navigation" to ValueType.BOOLEAN,
         "show-navigation-notifications" to ValueType.BOOLEAN,
         Settings.KEY_SYNC_MEDIA_SESSION_AA_METADATA to ValueType.BOOLEAN,
+        Settings.KEY_LIBREHU_FOLLOW_LAUNCHER_THEME to ValueType.BOOLEAN,
         "night-mode" to ValueType.INT,
         "night-mode-threshold-lux" to ValueType.INT,
         "night-mode-threshold-brightness" to ValueType.INT,

@@ -83,8 +83,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/disclaimer_accept"
-                android:textColor="@android:color/white"
-                app:backgroundTint="@color/brand_teal"
+                android:textColor="?attr/librehuOnAccent"
+                app:backgroundTint="?attr/librehuAccent"
                 android:textStyle="bold"/>
 
         </LinearLayout>

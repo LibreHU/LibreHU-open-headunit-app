@@ -15,10 +15,10 @@
         android:layout_height="64dp"
         android:text="@string/save"
         android:textAllCaps="true"
-        android:textColor="@android:color/white"
+        android:textColor="?attr/librehuOnAccent"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:backgroundTint="@color/brand_teal"
+        app:backgroundTint="?attr/librehuAccent"
         app:cornerRadius="12dp"
         app:rippleColor="#33FFFFFF" />
 

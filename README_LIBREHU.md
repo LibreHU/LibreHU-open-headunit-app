@@ -38,6 +38,32 @@ Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »)
   applis) viennent de LibreHU-service (`content://org.librehu.service.vehicle/info`, permission signature
   `org.librehu.permission.VEHICLE`) et remplissent les reglages vehicule d'Open Headunit (envoyes au telephone a la
   connexion). Une valeur vide laisse celle d'Open Headunit.
+- **Theme du launcher** (`librehu/LibreHuTheme.kt`) : clair / sombre et couleur d'accent de LibreHU Launcher
+  (`content://org.librehu.launcher.theme/theme` et diffusion `org.librehu.action.THEME_CHANGED`), suivis en direct.
+  L'accent du launcher (un de ses 8 : bleu, sarcelle, vert, jaune, orange, rouge, rose, violet, en variante claire ou
+  sombre) remplace le sarcelle d'Open Headunit : boutons, interrupteurs, dialogues, barres de progression. Les styles
+  et les mises en page passent par l'attribut `?attr/librehuAccent` (et `?attr/librehuOnAccent` pour le texte pose
+  dessus), et un `ThemeOverlay.LibreHU.*` est pose sur chaque theme d'activite et de dialogue plein ecran. Le mode
+  jour / nuit de l'appli devient celui du launcher ; le moteur d'Open Headunit (capteur de lumiere, lever du soleil…)
+  est alors en pause. Option **Reglages → Mode sombre → « Suivre le launcher LibreHU »** : activee par defaut et
+  visible seulement si le launcher est installe. Desactivee, les reglages de theme d'Open Headunit reviennent. La
+  projection n'est pas recreee (seulement un changement de configuration), donc la video continue.
+- **Pre-configuration LibreHU** (`librehu/LibreHuDefaults.kt`) : appliquee une fois, si LibreHU Launcher ou
+  LibreHU-service est installe, et **seulement pour les reglages jamais choisis**. Un choix de l'utilisateur ou une
+  sauvegarde importee reste.
+
+  | Reglage | Valeur | Pourquoi |
+  |---|---|---|
+  | Demarrage au branchement USB | active | rien a ouvrir a la main en montant en voiture |
+  | Connexion automatique si un seul appareil | activee | un seul telephone branche : rien a choisir |
+  | Orientation | paysage fixe | dalle 1280x720 montee en paysage |
+  | Lecture en cours d'Android Auto dans la session media | activee | titre, artiste et pochette dans le lecteur du launcher et pour les touches du volant |
+
+  Ce qui reste hors de la pre-configuration :
+  - la video (resolution, codec, rendu, densite), choisie par l'assistant de premier demarrage d'Open Headunit d'apres
+    la taille de la dalle et les decodeurs H.264 / H.265 ;
+  - le mode nuit envoye au telephone, qui peut suivre les phares (LibreHU-service) ;
+  - l'avertissement de securite de l'assistant, qui n'est pas saute.
 - **LibreHU-service** (onglet Android Auto) : etat de la session (`com.andrerinas.headunitrevived.SESSION_STATE`),
   mode jour / nuit selon les phares (`ACTION_SET_NIGHT_MODE`), connexion USB, deconnexion, affichage, reglages ;
   marche aussi avec Open Headunit d'origine (sans la configuration).

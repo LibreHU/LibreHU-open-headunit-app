@@ -11,13 +11,13 @@
         android:minWidth="0dp"
         android:minHeight="0dp"
         app:icon="@drawable/ic_refresh_white"
-        app:iconTint="@android:color/white"
+        app:iconTint="?attr/librehuOnAccent"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
         android:layout_width="32dp"
         android:layout_height="40dp"
         android:enabled="true"
-        android:textColor="@android:color/white"
+        android:textColor="?attr/librehuOnAccent"
         app:cornerRadius="20dp"
-        app:backgroundTint="@color/brand_teal" />
+        app:backgroundTint="?attr/librehuAccent" />
 </FrameLayout>

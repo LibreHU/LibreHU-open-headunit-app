@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- LibreHU fork: accent of the app (Open Headunit teal, or the LibreHU launcher's accent) and the colour on it. -->
+    <attr name="librehuAccent" format="color" />
+    <attr name="librehuOnAccent" format="color" />
+</resources>

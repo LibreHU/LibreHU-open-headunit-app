@@ -785,6 +785,14 @@ class OnboardingActivity : BaseActivity() {
     // --- Appearance (reuse the same option arrays as the settings screen) ---
 
     private fun updateThemeButtonText() {
+        // LibreHU fork: the launcher decides light / dark and the accent (option in Settings > Dark mode).
+        if (com.andrerinas.openheadunit.librehu.LibreHuTheme.following) {
+            findViewById<MaterialButton>(R.id.onb_theme_button)?.apply {
+                setText(R.string.librehu_theme_from_launcher)
+                isEnabled = false
+            }
+            return
+        }
         val labels = resources.getStringArray(R.array.app_theme)
         val idx = settings.appTheme.value.coerceIn(0, labels.size - 1)
         findViewById<MaterialButton>(R.id.onb_theme_button)?.text = labels[idx]

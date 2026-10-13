@@ -1361,6 +1361,19 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("show-toast-messages", true)
         set(value) { prefs.edit().putBoolean("show-toast-messages", value).apply() }
 
+    /** LibreHU fork: light / dark and accent of the LibreHU launcher instead of the app theme settings. */
+    var librehuFollowLauncherTheme: Boolean
+        get() = prefs.getBoolean(KEY_LIBREHU_FOLLOW_LAUNCHER_THEME, true)
+        set(value) { prefs.edit().putBoolean(KEY_LIBREHU_FOLLOW_LAUNCHER_THEME, value).apply() }
+
+    /** LibreHU fork: version of the LibreHU preset already applied (see LibreHuDefaults). */
+    var librehuPresetVersion: Int
+        get() = prefs.getInt("librehu-preset-version", 0)
+        set(value) { prefs.edit().putInt("librehu-preset-version", value).apply() }
+
+    /** True when the user (or a preset) already chose [key]: presets only fill the untouched ones. */
+    fun isSet(key: String): Boolean = prefs.contains(key)
+
     var reopenOnReconnection: Boolean
         get() {
             if (isCarLauncherActive) return false
@@ -1782,6 +1795,7 @@ class Settings(private val context: Context) {
         const val KEY_ASSISTANT_VOLUME_OFFSET = "assistant-volume-offset"
         const val KEY_NAVIGATION_VOLUME_OFFSET = "navigation-volume-offset"
         const val KEY_ENABLE_CAR_LAUNCHER = "enable-car-launcher"
+        const val KEY_LIBREHU_FOLLOW_LAUNCHER_THEME = "librehu-follow-launcher-theme"
 
         const val AUTO_CONNECT_LAST_SESSION = "last-session"
         const val AUTO_CONNECT_SELF_MODE = "self-mode"

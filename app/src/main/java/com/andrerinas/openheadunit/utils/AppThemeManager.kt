@@ -327,6 +327,12 @@ class AppThemeManager(
                 }
                 return
             }
+            // LibreHU fork: the launcher's light / dark wins while the app follows it.
+            if (com.andrerinas.openheadunit.librehu.LibreHuTheme.following) {
+                com.andrerinas.openheadunit.librehu.LibreHuTheme.applyNightMode()
+                signalThemeChange()
+                return
+            }
             val mode = when (settings.appTheme) {
                 Settings.AppTheme.AUTOMATIC -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 Settings.AppTheme.CLEAR -> AppCompatDelegate.MODE_NIGHT_NO
@@ -358,6 +364,11 @@ class AppThemeManager(
             }
             com.andrerinas.openheadunit.App.appThemeManager?.stop()
             com.andrerinas.openheadunit.App.appThemeManager = null
+            // LibreHU fork: no light sensor / sunrise engine while the launcher decides light or dark.
+            if (com.andrerinas.openheadunit.librehu.LibreHuTheme.following) {
+                com.andrerinas.openheadunit.librehu.LibreHuTheme.applyNightMode()
+                return
+            }
             if (!isStaticMode(settings.appTheme)) {
                 val manager = AppThemeManager(context.applicationContext, settings)
                 com.andrerinas.openheadunit.App.appThemeManager = manager

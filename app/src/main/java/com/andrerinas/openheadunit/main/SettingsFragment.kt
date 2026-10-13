@@ -5217,11 +5217,11 @@ class SettingsFragment : Fragment() {
             when (backend) {
                 OemAppManager.ExecutionBackend.ROOT -> {
                     tvBackendStatus.setText(R.string.oem_app_backend_root)
-                    tvBackendStatus.setTextColor(ContextCompat.getColor(context, R.color.brand_teal))
+                    tvBackendStatus.setTextColor(com.andrerinas.openheadunit.librehu.LibreHuTheme.accent(context))
                 }
                 OemAppManager.ExecutionBackend.ADB -> {
                     tvBackendStatus.setText(R.string.oem_app_backend_adb)
-                    tvBackendStatus.setTextColor(ContextCompat.getColor(context, R.color.brand_teal))
+                    tvBackendStatus.setTextColor(com.andrerinas.openheadunit.librehu.LibreHuTheme.accent(context))
                 }
                 OemAppManager.ExecutionBackend.NONE -> {
                     tvBackendStatus.setText(R.string.oem_app_backend_none)

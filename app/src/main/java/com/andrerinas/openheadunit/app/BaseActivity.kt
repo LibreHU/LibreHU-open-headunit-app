@@ -2,6 +2,7 @@ package com.andrerinas.openheadunit.app
 
 import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -16,6 +17,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.andrerinas.openheadunit.R
+import com.andrerinas.openheadunit.librehu.LibreHuTheme
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppThemeManager
 import com.andrerinas.openheadunit.utils.LocaleHelper
@@ -42,6 +44,12 @@ open class BaseActivity : AppCompatActivity() {
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrapContext(newBase))
+    }
+
+    // LibreHU fork: the launcher accent over every theme set on this activity (manifest, setTheme).
+    override fun onApplyThemeResource(theme: Resources.Theme, resid: Int, first: Boolean) {
+        super.onApplyThemeResource(theme, resid, first)
+        LibreHuTheme.applyTo(theme)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

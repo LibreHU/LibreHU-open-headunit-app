@@ -21,6 +21,9 @@
         <package android:name="com.autokit" />
         <package android:name="com.suding.speedplay" />
         <package android:name="com.tlink.carplay" />
+        <!-- LibreHU fork: launcher theme and LibreHU-service vehicle providers (Android 11+ package visibility). -->
+        <provider android:authorities="org.librehu.launcher.theme" />
+        <provider android:authorities="org.librehu.service.vehicle" />
     </queries>
 
     <uses-feature

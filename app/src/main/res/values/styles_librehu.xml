@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- LibreHU fork: the launcher accent over AppTheme (LibreHuTheme applies one on every activity and dialog theme). -->
+    <style name="ThemeOverlay.LibreHU.Blue" parent="">
+        <item name="librehuAccent">@color/librehu_accent_blue</item>
+        <item name="librehuOnAccent">@color/librehu_on_accent</item>
+    </style>
+    <style name="ThemeOverlay.LibreHU.Teal" parent="">
+        <item name="librehuAccent">@color/librehu_accent_teal</item>
+        <item name="librehuOnAccent">@color/librehu_on_accent</item>
+    </style>
+    <style name="ThemeOverlay.LibreHU.Green" parent="">
+        <item name="librehuAccent">@color/librehu_accent_green</item>
+        <item name="librehuOnAccent">@color/librehu_on_accent</item>
+    </style>
+    <style name="ThemeOverlay.LibreHU.Yellow" parent="">
+        <item name="librehuAccent">@color/librehu_accent_yellow</item>
+        <item name="librehuOnAccent">@color/librehu_on_accent</item>
+    </style>
+    <style name="ThemeOverlay.LibreHU.Orange" parent="">
+        <item name="librehuAccent">@color/librehu_accent_orange</item>
+        <item name="librehuOnAccent">@color/librehu_on_accent</item>
+    </style>
+    <style name="ThemeOverlay.LibreHU.Red" parent="">
+        <item name="librehuAccent">@color/librehu_accent_red</item>
+        <item name="librehuOnAccent">@color/librehu_on_accent</item>
+    </style>
+    <style name="ThemeOverlay.LibreHU.Pink" parent="">
+        <item name="librehuAccent">@color/librehu_accent_pink</item>
+        <item name="librehuOnAccent">@color/librehu_on_accent</item>
+    </style>
+    <style name="ThemeOverlay.LibreHU.Purple" parent="">
+        <item name="librehuAccent">@color/librehu_accent_purple</item>
+        <item name="librehuOnAccent">@color/librehu_on_accent</item>
+    </style>
+</resources>

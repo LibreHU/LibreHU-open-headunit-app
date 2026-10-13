@@ -7,16 +7,22 @@
         <item name="android:windowBackground">@drawable/bg</item>
         <item name="android:windowTranslucentNavigation">false</item>
         <item name="android:windowTranslucentStatus">false</item>
-        <item name="colorPrimary">@color/brand_teal</item>
-        <item name="colorSecondary">@color/brand_teal</item>
-        <item name="colorAccent">@color/brand_teal</item>
-        <item name="android:colorAccent">@color/brand_teal</item>
+        <!-- LibreHU fork: Open Headunit teal unless LibreHuTheme puts the launcher accent over it. -->
+        <item name="librehuAccent">@color/brand_teal</item>
+        <item name="librehuOnAccent">@android:color/white</item>
+        <item name="colorPrimary">?attr/librehuAccent</item>
+        <item name="colorSecondary">?attr/librehuAccent</item>
+        <item name="colorAccent">?attr/librehuAccent</item>
+        <item name="android:colorAccent">?attr/librehuAccent</item>
         <item name="android:dialogTheme">@style/DarkAlertDialog</item>
         <item name="android:alertDialogTheme">@style/DarkAlertDialog</item>
         <item name="materialAlertDialogTheme">@style/DarkAlertDialog</item>
     </style>
 
-    <style name="AppTheme.Translucent" parent="android:Theme.Translucent.NoTitleBar" />
+    <style name="AppTheme.Translucent" parent="android:Theme.Translucent.NoTitleBar">
+        <item name="librehuAccent">@color/brand_teal</item>
+        <item name="librehuOnAccent">@android:color/white</item>
+    </style>
 
     <style name="AppTheme.Fullscreen" parent="AppTheme">
         <item name="android:windowFullscreen">true</item>
@@ -33,11 +39,11 @@
     </style>
 
     <style name="DarkAlertDialog" parent="Theme.Material3.DayNight.Dialog.Alert">
-        <item name="colorPrimary">@color/brand_teal</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorSecondary">@color/brand_teal</item>
-        <item name="colorOnSecondary">@android:color/white</item>
-        <item name="android:colorAccent">@color/brand_teal</item>
+        <item name="colorPrimary">?attr/librehuAccent</item>
+        <item name="colorOnPrimary">?attr/librehuOnAccent</item>
+        <item name="colorSecondary">?attr/librehuAccent</item>
+        <item name="colorOnSecondary">?attr/librehuOnAccent</item>
+        <item name="android:colorAccent">?attr/librehuAccent</item>
         <item name="android:background">?attr/colorSurface</item>
         <item name="android:textColorPrimary">@color/adaptive_text_color</item>
         <item name="buttonBarPositiveButtonStyle">@style/DialogButton.Positive</item>
@@ -47,15 +53,15 @@
     </style>
 
     <style name="DialogButton.Positive" parent="Widget.Material3.Button">
-        <item name="android:textColor">@android:color/white</item>
-        <item name="backgroundTint">@color/brand_teal</item>
-        <item name="android:backgroundTint">@color/brand_teal</item>
+        <item name="android:textColor">?attr/librehuOnAccent</item>
+        <item name="backgroundTint">?attr/librehuAccent</item>
+        <item name="android:backgroundTint">?attr/librehuAccent</item>
         <item name="android:background">@drawable/btn_primary_teal</item>
     </style>
 
     <style name="DialogButton.Negative" parent="Widget.Material3.Button.TextButton">
-        <item name="android:textColor">@color/brand_teal</item>
-        <item name="colorSecondary">@color/brand_teal</item>
+        <item name="android:textColor">?attr/librehuAccent</item>
+        <item name="colorSecondary">?attr/librehuAccent</item>
     </style>
     <style name="DialogWindowTitle" parent="android:Widget.TextView">
         <item name="android:textColor">@color/text_primary</item>

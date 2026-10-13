@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.andrerinas.openheadunit.App
 import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.AapService
+import com.andrerinas.openheadunit.librehu.LibreHuTheme
 import com.andrerinas.openheadunit.main.settings.SettingItem
 import com.andrerinas.openheadunit.main.settings.SettingsAdapter
 import com.andrerinas.openheadunit.utils.AppThemeManager
@@ -579,139 +580,156 @@ class DarkModeFragment : Fragment(), SensorEventListener {
         // --- App Theme ---
         items.add(SettingItem.CategoryHeader("appTheme", R.string.app_theme))
 
-        val appThemeTitles = resources.getStringArray(R.array.app_theme)
-        items.add(SettingItem.SettingEntry(
-            stableId = "appTheme",
-            nameResId = R.string.app_theme,
-            value = appThemeTitles[pendingAppTheme!!.value],
-            onClick = { _ ->
-                MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
-                    .setTitle(R.string.change_app_theme)
-                    .setSingleChoiceItems(appThemeTitles, pendingAppTheme!!.value) { dialog, which ->
-                        pendingAppTheme = Settings.AppTheme.fromInt(which)
-                        if (pendingAppTheme != Settings.AppTheme.LOCATION) restoreAppTheme = pendingAppTheme!!
-                        // Reset useExtremeDarkMode for static modes
-                        if (pendingAppTheme == Settings.AppTheme.CLEAR ||
-                            pendingAppTheme == Settings.AppTheme.DARK ||
-                            pendingAppTheme == Settings.AppTheme.EXTREME_DARK) {
-                            pendingUseExtremeDarkMode = false
-                        }
-                        checkChanges()
-                        dialog.dismiss()
-                        updateSettingsList()
-                    }
-                    .show()
-            }
-        ))
-
-        // "Use Extreme Dark" toggle for auto modes
-        if (pendingAppTheme != Settings.AppTheme.CLEAR &&
-            pendingAppTheme != Settings.AppTheme.DARK &&
-            pendingAppTheme != Settings.AppTheme.EXTREME_DARK) {
+        // LibreHU fork: light / dark and accent of the LibreHU launcher, instead of the choices below.
+        val ctx = requireContext()
+        if (LibreHuTheme.isAvailable(ctx)) {
             items.add(SettingItem.ToggleSettingEntry(
-                stableId = "useExtremeDarkMode",
-                nameResId = R.string.use_extreme_dark,
-                descriptionResId = R.string.use_extreme_dark_description,
-                isChecked = pendingUseExtremeDarkMode!!,
+                stableId = "librehuFollowLauncherTheme",
+                nameResId = R.string.librehu_follow_launcher_theme,
+                descriptionResId = R.string.librehu_follow_launcher_theme_description,
+                isChecked = settings.librehuFollowLauncherTheme,
                 onCheckedChanged = { isChecked ->
-                    pendingUseExtremeDarkMode = isChecked
-                    checkChanges()
+                    LibreHuTheme.setEnabled(ctx, isChecked)
                     updateSettingsList()
                 }
             ))
         }
 
-        // App theme sub-options: threshold slider for Light Sensor / Screen Brightness
-        if (pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR || pendingAppTheme == Settings.AppTheme.SCREEN_BRIGHTNESS) {
-            val isSensor = pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR
-            val currentValue = if (isSensor) pendingAppThemeThresholdLux else pendingAppThemeThresholdBrightness
-            val title = getString(if (isSensor) R.string.threshold_light_title else R.string.threshold_brightness_title)
-            val hint = getString(if (isSensor) R.string.threshold_light_hint else R.string.threshold_brightness_hint)
-            val currentReading = if (isSensor) {
-                if (cachedLux >= 0) getString(R.string.current_light_reading, cachedLux.toInt()) else ""
-            } else {
-                if (cachedBrightness >= 0) getString(R.string.current_brightness_reading, cachedBrightness) else ""
-            }
-            val displayValue = if (isSensor) {
-                val base = "${currentValue ?: 0} Lux"
-                if (currentReading.isNotEmpty()) "$base ($currentReading)" else base
-            } else {
-                val base = "${currentValue ?: 0} / 255"
-                if (currentReading.isNotEmpty()) "$base ($currentReading)" else base
-            }
-
+        if (!LibreHuTheme.following) {
+            val appThemeTitles = resources.getStringArray(R.array.app_theme)
             items.add(SettingItem.SettingEntry(
-                stableId = "appThemeThreshold",
-                nameResId = if (isSensor) R.string.threshold_light_title else R.string.threshold_brightness_title,
-                value = displayValue,
+                stableId = "appTheme",
+                nameResId = R.string.app_theme,
+                value = appThemeTitles[pendingAppTheme!!.value],
                 onClick = { _ ->
-                    if (isSensor) {
-                        showLuxSliderDialog(
-                            title = title,
-                            message = hint,
-                            initialLux = currentValue ?: 0,
-                            currentReading = currentReading,
-                            onConfirm = { newLux ->
-                                pendingAppThemeThresholdLux = newLux
-                                checkChanges()
-                                updateSettingsList()
+                    MaterialAlertDialogBuilder(requireContext(), R.style.DarkAlertDialog)
+                        .setTitle(R.string.change_app_theme)
+                        .setSingleChoiceItems(appThemeTitles, pendingAppTheme!!.value) { dialog, which ->
+                            pendingAppTheme = Settings.AppTheme.fromInt(which)
+                            if (pendingAppTheme != Settings.AppTheme.LOCATION) restoreAppTheme = pendingAppTheme!!
+                            // Reset useExtremeDarkMode for static modes
+                            if (pendingAppTheme == Settings.AppTheme.CLEAR ||
+                                pendingAppTheme == Settings.AppTheme.DARK ||
+                                pendingAppTheme == Settings.AppTheme.EXTREME_DARK) {
+                                pendingUseExtremeDarkMode = false
                             }
-                        )
-                    } else {
-                        showSliderDialog(
-                            title = title,
-                            message = hint,
-                            initialPercentage = currentValue ?: 100,
-                            minLabel = "0",
-                            maxLabel = "255",
-                            formatValue = { v -> "$v" },
-                            currentReading = currentReading,
-                            sliderMax = 255,
-                            onConfirm = { newVal ->
-                                pendingAppThemeThresholdBrightness = newVal
-                                checkChanges()
-                                updateSettingsList()
-                            }
-                        )
+                            checkChanges()
+                            dialog.dismiss()
+                            updateSettingsList()
+                        }
+                        .show()
+                }
+            ))
+
+            // "Use Extreme Dark" toggle for auto modes
+            if (pendingAppTheme != Settings.AppTheme.CLEAR &&
+                pendingAppTheme != Settings.AppTheme.DARK &&
+                pendingAppTheme != Settings.AppTheme.EXTREME_DARK) {
+                items.add(SettingItem.ToggleSettingEntry(
+                    stableId = "useExtremeDarkMode",
+                    nameResId = R.string.use_extreme_dark,
+                    descriptionResId = R.string.use_extreme_dark_description,
+                    isChecked = pendingUseExtremeDarkMode!!,
+                    onCheckedChanged = { isChecked ->
+                        pendingUseExtremeDarkMode = isChecked
+                        checkChanges()
+                        updateSettingsList()
                     }
-                }
-            ))
+                ))
+            }
 
+            // App theme sub-options: threshold slider for Light Sensor / Screen Brightness
+            if (pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR || pendingAppTheme == Settings.AppTheme.SCREEN_BRIGHTNESS) {
+                val isSensor = pendingAppTheme == Settings.AppTheme.LIGHT_SENSOR
+                val currentValue = if (isSensor) pendingAppThemeThresholdLux else pendingAppThemeThresholdBrightness
+                val title = getString(if (isSensor) R.string.threshold_light_title else R.string.threshold_brightness_title)
+                val hint = getString(if (isSensor) R.string.threshold_light_hint else R.string.threshold_brightness_hint)
+                val currentReading = if (isSensor) {
+                    if (cachedLux >= 0) getString(R.string.current_light_reading, cachedLux.toInt()) else ""
+                } else {
+                    if (cachedBrightness >= 0) getString(R.string.current_brightness_reading, cachedBrightness) else ""
+                }
+                val displayValue = if (isSensor) {
+                    val base = "${currentValue ?: 0} Lux"
+                    if (currentReading.isNotEmpty()) "$base ($currentReading)" else base
+                } else {
+                    val base = "${currentValue ?: 0} / 255"
+                    if (currentReading.isNotEmpty()) "$base ($currentReading)" else base
+                }
+
+                items.add(SettingItem.SettingEntry(
+                    stableId = "appThemeThreshold",
+                    nameResId = if (isSensor) R.string.threshold_light_title else R.string.threshold_brightness_title,
+                    value = displayValue,
+                    onClick = { _ ->
+                        if (isSensor) {
+                            showLuxSliderDialog(
+                                title = title,
+                                message = hint,
+                                initialLux = currentValue ?: 0,
+                                currentReading = currentReading,
+                                onConfirm = { newLux ->
+                                    pendingAppThemeThresholdLux = newLux
+                                    checkChanges()
+                                    updateSettingsList()
+                                }
+                            )
+                        } else {
+                            showSliderDialog(
+                                title = title,
+                                message = hint,
+                                initialPercentage = currentValue ?: 100,
+                                minLabel = "0",
+                                maxLabel = "255",
+                                formatValue = { v -> "$v" },
+                                currentReading = currentReading,
+                                sliderMax = 255,
+                                onConfirm = { newVal ->
+                                    pendingAppThemeThresholdBrightness = newVal
+                                    checkChanges()
+                                    updateSettingsList()
+                                }
+                            )
+                        }
+                    }
+                ))
+
+            }
+
+            // App theme sub-options: time pickers for Manual Time
+            if (pendingAppTheme == Settings.AppTheme.MANUAL_TIME) {
+                val formatTime = { minutes: Int -> "%02d:%02d".format(minutes / 60, minutes % 60) }
+
+                items.add(SettingItem.SettingEntry(
+                    stableId = "appThemeStart",
+                    nameResId = R.string.night_mode_start,
+                    value = formatTime(pendingAppThemeManualStart!!),
+                    onClick = { _ ->
+                        TimePickerDialog(requireContext(), { _, hour, minute ->
+                            pendingAppThemeManualStart = hour * 60 + minute
+                            checkChanges()
+                            updateSettingsList()
+                        }, pendingAppThemeManualStart!! / 60, pendingAppThemeManualStart!! % 60, true).show()
+                    }
+                ))
+
+                items.add(SettingItem.SettingEntry(
+                    stableId = "appThemeEnd",
+                    nameResId = R.string.night_mode_end,
+                    value = formatTime(pendingAppThemeManualEnd!!),
+                    onClick = { _ ->
+                        TimePickerDialog(requireContext(), { _, hour, minute ->
+                            pendingAppThemeManualEnd = hour * 60 + minute
+                            checkChanges()
+                            updateSettingsList()
+                        }, pendingAppThemeManualEnd!! / 60, pendingAppThemeManualEnd!! % 60, true).show()
+                    }
+                ))
+            }
+
+            // App theme contextual sub-options (Location has its own group below)
+            if (pendingAppTheme == Settings.AppTheme.AUTO_SUNRISE) addSunriseReference(items, "app")
         }
-
-        // App theme sub-options: time pickers for Manual Time
-        if (pendingAppTheme == Settings.AppTheme.MANUAL_TIME) {
-            val formatTime = { minutes: Int -> "%02d:%02d".format(minutes / 60, minutes % 60) }
-
-            items.add(SettingItem.SettingEntry(
-                stableId = "appThemeStart",
-                nameResId = R.string.night_mode_start,
-                value = formatTime(pendingAppThemeManualStart!!),
-                onClick = { _ ->
-                    TimePickerDialog(requireContext(), { _, hour, minute ->
-                        pendingAppThemeManualStart = hour * 60 + minute
-                        checkChanges()
-                        updateSettingsList()
-                    }, pendingAppThemeManualStart!! / 60, pendingAppThemeManualStart!! % 60, true).show()
-                }
-            ))
-
-            items.add(SettingItem.SettingEntry(
-                stableId = "appThemeEnd",
-                nameResId = R.string.night_mode_end,
-                value = formatTime(pendingAppThemeManualEnd!!),
-                onClick = { _ ->
-                    TimePickerDialog(requireContext(), { _, hour, minute ->
-                        pendingAppThemeManualEnd = hour * 60 + minute
-                        checkChanges()
-                        updateSettingsList()
-                    }, pendingAppThemeManualEnd!! / 60, pendingAppThemeManualEnd!! % 60, true).show()
-                }
-            ))
-        }
-
-        // App theme contextual sub-options (Location has its own group below)
-        if (pendingAppTheme == Settings.AppTheme.AUTO_SUNRISE) addSunriseReference(items, "app")
 
         // --- Android Auto Night Mode ---
         items.add(SettingItem.CategoryHeader("aaNightMode", R.string.night_mode))

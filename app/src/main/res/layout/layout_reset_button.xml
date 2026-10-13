@@ -14,7 +14,7 @@
         android:minHeight="0dp"
         android:text="@string/reset"
         android:enabled="true"
-        android:textColor="@android:color/white"
+        android:textColor="?attr/librehuOnAccent"
         app:cornerRadius="20dp"
-        app:backgroundTint="@color/brand_teal" />
+        app:backgroundTint="?attr/librehuAccent" />
 </FrameLayout>

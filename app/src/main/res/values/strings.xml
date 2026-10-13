@@ -1329,4 +1329,8 @@
     <string name="copy_to_clipboard">Copy</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="audio_settings_reconnect">Audio settings saved. Reconnect Android Auto to apply them.</string>
+    <!-- LibreHU fork -->
+    <string name="librehu_follow_launcher_theme">Follow the LibreHU launcher</string>
+    <string name="librehu_follow_launcher_theme_description">Light or dark and accent colour of the LibreHU launcher, changed with it</string>
+    <string name="librehu_theme_from_launcher">LibreHU launcher</string>
 </resources>

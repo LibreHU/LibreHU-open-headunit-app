@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- LibreHU launcher accents, dark variant (Accent.onDark of the launcher). -->
+    <color name="librehu_accent_blue">#8AB4F8</color>
+    <color name="librehu_accent_teal">#78D9EC</color>
+    <color name="librehu_accent_green">#81C995</color>
+    <color name="librehu_accent_yellow">#FDD663</color>
+    <color name="librehu_accent_orange">#FCAD70</color>
+    <color name="librehu_accent_red">#F28B82</color>
+    <color name="librehu_accent_pink">#FF8BCB</color>
+    <color name="librehu_accent_purple">#C58AF9</color>
+    <color name="librehu_on_accent">#202124</color>
+</resources>

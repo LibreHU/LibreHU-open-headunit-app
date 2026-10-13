@@ -31,11 +31,11 @@
                 android:layout_height="48dp"
                 android:text="-"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/librehuOnAccent"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="@color/brand_teal"
+                app:backgroundTint="?attr/librehuAccent"
                 app:iconPadding="0dp" />
             <EditText
                 android:id="@+id/input_top"
@@ -53,11 +53,11 @@
                 android:layout_height="48dp"
                 android:text="+"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/librehuOnAccent"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="@color/brand_teal"
+                app:backgroundTint="?attr/librehuAccent"
                 app:iconPadding="0dp" />
         </LinearLayout>
 
@@ -82,11 +82,11 @@
                 android:layout_height="48dp"
                 android:text="-"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/librehuOnAccent"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="@color/brand_teal" />
+                app:backgroundTint="?attr/librehuAccent" />
             <EditText
                 android:id="@+id/input_bottom"
                 android:layout_width="0dp"
@@ -103,11 +103,11 @@
                 android:layout_height="48dp"
                 android:text="+"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/librehuOnAccent"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="@color/brand_teal" />
+                app:backgroundTint="?attr/librehuAccent" />
         </LinearLayout>
 
         <!-- Left -->
@@ -131,11 +131,11 @@
                 android:layout_height="48dp"
                 android:text="-"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/librehuOnAccent"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="@color/brand_teal" />
+                app:backgroundTint="?attr/librehuAccent" />
             <EditText
                 android:id="@+id/input_left"
                 android:layout_width="0dp"
@@ -152,11 +152,11 @@
                 android:layout_height="48dp"
                 android:text="+"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/librehuOnAccent"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="@color/brand_teal" />
+                app:backgroundTint="?attr/librehuAccent" />
         </LinearLayout>
 
         <!-- Right -->
@@ -180,11 +180,11 @@
                 android:layout_height="48dp"
                 android:text="-"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/librehuOnAccent"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="@color/brand_teal" />
+                app:backgroundTint="?attr/librehuAccent" />
             <EditText
                 android:id="@+id/input_right"
                 android:layout_width="0dp"
@@ -201,11 +201,11 @@
                 android:layout_height="48dp"
                 android:text="+"
                 android:textSize="24sp"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/librehuOnAccent"
                 android:padding="0dp"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"
-                app:backgroundTint="@color/brand_teal" />
+                app:backgroundTint="?attr/librehuAccent" />
         </LinearLayout>
 
     </LinearLayout>

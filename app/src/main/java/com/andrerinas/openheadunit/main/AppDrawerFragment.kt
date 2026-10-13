@@ -105,6 +105,12 @@ class AppDrawerFragment : DialogFragment() {
         setStyle(STYLE_NORMAL, R.style.AppTheme_Fullscreen)
     }
 
+    // LibreHU fork: the dialog theme (AppTheme.Fullscreen) resets the accent, put the launcher's back.
+    override fun onCreateDialog(savedInstanceState: Bundle?): android.app.Dialog =
+        super.onCreateDialog(savedInstanceState).also {
+            com.andrerinas.openheadunit.librehu.LibreHuTheme.applyTo(it.context.theme)
+        }
+
     override fun onStart() {
         super.onStart()
         if (dialog != null) {

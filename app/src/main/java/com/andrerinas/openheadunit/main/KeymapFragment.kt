@@ -160,7 +160,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
                 val displayText = "Action: $action\n$codeText\n$extras"
                 
                 keypressDebuggerTextView.text = displayText
-                keypressDebuggerTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.brand_teal))
+                keypressDebuggerTextView.setTextColor(com.andrerinas.openheadunit.librehu.LibreHuTheme.accent(requireContext()))
                 return
             }
 
@@ -217,7 +217,7 @@ class KeymapFragment : Fragment(), MainActivity.KeyListener {
         AppLog.i("KeymapFragment: Captured $keyName ($keyCode) $actionName")
         
         keypressDebuggerTextView.text = "Key: $keyName ($keyCode) - $actionName"
-        keypressDebuggerTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.brand_teal))
+        keypressDebuggerTextView.setTextColor(com.andrerinas.openheadunit.librehu.LibreHuTheme.accent(requireContext()))
 
         if (assignTargetCode != KeyEvent.KEYCODE_UNKNOWN) {
             // Only finalize assignment on ACTION_UP to avoid accidental multiple mappings

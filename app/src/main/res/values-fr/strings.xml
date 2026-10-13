@@ -1290,4 +1290,8 @@
     <string name="pref_set_default_launcher_title">Application d\'accueil par défaut</string>
     <string name="pref_default_launcher_status_active">Actif (Appuyer pour gérer)</string>
     <string name="pref_default_launcher_status_inactive">Non défini (Appuyer pour configurer)</string>
+    <!-- Fork LibreHU -->
+    <string name="librehu_follow_launcher_theme">Suivre le launcher LibreHU</string>
+    <string name="librehu_follow_launcher_theme_description">Clair ou sombre et couleur d\'accent du launcher LibreHU, changés en même temps que lui</string>
+    <string name="librehu_theme_from_launcher">Launcher LibreHU</string>
 </resources>

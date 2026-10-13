@@ -140,6 +140,10 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
 
         // LibreHU fork: vehicle settings from LibreHU-service (name, make, model, year, driver's side, BT address).
         com.andrerinas.openheadunit.librehu.LibreHuVehicleSync.start(this)
+        // LibreHU fork: settings for a LibreHU head unit (once, untouched settings only), before the mirrors below.
+        com.andrerinas.openheadunit.librehu.LibreHuDefaults.apply(this)
+        // LibreHU fork: light / dark and accent of the LibreHU launcher, read before the theme is applied.
+        com.andrerinas.openheadunit.librehu.LibreHuTheme.start(this)
 
         // Sync auto-start settings to device-protected storage so that
         // BootCompleteReceiver, UsbAttachedActivity, and AutoStartReceiver
