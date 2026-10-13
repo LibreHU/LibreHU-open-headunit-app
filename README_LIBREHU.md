@@ -21,6 +21,10 @@ est publie avec ses APK.
   `latest-<branche>` avec `release.txt` (LibreHU Apps) et en compilations numerotees ; les workflows d'Open Headunit
   propres a son depot (revue Gemini, issues inactives, APK debug) sont retires, `android-ci.yml` garde.
 
+## Installation
+Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »), ou l'APK de la pre-release
+`latest-main` de ce depot.
+
 ## Integration LibreHU
 - **LibreHU-service** (onglet Android Auto) : etat de la session (`com.andrerinas.headunitrevived.SESSION_STATE`),
   mode jour / nuit selon les phares (`ACTION_SET_NIGHT_MODE`), connexion USB, deconnexion, affichage, reglages ;
