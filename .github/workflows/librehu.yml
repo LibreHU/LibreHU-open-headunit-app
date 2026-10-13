@@ -43,16 +43,20 @@ jobs:
 
       - name: Assemble github release APK
         env:
-          LIBREHU_KEYSTORE_BASE64: ${{ secrets.LIBREHU_KEYSTORE_BASE64 }}
+          LIBREHU_KEYSTORE_BASE64: ${{ secrets.LIBREHU_KEYSTORE_BASE64 || secrets.LIBREHU_KEYSTORE_B64 }}
           LIBREHU_KEYSTORE_PASSWORD: ${{ secrets.LIBREHU_KEYSTORE_PASSWORD }}
           LIBREHU_KEY_PASSWORD: ${{ secrets.LIBREHU_KEY_PASSWORD }}
         run: |
-          # The LibreHU key comes from the LIBREHU_KEYSTORE_BASE64 secret (repository or LibreHU organization):
-          # *.jks files are ignored by git in this repository.
+          # The LibreHU key: the LIBREHU_KEYSTORE_B64 secret when set, else the one of LibreHU-service.
           if [ -n "$LIBREHU_KEYSTORE_BASE64" ]; then
             echo "$LIBREHU_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/librehu.jks"
-            export LIBREHU_KEYSTORE="$RUNNER_TEMP/librehu.jks"
+          else
+            # Without the secret: the shared LibreHU key of LibreHU-service (keystore/librehu.jks, the one every
+            # LibreHU app is signed with); *.jks files are ignored by git in this repository.
+            curl -fsSL -o "$RUNNER_TEMP/librehu.jks" \
+              https://raw.githubusercontent.com/LibreHU/LibreHU-service/main/keystore/librehu.jks
           fi
+          export LIBREHU_KEYSTORE="$RUNNER_TEMP/librehu.jks"
           unset LIBREHU_KEYSTORE_BASE64
           [ -n "$LIBREHU_KEYSTORE_PASSWORD" ] || unset LIBREHU_KEYSTORE_PASSWORD
           [ -n "$LIBREHU_KEY_PASSWORD" ] || unset LIBREHU_KEY_PASSWORD

@@ -13,10 +13,9 @@ est publie avec ses APK.
   (`org.librehu.themed_icon`) que LibreHU Launcher colore avec l'accent du theme. Le logo Android Auto de Google n'est
   pas repris : marque reservee (voir « Marques » ci-dessous). Pour mettre une autre image sur son autoradio : appui
   long sur l'appli dans LibreHU Launcher → « Changer l'icone ».
-- **Signe avec la cle LibreHU**, comme toutes les applis LibreHU : LibreHU-service et LibreHU Launcher lui font
-  confiance par signature. Les `*.jks` sont ignores par git dans ce depot : la CI prend la cle dans le secret
-  `LIBREHU_KEYSTORE_BASE64` (keystore en base64, secret du depot ou de l'organisation LibreHU, mots de passe dans
-  `LIBREHU_KEYSTORE_PASSWORD` / `LIBREHU_KEY_PASSWORD` s'ils changent) et refuse de publier un APK non signe
+- **Signe avec la cle LibreHU** (la meme que toutes les applis LibreHU) : LibreHU-service et LibreHU Launcher lui
+  font confiance par signature. Les `*.jks` sont ignores par git ici : la CI prend le secret `LIBREHU_KEYSTORE_B64`, ou
+  a defaut telecharge `keystore/librehu.jks` de LibreHU-service ; elle refuse de publier un APK non signe
   (`apksigner verify`), qu'Android refuserait (« Failed to collect certificates »).
 - **`LibreHuAutomationReceiver`** : les memes commandes que `AutomationReceiver`, reservees aux applis signees avec
   la cle LibreHU (permission signature `org.librehu.headunit.permission.CONFIGURE`), configuration comprise sans le
