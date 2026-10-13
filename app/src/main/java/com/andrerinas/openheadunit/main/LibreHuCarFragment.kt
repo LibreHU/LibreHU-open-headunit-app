@@ -119,6 +119,20 @@ class LibreHuCarFragment : Fragment() {
             ),
         )
 
+        items.add(SettingItem.CategoryHeader("librehuVideoHeader", R.string.librehu_video_header))
+        items.add(
+            SettingItem.ToggleSettingEntry(
+                stableId = "librehuVideoCard",
+                nameResId = R.string.librehu_video_card,
+                descriptionResId = R.string.librehu_video_card_description,
+                isChecked = settings.librehuVideoCard,
+                onCheckedChanged = { on ->
+                    settings.librehuVideoCard = on
+                    updateList()
+                },
+            ),
+        )
+
         items.add(SettingItem.CategoryHeader("librehuLiveHeader", R.string.librehu_live_header))
         items.add(SettingItem.InfoBanner("librehuLive", R.string.librehu_live_none, live(LibreHuCar.state.value)))
 

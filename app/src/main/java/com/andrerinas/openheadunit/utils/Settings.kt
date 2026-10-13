@@ -1378,6 +1378,11 @@ class Settings(private val context: Context) {
         prefs.edit().putBoolean(key, on).apply()
     }
 
+    /** LibreHU fork: Android Auto's picture in a card of LibreHU Launcher (LibreHuVideoService), experimental. */
+    var librehuVideoCard: Boolean
+        get() = prefs.getBoolean("librehu-video-card", true)
+        set(value) { prefs.edit().putBoolean("librehu-video-card", value).apply() }
+
     /** LibreHU fork: steering wheel and front panel keys forwarded by LibreHU-service during a session. */
     var librehuCarKeys: Boolean
         get() = prefs.getBoolean("librehu-car-keys", true)

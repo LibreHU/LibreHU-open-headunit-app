@@ -83,6 +83,12 @@ Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »)
     du telephone), via la table de touches d'Open Headunit ; le fork repond s'il a pris la touche, sinon elle garde
     son action habituelle cote LibreHU-service.
   - **GPS de l'autoradio** envoye au telephone (meme reglage que « Navigation GPS »).
+- **Image dans la carte du launcher** (experimental, `librehu/LibreHuVideoService.kt`) : LibreHU Launcher se lie a ce
+  service (permission signature `CONFIGURE`) et lui passe la surface de sa carte Android Auto ; le decodeur y dessine
+  (image entiere mise a l'echelle de la carte) tant que l'ecran de projection n'est pas affiche, et Open Headunit
+  redemande une image cle au telephone. Les touches de la carte reviennent en fractions de la carte (un doigt). Quand
+  l'ecran de projection revient, sa surface reprend la main ; la carte partie, le focus video est rendu au
+  telephone. Interrupteur dans Voiture et touches (LibreHU), active ; cote launcher : desactive par defaut.
 - **LibreHU-service** (onglet Android Auto) : etat de la session (`com.andrerinas.headunitrevived.SESSION_STATE`),
   mode jour / nuit selon les phares (`ACTION_SET_NIGHT_MODE`), connexion USB, deconnexion, affichage, reglages ;
   marche aussi avec Open Headunit d'origine (sans la configuration).

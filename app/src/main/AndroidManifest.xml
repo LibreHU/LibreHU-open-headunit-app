@@ -129,6 +129,12 @@
             android:name="org.librehu.themed_icon"
             android:resource="@drawable/librehu_launcher_glyph" />
 
+        <!-- LibreHU fork: Android Auto's picture in a LibreHU Launcher card (apps signed with the LibreHU key). -->
+        <service
+            android:name=".librehu.LibreHuVideoService"
+            android:exported="true"
+            android:permission="${applicationId}.permission.CONFIGURE" />
+
         <activity
             android:name=".aap.AapProjectionActivity"
             android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation"

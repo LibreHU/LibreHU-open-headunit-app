@@ -81,6 +81,7 @@ object SettingsBackupManager {
         Settings.KEY_SYNC_MEDIA_SESSION_AA_METADATA to ValueType.BOOLEAN,
         Settings.KEY_LIBREHU_FOLLOW_LAUNCHER_THEME to ValueType.BOOLEAN,
         "librehu-car-keys" to ValueType.BOOLEAN,
+        "librehu-video-card" to ValueType.BOOLEAN,
         "librehu-sensor-parking-brake" to ValueType.BOOLEAN,
         "librehu-sensor-speed" to ValueType.BOOLEAN,
         "librehu-sensor-rpm" to ValueType.BOOLEAN,

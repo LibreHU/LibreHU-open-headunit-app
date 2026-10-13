@@ -1323,4 +1323,7 @@
     <string name="librehu_live_headlights">Phares</string>
     <string name="librehu_yes">oui</string>
     <string name="librehu_no">non</string>
+    <string name="librehu_video_header">LibreHU Launcher</string>
+    <string name="librehu_video_card">Image dans la carte du launcher (expérimental)</string>
+    <string name="librehu_video_card_description">Quand la projection n\'est pas à l\'écran, l\'image d\'Android Auto peut s\'afficher et se toucher dans la carte du tableau de bord de LibreHU Launcher (option aussi dans le launcher)</string>
 </resources>
