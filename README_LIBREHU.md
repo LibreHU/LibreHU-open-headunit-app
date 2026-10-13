@@ -26,6 +26,11 @@ Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »)
 `latest-main` de ce depot.
 
 ## Integration LibreHU
+- **Vehicule** (`librehu/LibreHuVehicleSync.kt`) : au demarrage et a chaque changement, le nom de la voiture, la
+  marque, le modele, l'annee, le cote conducteur et l'adresse Bluetooth de l'autoradio (qu'Android cache aux
+  applis) viennent de LibreHU-service (`content://org.librehu.service.vehicle/info`, permission signature
+  `org.librehu.permission.VEHICLE`) et remplissent les reglages vehicule d'Open Headunit (envoyes au telephone a la
+  connexion). Une valeur vide laisse celle d'Open Headunit.
 - **LibreHU-service** (onglet Android Auto) : etat de la session (`com.andrerinas.headunitrevived.SESSION_STATE`),
   mode jour / nuit selon les phares (`ACTION_SET_NIGHT_MODE`), connexion USB, deconnexion, affichage, reglages ;
   marche aussi avec Open Headunit d'origine (sans la configuration).

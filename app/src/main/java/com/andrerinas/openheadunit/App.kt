@@ -138,6 +138,9 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         val settings = Settings(this) // Create a Settings instance
         AppLog.init(settings, this) // Initialize AppLog with settings for conditional logging
 
+        // LibreHU fork: vehicle settings from LibreHU-service (name, make, model, year, driver's side, BT address).
+        com.andrerinas.openheadunit.librehu.LibreHuVehicleSync.start(this)
+
         // Sync auto-start settings to device-protected storage so that
         // BootCompleteReceiver, UsbAttachedActivity, and AutoStartReceiver
         // can read them during locked boot (before user unlock)
