@@ -93,7 +93,9 @@ android {
         // installs, testers) and existing users just get a normal update. Only the display name
         // changed to Open Headunit. The code package and namespace stay openheadunit, so the
         // applicationId deliberately differs from the namespace, like com.google.talk for Hangouts.
-        applicationId = "com.andrerinas.headunitrevived"
+        // LibreHU fork: its own package, so that it installs beside Open Headunit and is signed with the
+        // LibreHU key (LibreHU-service and the launcher are trusted by signature, see LibreHuAutomationReceiver).
+        applicationId = "org.librehu.headunit"
         minSdk = 16
         targetSdk = 36
         versionCode = 117
@@ -133,6 +135,13 @@ android {
             // storePassword = property("HEADUNIT_KEYSTORE_PASSWORD") as String
             // keyAlias = property("HEADUNIT_KEYSTORE_ALIAS") as String
             // keyPassword = property("HEADUNIT_KEYSTORE_PASSWORD") as String
+        }
+        // LibreHU key, as every LibreHU app: from the CI secrets when set, else keystore/librehu.jks.
+        create("librehu") {
+            storeFile = System.getenv("LIBREHU_KEYSTORE")?.let { file(it) } ?: rootProject.file("keystore/librehu.jks")
+            storePassword = System.getenv("LIBREHU_KEYSTORE_PASSWORD") ?: "librehu"
+            keyAlias = System.getenv("LIBREHU_KEY_ALIAS") ?: "librehu"
+            keyPassword = System.getenv("LIBREHU_KEY_PASSWORD") ?: "librehu"
         }
         create("release") {
             val defaultStoreFile = when {
@@ -181,13 +190,17 @@ android {
             )
 
             val relConfig = signingConfigs.getByName("release")
-            if (relConfig.storeFile != null && relConfig.storeFile!!.exists()) {
+            val librehu = signingConfigs.getByName("librehu")
+            if (librehu.storeFile?.exists() == true) {
+                signingConfig = librehu
+            } else if (relConfig.storeFile != null && relConfig.storeFile!!.exists()) {
                 signingConfig = relConfig
             }
         }
 
         getByName("debug") {
             // debugging setup
+            if (signingConfigs.getByName("librehu").storeFile?.exists() == true) signingConfig = signingConfigs.getByName("librehu")
         }
     }
 

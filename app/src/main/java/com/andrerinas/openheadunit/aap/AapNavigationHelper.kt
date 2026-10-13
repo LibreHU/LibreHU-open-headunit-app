@@ -82,7 +82,9 @@ class AapNavigationHelper(
             estimatedArrival = prepared.estimatedArrival,
             currentRoad = prepared.currentRoad
         )
-        context.applicationContext.sendBroadcast(intent, NavigationUpdateIntent.BROADCAST_PERMISSION)
+        // LibreHU fork: the permission this package declares (signature), held by the LibreHU apps; the contract's
+        // name is Open Headunit's own package, which this one cannot declare beside it.
+        context.applicationContext.sendBroadcast(intent, "${com.andrerinas.openheadunit.BuildConfig.APPLICATION_ID}.permission.NAVIGATION_UPDATE")
     }
 
     fun showNotificationForSnapshot(snapshot: NavigationSnapshot, distanceMeters: Int?) {

@@ -48,9 +48,16 @@
         android:name="android.hardware.bluetooth"
         android:required="false" />
 
+    <!-- LibreHU fork: turn-by-turn broadcasts (NAVIGATION_UPDATE) and configuration commands for the apps signed
+         with the LibreHU key only. -->
     <permission
-        android:name="com.andrerinas.openheadunit.permission.NAVIGATION_UPDATE"
+        android:name="${applicationId}.permission.NAVIGATION_UPDATE"
         android:protectionLevel="signature" />
+    <permission
+        android:name="${applicationId}.permission.CONFIGURE"
+        android:protectionLevel="signature" />
+    <!-- Open Headunit's com.andrerinas.openheadunit.permission.NAVIGATION_UPDATE is not declared here: two apps
+         declaring one permission with different keys cannot be installed together. -->
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -280,6 +287,13 @@
              an activity because Tasker and MacroDroid can send to one without holding "Display
              over other apps", which an activity target needs on Android 10+. The configuring
              actions are refused unless the user turns on "Allow external configuration". -->
+        <!-- LibreHU fork: the same commands for LibreHU-service and the launcher (LibreHU key), configuration
+             included without "Allow external configuration". Explicit component, no intent filter. -->
+        <receiver
+            android:name=".automation.LibreHuAutomationReceiver"
+            android:exported="true"
+            android:permission="${applicationId}.permission.CONFIGURE" />
+
         <receiver
             android:name=".automation.AutomationReceiver"
             android:exported="true">

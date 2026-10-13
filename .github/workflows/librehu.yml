@@ -1,0 +1,96 @@
+name: LibreHU build
+
+# LibreHU fork: the github flavour in release, signed with the LibreHU key, published as the rolling prerelease of the
+# branch (LibreHU Apps reads its release.txt) and as a numbered build.
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: librehu-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: ''
+
+      - name: Install pinned NDK, CMake and build tools
+        run: |
+          for attempt in 1 2 3; do
+            sdkmanager "ndk;29.0.14206865" "cmake;3.22.1" "build-tools;36.0.0" && exit 0
+            sleep 15
+          done
+          exit 1
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Assemble github release APK
+        env:
+          LIBREHU_KEYSTORE_PASSWORD: ${{ secrets.LIBREHU_KEYSTORE_PASSWORD }}
+          LIBREHU_KEY_PASSWORD: ${{ secrets.LIBREHU_KEY_PASSWORD }}
+        run: |
+          # Without the secrets, the repository's keystore and its default passwords (as the other LibreHU apps).
+          [ -n "$LIBREHU_KEYSTORE_PASSWORD" ] || unset LIBREHU_KEYSTORE_PASSWORD
+          [ -n "$LIBREHU_KEY_PASSWORD" ] || unset LIBREHU_KEY_PASSWORD
+          ./gradlew :app:assembleGithubRelease --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: open-headunit-librehu
+          path: app/build/outputs/apk/github/release/*.apk
+          if-no-files-found: error
+
+      - name: Rolling release of the branch (LibreHU OTA)
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+          APP: OpenHeadunit-LibreHU
+        run: |
+          SLUG="${BRANCH//\//-}"
+          TAG="latest-$SLUG"
+          OUT="$APP-$SLUG.apk"
+          cp "$(ls app/build/outputs/apk/github/release/*.apk | head -n1)" "$OUT"
+          # versionCode and versionName of the APK itself (upstream's numbering), the commit for the changes.
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n1)
+          CODE=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionCode='\([0-9]*\)'.*/\1/p")
+          NAME=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")-$(git rev-parse --short HEAD)
+          printf 'versionCode=%s\nversionName=%s\nbranch=%s\ncommit=%s\n\n%s\n' \
+            "$CODE" "$NAME" "$BRANCH" "$GITHUB_SHA" "$(git log -1 --pretty=%s)" > notes.txt
+          git tag -f "$TAG" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$TAG"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$APP $NAME ($BRANCH)" --notes-file notes.txt --prerelease
+          else
+            gh release create "$TAG" --title "$APP $NAME ($BRANCH)" --notes-file notes.txt --prerelease --verify-tag
+          fi
+          # The same notes with the APK name and size, as a file of the release: LibreHU Apps reads it as a download,
+          # which does not count against the GitHub API limit (60 requests per hour without an account).
+          { printf 'apk=%s\nsize=%s\ndate=%s\n' "$OUT" "$(stat -c %s "$OUT")" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"; cat notes.txt; } > release.txt
+          gh release upload "$TAG" "$OUT" release.txt --clobber
+          BTAG="build-$SLUG-$(git rev-list --count HEAD)"
+          if ! gh release view "$BTAG" >/dev/null 2>&1; then
+            git tag -f "$BTAG" "$GITHUB_SHA"
+            git push -f origin "refs/tags/$BTAG"
+            gh release create "$BTAG" "$OUT" --title "$APP $NAME ($BRANCH)" --notes-file notes.txt --prerelease --verify-tag
+          fi
+          gh release list --limit 300 --json tagName --jq ".[].tagName | select(startswith(\"build-$SLUG-\"))" \
+            | awk -F- '{ print $NF, $0 }' | sort -n | head -n -15 | cut -d' ' -f2 \
+            | while read -r old; do gh release delete "$old" --cleanup-tag -y; done

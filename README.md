@@ -1,3 +1,6 @@
+> **Fork LibreHU** : paquet `org.librehu.headunit`, signe avec la cle LibreHU, integre a LibreHU-service et LibreHU
+> Launcher. Voir [README_LIBREHU.md](README_LIBREHU.md). Projet d'origine : [Open Headunit](https://github.com/andreknieriem/headunit-revived).
+
 # Open Headunit
 
 <a href='https://play.google.com/store/apps/details?id=com.andrerinas.headunitrevived'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200"/></a>
