@@ -43,10 +43,17 @@ jobs:
 
       - name: Assemble github release APK
         env:
+          LIBREHU_KEYSTORE_BASE64: ${{ secrets.LIBREHU_KEYSTORE_BASE64 }}
           LIBREHU_KEYSTORE_PASSWORD: ${{ secrets.LIBREHU_KEYSTORE_PASSWORD }}
           LIBREHU_KEY_PASSWORD: ${{ secrets.LIBREHU_KEY_PASSWORD }}
         run: |
-          # Without the secrets, the repository's keystore and its default passwords (as the other LibreHU apps).
+          # The LibreHU key comes from the LIBREHU_KEYSTORE_BASE64 secret (repository or LibreHU organization):
+          # *.jks files are ignored by git in this repository.
+          if [ -n "$LIBREHU_KEYSTORE_BASE64" ]; then
+            echo "$LIBREHU_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/librehu.jks"
+            export LIBREHU_KEYSTORE="$RUNNER_TEMP/librehu.jks"
+          fi
+          unset LIBREHU_KEYSTORE_BASE64
           [ -n "$LIBREHU_KEYSTORE_PASSWORD" ] || unset LIBREHU_KEYSTORE_PASSWORD
           [ -n "$LIBREHU_KEY_PASSWORD" ] || unset LIBREHU_KEY_PASSWORD
           ./gradlew :app:assembleGithubRelease --stacktrace
@@ -68,6 +75,9 @@ jobs:
           TAG="latest-$SLUG"
           OUT="$APP-$SLUG.apk"
           cp "$(ls app/build/outputs/apk/github/release/*.apk | head -n1)" "$OUT"
+          # An unsigned APK does not install ("Failed to collect certificates"): never publish one.
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | tail -n1)
+          "$APKSIGNER" verify --print-certs "$OUT" || { echo "::error::$OUT is not signed (LIBREHU_KEYSTORE_BASE64 secret missing?)"; exit 1; }
           # versionCode and versionName of the APK itself (upstream's numbering), the commit for the changes.
           AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n1)
           CODE=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionCode='\([0-9]*\)'.*/\1/p")
