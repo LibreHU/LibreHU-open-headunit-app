@@ -144,6 +144,8 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         com.andrerinas.openheadunit.librehu.LibreHuDefaults.apply(this)
         // LibreHU fork: light / dark and accent of the LibreHU launcher, read before the theme is applied.
         com.andrerinas.openheadunit.librehu.LibreHuTheme.start(this)
+        // LibreHU fork: keys and car sensors from LibreHU-service (signature-protected broadcasts).
+        com.andrerinas.openheadunit.librehu.LibreHuCar.start(this)
 
         // Sync auto-start settings to device-protected storage so that
         // BootCompleteReceiver, UsbAttachedActivity, and AutoStartReceiver

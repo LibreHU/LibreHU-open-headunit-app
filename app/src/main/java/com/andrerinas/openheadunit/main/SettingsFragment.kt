@@ -121,6 +121,8 @@ class SettingsFragment : Fragment() {
     // Curated everyday options shown in the Basic tab. Advanced shows everything.
     // Wireless items here only appear in Basic when the user connects wirelessly (see filterSettings).
     private val basicSettingIds = setOf(
+        // LibreHU fork
+        "librehuCar",
         // General
         "autoOptimize", "connectionMode", "appLanguage",
         // Wireless (shown in Basic only when WiFi is among the selected connection modes).
@@ -1030,6 +1032,27 @@ class SettingsFragment : Fragment() {
         val items = mutableListOf<SettingItem>()
 
         // --- General Settings ---
+        // LibreHU fork: keys, car sensors and GPS from LibreHU-service, on a head unit running it.
+        if (com.andrerinas.openheadunit.librehu.LibreHuCar.available(requireContext())) {
+            items.add(SettingItem.CategoryHeader("librehu", R.string.librehu_category))
+            items.add(SettingItem.SettingEntry(
+                stableId = "librehuCar",
+                nameResId = R.string.librehu_car_settings,
+                value = getString(R.string.librehu_car_settings_summary),
+                searchKeywords = kw(
+                    R.string.librehu_sensor_parking_brake, R.string.librehu_sensor_speed, R.string.librehu_car_keys,
+                    R.string.librehu_gps
+                ),
+                onClick = {
+                    try {
+                        findNavController().navigate(R.id.action_settingsFragment_to_librehuCarFragment)
+                    } catch (e: Exception) {
+                        // Failover
+                    }
+                }
+            ))
+        }
+
         items.add(SettingItem.CategoryHeader("general", R.string.category_general))
 
         // Auto-Optimize Wizard

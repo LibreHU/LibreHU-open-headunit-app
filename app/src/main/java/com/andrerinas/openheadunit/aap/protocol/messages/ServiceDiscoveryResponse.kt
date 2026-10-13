@@ -44,6 +44,15 @@ internal class ServiceDiscoveryResponse(context: Context, audioConfig: AudioSess
                     sources.addSensors(makeSensorType(Sensors.SensorType.NIGHT))
                     AppLog.i("[ServiceDiscovery] Announcing NIGHT sensor support. Strategy: ${settings.nightMode}")
 
+                    // LibreHU fork: the car's sensors LibreHU-service sends (parking brake, speed...), each one
+                    // switchable in Settings > LibreHU; only on a head unit running LibreHU-service.
+                    if (com.andrerinas.openheadunit.librehu.LibreHuCar.available(context)) {
+                        for (type in com.andrerinas.openheadunit.librehu.LibreHuCar.announced(settings)) {
+                            sources.addSensors(makeSensorType(type))
+                        }
+                        AppLog.i("[ServiceDiscovery] LibreHU sensors: ${com.andrerinas.openheadunit.librehu.LibreHuCar.announced(settings)}")
+                    }
+
                 }.build()
             }.build()
 

@@ -63,6 +63,14 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <!-- LibreHU fork: keys, car sensors and GPS from LibreHU-service. -->
+        <action
+            android:id="@+id/action_settingsFragment_to_librehuCarFragment"
+            app:destination="@id/librehuCarFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
         <action
             android:id="@+id/action_settingsFragment_to_darkModeFragment"
             app:destination="@id/darkModeFragment"
@@ -172,6 +180,11 @@
         android:id="@+id/performanceOverlaySettingsFragment"
         android:name="com.andrerinas.openheadunit.main.PerformanceOverlaySettingsFragment"
         android:label="@string/performance_overlay_settings" />
+
+    <fragment
+        android:id="@+id/librehuCarFragment"
+        android:name="com.andrerinas.openheadunit.main.LibreHuCarFragment"
+        android:label="@string/librehu_car_settings" />
 
     <fragment
         android:id="@+id/darkModeFragment"

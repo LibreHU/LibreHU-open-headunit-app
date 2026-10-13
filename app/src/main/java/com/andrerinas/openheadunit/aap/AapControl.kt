@@ -274,6 +274,9 @@ internal class AapControlSensor(
         aapTransport.send(msg)
         aapTransport.startSensor(request.type.number)
 
+        // LibreHU fork: the last value LibreHU-service sent for this sensor, if it is one of the car's.
+        com.andrerinas.openheadunit.librehu.LibreHuCar.prime(context, request.type)
+
         if (request.type == Sensors.SensorType.NIGHT) {
             AppLog.i("Night sensor requested. Triggering immediate update.")
             val intent = Intent(AapService.ACTION_REQUEST_NIGHT_MODE_UPDATE)

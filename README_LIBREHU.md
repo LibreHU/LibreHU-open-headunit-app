@@ -67,6 +67,22 @@ Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »)
     la taille de la dalle et les decodeurs H.264 / H.265 ;
   - le mode nuit envoye au telephone, qui peut suivre les phares (LibreHU-service) ;
   - l'avertissement de securite de l'assistant, qui n'est pas saute.
+- **Voiture et touches** (`librehu/LibreHuCar.kt`, Reglages → **Voiture et touches (LibreHU)**, visible si
+  LibreHU-service est installe) : LibreHU-service envoie l'etat de la voiture et les touches par des diffusions que
+  seules les applis signees LibreHU peuvent envoyer (permission `org.librehu.headunit.permission.CONFIGURE`).
+  - **Capteurs Android Auto** annonces au telephone a la connexion, chacun coupable : frein a main (MCU), vitesse,
+    regime, carburant, temperature exterieure (adaptateur OBD), phares et clignotants (MCU), rapport (seulement R / D
+    d'apres la marche arriere, coupe par defaut). Le **frein a main** peut ne plus etre transmis du tout : il n'est
+    alors ni annonce ni envoye, et le telephone se fie a sa propre estimation. Une information activee compte a la
+    prochaine connexion ; coupee, elle n'est plus envoyee tout de suite. La derniere valeur est renvoyee des que le
+    telephone demande le capteur, et l'ecran montre les dernieres valeurs recues.
+  - Ce qu'Android Auto fait de chaque capteur n'est pas documente publiquement ; les commentaires du protocole repris
+    par Open Headunit (`sensors.proto`) notent le frein a main et la vitesse comme recus, la plupart des autres comme
+    non exploites. Ils sont donc « envoyes », pas forcement « utilises ».
+  - **Touches** (interrupteur) : lecture / pause, pistes, appel, raccrocher, Assistant vocal (bascule de l'assistant
+    du telephone), via la table de touches d'Open Headunit ; le fork repond s'il a pris la touche, sinon elle garde
+    son action habituelle cote LibreHU-service.
+  - **GPS de l'autoradio** envoye au telephone (meme reglage que « Navigation GPS »).
 - **LibreHU-service** (onglet Android Auto) : etat de la session (`com.andrerinas.headunitrevived.SESSION_STATE`),
   mode jour / nuit selon les phares (`ACTION_SET_NIGHT_MODE`), connexion USB, deconnexion, affichage, reglages ;
   marche aussi avec Open Headunit d'origine (sans la configuration).

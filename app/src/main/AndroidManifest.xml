@@ -24,6 +24,7 @@
         <!-- LibreHU fork: launcher theme and LibreHU-service vehicle providers (Android 11+ package visibility). -->
         <provider android:authorities="org.librehu.launcher.theme" />
         <provider android:authorities="org.librehu.service.vehicle" />
+        <package android:name="org.librehu.service" />
     </queries>
 
     <uses-feature

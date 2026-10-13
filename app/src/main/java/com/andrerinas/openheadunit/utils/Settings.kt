@@ -1371,6 +1371,18 @@ class Settings(private val context: Context) {
         get() = prefs.getInt("librehu-preset-version", 0)
         set(value) { prefs.edit().putInt("librehu-preset-version", value).apply() }
 
+    /** LibreHU fork: one Android Auto sensor fed by LibreHU-service (see LibreHuCar.Sensor). */
+    fun librehuSensor(key: String, default: Boolean): Boolean = prefs.getBoolean(key, default)
+
+    fun setLibrehuSensor(key: String, on: Boolean) {
+        prefs.edit().putBoolean(key, on).apply()
+    }
+
+    /** LibreHU fork: steering wheel and front panel keys forwarded by LibreHU-service during a session. */
+    var librehuCarKeys: Boolean
+        get() = prefs.getBoolean("librehu-car-keys", true)
+        set(value) { prefs.edit().putBoolean("librehu-car-keys", value).apply() }
+
     /** True when the user (or a preset) already chose [key]: presets only fill the untouched ones. */
     fun isSet(key: String): Boolean = prefs.contains(key)
 
