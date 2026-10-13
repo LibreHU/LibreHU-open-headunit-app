@@ -82,7 +82,7 @@ jobs:
           # An unsigned APK does not install ("Failed to collect certificates"): never publish one.
           APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | tail -n1)
           "$APKSIGNER" verify --print-certs "$OUT" || { echo "::error::$OUT is not signed (LIBREHU_KEYSTORE_BASE64 secret missing?)"; exit 1; }
-          # versionCode and versionName of the APK itself (upstream's numbering), the commit for the changes.
+          # versionCode (upstream's + number of commits, see build.gradle.kts) and versionName of the APK itself, the commit.
           AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n1)
           CODE=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionCode='\([0-9]*\)'.*/\1/p")
           NAME=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")-$(git rev-parse --short HEAD)

@@ -24,6 +24,9 @@ est publie avec ses APK.
   `org.librehu.headunit.permission.NAVIGATION_UPDATE`, declaree par ce paquet (celle d'Open Headunit,
   `com.andrerinas.headunitrevived.permission.NAVIGATION_UPDATE`, n'est declaree par aucune appli : personne ne
   recevait ces diffusions). LibreHU Launcher l'affiche sur le tableau de bord.
+- **Numero de version** : `versionCode` = celui d'amont (117) + nombre de commits du depot. LibreHU Apps propose une
+  mise a jour quand le `versionCode` augmente ; celui d'amont ne bougeait pas d'un build du fork a l'autre, la mise a
+  jour n'apparaissait donc pas. Le `versionName` reste celui d'amont, suivi du commit dans `release.txt`.
 - **CI** (`.github/workflows/librehu.yml`) : saveur `github` en release, publiee en pre-release continue
   `latest-<branche>` avec `release.txt` (LibreHU Apps) et en compilations numerotees ; les workflows d'Open Headunit
   propres a son depot (revue Gemini, issues inactives, APK debug) sont retires, `android-ci.yml` garde.

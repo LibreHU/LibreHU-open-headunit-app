@@ -7,6 +7,17 @@ plugins {
     kotlin("android")
 }
 
+// LibreHU fork: LibreHU Apps updates when versionCode grows, and upstream's stays the same between two builds of the
+// fork. versionCode = upstream's + number of commits: grows with every commit, upstream bumps included.
+fun librehuCommitCount(dir: File): Int =
+    try {
+        val p = ProcessBuilder("git", "rev-list", "--count", "HEAD").directory(dir).redirectErrorStream(true).start()
+        val text = p.inputStream.bufferedReader().readText().trim()
+        if (p.waitFor() == 0) text.toIntOrNull() ?: 0 else 0
+    } catch (e: Exception) {
+        0
+    }
+
 android {
     compileSdk = 36
     ndkVersion = "29.0.14206865"
@@ -98,7 +109,7 @@ android {
         applicationId = "org.librehu.headunit"
         minSdk = 16
         targetSdk = 36
-        versionCode = 117
+        versionCode = 117 + librehuCommitCount(rootDir)
         versionName = "3.5.0-beta4"
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
