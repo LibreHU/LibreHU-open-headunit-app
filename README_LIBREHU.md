@@ -8,6 +8,11 @@ est publie avec ses APK.
 ## Ce que change le fork
 - **Paquet `org.librehu.headunit`** (« Open Headunit LibreHU ») : s'installe a cote d'Open Headunit. Le namespace du
   code et les actions d'automatisation (`com.andrerinas.openheadunit.ACTION_*`) ne changent pas.
+- **Nom et icone** : affiche « Android Auto » sous l'icone (role de l'appli sur l'autoradio). L'icone est
+  originale (fleche de navigation Material, Apache-2.0, sur fond vert), avec un glyphe blanc
+  (`org.librehu.themed_icon`) que LibreHU Launcher colore avec l'accent du theme. Le logo Android Auto de Google n'est
+  pas repris : marque reservee (voir « Marques » ci-dessous). Pour mettre une autre image sur son autoradio : appui
+  long sur l'appli dans LibreHU Launcher → « Changer l'icone ».
 - **Signe avec la cle LibreHU** (`keystore/librehu.jks`, ou les secrets `LIBREHU_*` de la CI), comme toutes les
   applis LibreHU : LibreHU-service et LibreHU Launcher lui font confiance par signature.
 - **`LibreHuAutomationReceiver`** : les memes commandes que `AutomationReceiver`, reservees aux applis signees avec
@@ -36,6 +41,13 @@ Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »)
   marche aussi avec Open Headunit d'origine (sans la configuration).
 - **LibreHU Launcher** : carte Android Auto sur le tableau de bord (etat, afficher, deconnecter) et prochaine
   manoeuvre de la navigation.
+
+## Marques
+Android Auto est une marque de Google LLC. Ce fork n'est ni affilie a Google ni certifie par Google ; le nom
+« Android Auto » sous l'icone decrit seulement le protocole que l'appli recoit. Les directives de marque de Google
+reservent l'usage du nom et du logo Android Auto aux produits approuves
+([Brand guidelines](https://developer.android.com/distribute/marketing-tools/brand-guidelines)) : le logo n'est donc
+pas inclus dans ce depot public.
 
 ## Suivre Open Headunit
 ```

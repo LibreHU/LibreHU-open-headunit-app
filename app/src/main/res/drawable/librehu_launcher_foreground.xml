@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LibreHU: the glyph in the safe zone of the adaptive icon (108 dp, 66 dp visible). -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/librehu_launcher_glyph"
+    android:inset="30dp" />

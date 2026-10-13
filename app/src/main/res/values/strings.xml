@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Open Headunit LibreHU</string>
+    <!-- LibreHU: name under the icon (the app is the head unit's Android Auto receiver). -->
+    <string name="librehu_app_label" translatable="false">Android Auto</string>
     <string name="menu">Menu</string>
     <string name="settings">Settings</string>
 

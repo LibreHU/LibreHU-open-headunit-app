@@ -114,10 +114,16 @@
         android:name=".App"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/title"
+        android:label="@string/librehu_app_label"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:largeHeap="true"
         android:supportsRtl="true"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <!-- LibreHU: white glyph that the LibreHU launcher draws in the theme colours. -->
+        <meta-data
+            android:name="org.librehu.themed_icon"
+            android:resource="@drawable/librehu_launcher_glyph" />
 
         <activity
             android:name=".aap.AapProjectionActivity"
