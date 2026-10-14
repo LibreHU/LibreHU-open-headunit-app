@@ -486,5 +486,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+        <!-- LibreHU Launcher's first start: root asked for every LibreHU app at once (RootRequestReceiver). -->
+        <receiver
+            android:name="com.andrerinas.openheadunit.librehu.RootRequestReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="org.librehu.action.REQUEST_ROOT" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

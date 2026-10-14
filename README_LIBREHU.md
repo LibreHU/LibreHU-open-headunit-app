@@ -31,6 +31,15 @@ est publie avec ses APK.
   `latest-<branche>` avec `release.txt` (LibreHU Apps) et en compilations numerotees ; les workflows d'Open Headunit
   propres a son depot (revue Gemini, issues inactives, APK debug) sont retires, `android-ci.yml` garde.
 
+## Root (SuperSU) : demandé une fois pour toutes
+
+Le fork utilise le root (comme Open Headunit, pour certaines connexions) par SuperSU (installé dans la ROM) ; chaque demande doit être accordée avec « Se
+souvenir ». Pour que toutes les fenêtres SuperSU arrivent au même moment, l'assistant de premier démarrage de LibreHU
+Launcher (« Autoriser le root pour toutes les applis LibreHU ») interroge chaque appli LibreHU l'une après l'autre :
+`RootRequestReceiver`, sur `org.librehu.action.REQUEST_ROOT` envoyé à ce paquet, lance une fois `su -c id` (SuperSU
+affiche alors la demande de cette appli), puis répond `org.librehu.action.ROOT_RESULT` (extras `package`, `granted`)
+au paquet indiqué dans `reply_to`. Rien d'autre que `id` n'est lancé ; une seconde demande dans les 20 s est ignorée.
+
 ## Installation
 Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »), ou l'APK de la pre-release
 `latest-main` de ce depot.
