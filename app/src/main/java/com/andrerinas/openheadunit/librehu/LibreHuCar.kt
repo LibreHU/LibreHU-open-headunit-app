@@ -68,6 +68,27 @@ object LibreHuCar {
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
 
+    /** Broadcast inside this app when the headlights change: the "Car Headlight Signal" night mode and theme follow. */
+    const val ACTION_HEADLIGHT_CHANGED = "org.librehu.headunit.internal.HEADLIGHT_CHANGED"
+
+    /** Headlights reported by LibreHU-service, null until then: the car signal of this head unit. */
+    val headlight: Boolean? get() = _state.value.headlight
+
+    /** The headlights alone (LibreHU-service's night command), when the car data is not sent. */
+    fun setHeadlight(
+        context: Context,
+        on: Boolean,
+    ) {
+        val old = _state.value
+        if (old.headlight == on) return
+        _state.value = old.copy(headlight = on, updated = System.currentTimeMillis())
+        headlightChanged(context)
+    }
+
+    private fun headlightChanged(context: Context) {
+        runCatching { context.sendBroadcast(Intent(ACTION_HEADLIGHT_CHANGED).setPackage(context.packageName)) }
+    }
+
     private var registered = false
 
     fun enabled(
@@ -153,6 +174,7 @@ object LibreHuCar {
                 updated = System.currentTimeMillis(),
             )
         _state.value = new
+        if (old.headlight != new.headlight) headlightChanged(context)
         val comm = App.provide(context).commManager
         if (!comm.isConnected) return
         val settings = Settings(context)

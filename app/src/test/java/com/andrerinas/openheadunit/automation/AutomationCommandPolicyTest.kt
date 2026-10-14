@@ -271,6 +271,18 @@ class AutomationCommandPolicyTest {
     }
 
     @Test
+    fun `night mode car takes the headlights from LibreHU-service`() {
+        assertEquals(
+            AutomationCommandPolicy.Effect.SetNightMode("car", true),
+            single(HeadUnitCommand.ACTION_SET_NIGHT_MODE, mapOf(HeadUnitCommand.EXTRA_STATE to "car", "headlight" to "on"))
+        )
+        assertEquals(
+            AutomationCommandPolicy.Effect.SetNightMode("car"),
+            single(HeadUnitCommand.ACTION_SET_NIGHT_MODE, mapOf(HeadUnitCommand.EXTRA_STATE to "car"))
+        )
+    }
+
+    @Test
     fun `log level accepts only real levels`() {
         assertEquals(
             AutomationCommandPolicy.Effect.SetLogLevel("verbose"),

@@ -32,7 +32,7 @@ object AutomationCommandPolicy {
         /** Open a TCP session to a head unit server. Paired with a [StartService] of the same name. */
         data class ConnectSocket(val ip: String, val port: Int) : Effect
 
-        data class SetNightMode(val mode: String) : Effect
+        data class SetNightMode(val mode: String, val headlight: Boolean? = null) : Effect
 
         data class ImportSettings(val json: String?, val path: String?) : Effect
         data class ExportSettings(val path: String?) : Effect
@@ -53,7 +53,8 @@ object AutomationCommandPolicy {
     /** Port of Android Auto's built-in head unit server, which is what an `ip` command targets. */
     const val HEADUNIT_SERVER_PORT = 5277
 
-    private val NIGHT_MODES = setOf("day", "night", "auto")
+    // "car": the Car Headlight Signal mode, with the headlights in `headlight` (on / off) from LibreHU-service.
+    private val NIGHT_MODES = setOf("day", "night", "auto", "car")
 
     private val LOG_LEVELS = setOf("verbose", "debug", "info", "warn", "error", "silent")
 
@@ -179,7 +180,13 @@ object AutomationCommandPolicy {
         if (mode !in NIGHT_MODES) {
             return listOf(Effect.Refuse("state must be one of ${NIGHT_MODES.joinToString("/")}"))
         }
-        return listOf(Effect.SetNightMode(mode!!))
+        val headlight =
+            when (extras.string("headlight")?.lowercase()) {
+                "on", "true", "1" -> true
+                "off", "false", "0" -> false
+                else -> null
+            }
+        return listOf(Effect.SetNightMode(mode!!, headlight))
     }
 
     private fun logLevel(extras: Extras): List<Effect> {

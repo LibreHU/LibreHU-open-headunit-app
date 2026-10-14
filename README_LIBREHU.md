@@ -61,11 +61,13 @@ Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »)
   | Connexion automatique si un seul appareil | activee | un seul telephone branche : rien a choisir |
   | Orientation | paysage fixe | dalle 1280x720 montee en paysage |
   | Lecture en cours d'Android Auto dans la session media | activee | titre, artiste et pochette dans le lecteur du launcher et pour les touches du volant |
+  | Theme de l'appli (quand il ne suit pas le launcher) | Signal des phares (ILL+) | les phares envoyes par LibreHU-service (version 2 de la pre-configuration) |
 
   Ce qui reste hors de la pre-configuration :
   - la video (resolution, codec, rendu, densite), choisie par l'assistant de premier demarrage d'Open Headunit d'apres
     la taille de la dalle et les decodeurs H.264 / H.265 ;
-  - le mode nuit envoye au telephone, qui peut suivre les phares (LibreHU-service) ;
+  - le mode nuit envoye au telephone : LibreHU-service le met sur « Signal des phares (ILL+) » quand son
+    interrupteur « nuit selon les phares » est actif (par defaut) ;
   - l'avertissement de securite de l'assistant, qui n'est pas saute.
 - **Voiture et touches** (`librehu/LibreHuCar.kt`, Reglages → **Voiture et touches (LibreHU)**, visible si
   LibreHU-service est installe) : LibreHU-service envoie l'etat de la voiture et les touches par des diffusions que
@@ -89,8 +91,14 @@ Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »)
   redemande une image cle au telephone. Les touches de la carte reviennent en fractions de la carte (un doigt). Quand
   l'ecran de projection revient, sa surface reprend la main ; la carte partie, le focus video est rendu au
   telephone. Interrupteur dans Voiture et touches (LibreHU), active ; cote launcher : desactive par defaut.
+- **Phares → mode sombre** : les modes « Signal des phares (ILL+) » (mode nuit d'Android Auto et theme de l'appli)
+  lisent d'abord les phares envoyes par LibreHU-service (`ACTION_CAR` `headlight`, ou `ACTION_SET_NIGHT_MODE`
+  `state=car` + `headlight=on/off`), puis, sans eux, `Settings.System car_mode` comme Open Headunit d'origine (cet
+  autoradio ne le fournit pas). Le changement est applique tout de suite (pas d'anti-rebond), session en cours
+  comprise.
 - **LibreHU-service** (onglet Android Auto) : etat de la session (`com.andrerinas.headunitrevived.SESSION_STATE`),
-  mode jour / nuit selon les phares (`ACTION_SET_NIGHT_MODE`), connexion USB, deconnexion, affichage, reglages ;
+  mode jour / nuit selon les phares (`ACTION_SET_NIGHT_MODE` : `car` et les phares pour ce fork, `day` / `night`
+  pour Open Headunit d'origine), connexion USB, deconnexion, affichage, reglages ;
   marche aussi avec Open Headunit d'origine (sans la configuration).
 - **LibreHU Launcher** : carte Android Auto sur le tableau de bord (etat, afficher, deconnecter) et prochaine
   manoeuvre de la navigation.

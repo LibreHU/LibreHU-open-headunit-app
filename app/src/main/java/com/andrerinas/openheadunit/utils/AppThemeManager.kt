@@ -64,6 +64,11 @@ class AppThemeManager(
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            // Headlights from LibreHU-service: a car signal, applied at once like ILL+.
+            if (intent.action == com.andrerinas.openheadunit.librehu.LibreHuCar.ACTION_HEADLIGHT_CHANGED) {
+                update(debounce = false)
+                return
+            }
             if (intent.action == LocationUpdateIntent.action) {
                 val oldLux = currentLux
                 val oldBright = currentBrightness
@@ -80,6 +85,7 @@ class AppThemeManager(
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_TIME_TICK)
             addAction(LocationUpdateIntent.action)
+            addAction(com.andrerinas.openheadunit.librehu.LibreHuCar.ACTION_HEADLIGHT_CHANGED)
         }
 
         ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
@@ -204,7 +210,8 @@ class AppThemeManager(
                 }
             }
             Settings.AppTheme.CAR_SIGNAL -> {
-                val carMode = try {
+                // LibreHU fork: the headlights from LibreHU-service first (this head unit has no car_mode).
+                val carMode = com.andrerinas.openheadunit.librehu.LibreHuCar.headlight?.let { if (it) 1 else 0 } ?: try {
                     SystemSettings.System.getInt(context.contentResolver, "car_mode")
                 } catch (_: Exception) { -1 }
                 if (carMode >= 0) {

@@ -68,6 +68,11 @@ class NightModeManager(
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            // Headlights from LibreHU-service: a car signal, applied at once like ILL+.
+            if (intent.action == com.andrerinas.openheadunit.librehu.LibreHuCar.ACTION_HEADLIGHT_CHANGED) {
+                update(debounce = false)
+                return
+            }
             if (intent.action == LocationUpdateIntent.action) {
                 // Keep the sensor values when recreating the calculator
                 val oldLux = currentLux
@@ -84,6 +89,7 @@ class NightModeManager(
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_TIME_TICK)
             addAction(LocationUpdateIntent.action)
+            addAction(com.andrerinas.openheadunit.librehu.LibreHuCar.ACTION_HEADLIGHT_CHANGED)
         }
         
         ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
@@ -227,7 +233,8 @@ class NightModeManager(
             Settings.NightMode.CAR_SIGNAL -> {
                 // Many Chinese aftermarket head units (e.g. OLEDPRO) expose the car's
                 // ILL+ headlight signal as Settings.System.car_mode (0 = day, 1 = night).
-                val carMode = try {
+                // LibreHU fork: the headlights from LibreHU-service first (this head unit has no car_mode).
+                val carMode = com.andrerinas.openheadunit.librehu.LibreHuCar.headlight?.let { if (it) 1 else 0 } ?: try {
                     SystemSettings.System.getInt(context.contentResolver, "car_mode")
                 } catch (_: Exception) { -1 }
                 if (carMode >= 0) {

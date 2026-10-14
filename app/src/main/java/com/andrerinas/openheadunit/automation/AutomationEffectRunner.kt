@@ -43,7 +43,7 @@ object AutomationEffectRunner {
                         component.commManager.connect(effect.ip, effect.port, ConnectionPriorityPolicy.Tier.USER)
                     }
                 is AutomationCommandPolicy.Effect.SetNightMode ->
-                    setNightMode(context, component.settings, effect.mode)
+                    setNightMode(context, component.settings, effect.mode, effect.headlight)
                 is AutomationCommandPolicy.Effect.ImportSettings -> importSettings(context, effect, reply)
                 is AutomationCommandPolicy.Effect.ExportSettings ->
                     if (!exportSettings(context, effect, reply)) ok = false
@@ -79,12 +79,15 @@ object AutomationEffectRunner {
         )
     }
 
-    private fun setNightMode(context: Context, settings: Settings, mode: String) {
+    private fun setNightMode(context: Context, settings: Settings, mode: String, headlight: Boolean? = null) {
         settings.nightMode = when (mode) {
             "day" -> Settings.NightMode.DAY
             "night" -> Settings.NightMode.NIGHT
+            "car" -> Settings.NightMode.CAR_SIGNAL
             else -> Settings.NightMode.AUTO
         }
+        // LibreHU fork: the headlights with the car mode (when LibreHU-service does not send its car data).
+        if (headlight != null) com.andrerinas.openheadunit.librehu.LibreHuCar.setHeadlight(context, headlight)
         ContextCompat.startForegroundService(
             context,
             Intent(context, AapService::class.java).apply {
