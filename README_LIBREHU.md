@@ -40,6 +40,42 @@ Launcher (« Autoriser le root pour toutes les applis LibreHU ») interroge chaq
 affiche alors la demande de cette appli), puis répond `org.librehu.action.ROOT_RESULT` (extras `package`, `granted`)
 au paquet indiqué dans `reply_to`. Rien d'autre que `id` n'est lancé ; une seconde demande dans les 20 s est ignorée.
 
+## Fichiers modifiés par rapport à l'amont
+
+Base : commit amont `4ee1d58f` (Open Headunit, « Merge pull request #1098 », 10/10/2026), branche locale `librehu`
+publiée sur `main`. `git diff 4ee1d58f HEAD --stat` donne la liste complète ; chaque modification du code est
+marquée `LibreHU fork:` en commentaire.
+
+| Fichier(s) | Modification |
+|---|---|
+| `app/build.gradle.kts` | `applicationId` `org.librehu.headunit`, signature par la clé LibreHU, `versionCode` = 117 + nombre de commits |
+| `app/src/main/AndroidManifest.xml` | permissions signature `CONFIGURE` et `NAVIGATION_UPDATE` déclarées par ce paquet ; `LibreHuAutomationReceiver`, `LibreHuVideoService`, `RootRequestReceiver` ; lecture des fournisseurs LibreHU (thème du launcher, fiche voiture) ; icône thémable |
+| `App.kt` | démarrage de `LibreHuTheme`, `LibreHuDefaults`, `LibreHuVehicleSync`, `LibreHuCar` |
+| `automation/LibreHuAutomationReceiver.kt` (nouveau) | commandes d'automatisation réservées aux applis signées LibreHU, configuration comprise |
+| `automation/AutomationCommandPolicy.kt`, `AutomationEffectRunner.kt` | mode nuit `car` (signal des phares) avec `headlight=on/off` venant de LibreHU-service |
+| `librehu/LibreHuCar.kt` (nouveau) | état de la voiture et touches venant de LibreHU-service → capteurs Android Auto (frein à main, vitesse, régime, carburant, température, phares / clignotants, rapport), chacun désactivable ; phares pour le mode nuit et le thème |
+| `librehu/LibreHuDefaults.kt` (nouveau) | pré-configuration LibreHU (version 2), seulement pour les réglages jamais choisis |
+| `librehu/LibreHuTheme.kt` (nouveau) | clair / sombre et accent de LibreHU Launcher, posés sur chaque thème d'activité |
+| `librehu/LibreHuVehicleSync.kt` (nouveau) | fiche voiture de LibreHU-service → réglages véhicule envoyés au téléphone |
+| `librehu/LibreHuVideoService.kt` (nouveau) | image d'Android Auto dans une carte de LibreHU Launcher (expérimental) |
+| `librehu/RootRequestReceiver.kt` (nouveau) | root demandé une fois pour toutes depuis l'assistant du launcher |
+| `aap/AapControl.kt`, `aap/protocol/messages/ServiceDiscoveryResponse.kt` | capteurs de la voiture annoncés au téléphone et dernière valeur envoyée à sa demande |
+| `aap/AapNavigationHelper.kt` | `NAVIGATION_UPDATE` envoyé avec la permission déclarée par ce paquet |
+| `app/BaseActivity.kt`, `app/SurfaceActivity.kt`, `main/AppDrawerFragment.kt`, `main/QuickSettingsFragment.kt` | accent du launcher sur chaque thème d'activité et de dialogue plein écran |
+| `main/HomeFragment.kt`, `main/KeymapFragment.kt` | couleur d'état et du débogueur de touches = accent du launcher au lieu du sarcelle |
+| `main/DarkModeFragment.kt`, `main/OnboardingActivity.kt` | option « Suivre le launcher LibreHU » ; thème grisé dans l'assistant quand le launcher décide |
+| `main/LibreHuCarFragment.kt` (nouveau), `res/layout/fragment_librehu_car.xml`, `res/navigation/nav_graph.xml`, `main/SettingsFragment.kt` | réglages « Voiture et touches (LibreHU) » |
+| `utils/AppThemeManager.kt`, `utils/NightModeManager.kt` | mode « Signal des phares (ILL+) » nourri par les phares de LibreHU-service (puis `car_mode` comme l'amont) |
+| `utils/Settings.kt`, `utils/SettingsBackupManager.kt` | réglages LibreHU (suivi du thème, capteurs, touches, carte vidéo, version de pré-configuration), inclus dans les sauvegardes |
+| `res/values/attrs_librehu.xml`, `colors_librehu.xml`, `values-night/colors_librehu.xml`, `styles_librehu.xml`, `styles.xml` | attributs `librehuAccent` / `librehuOnAccent` et `ThemeOverlay.LibreHU.*` (8 accents du launcher) |
+| `res/layout/dialog_*.xml`, `fragment_add_network_address.xml`, `item_keymap.xml`, `layout_*_button.xml`, `res/color-v23/*`, `res/drawable-v21/btn_primary_teal.xml` | couleurs codées en sarcelle remplacées par `?attr/librehuAccent` |
+| `res/drawable/librehu_launcher_*.xml`, `res/mipmap-anydpi-v26/ic_launcher*.xml` | icône originale et glyphe thémable |
+| `res/values/strings.xml`, `values-fr/strings.xml` | nom « Android Auto » sous l'icône, textes LibreHU (anglais, français) |
+| `res/xml/shortcuts.xml` | raccourcis vers le paquet `org.librehu.headunit` |
+| `app/src/test/.../AutomationCommandPolicyTest.kt` | test du mode nuit `car` |
+| `.github/workflows/librehu.yml` (nouveau) ; `build-debug-apk.yml`, `close-inactive-issues.yml`, `gemini-code-review.yml` (retirés) | CI LibreHU (APK signé, `latest-main`, `release.txt`) ; workflows propres au dépôt d'amont retirés |
+| `README.md`, `README_LIBREHU.md` | renvoi vers ce fichier ; ce fichier |
+
 ## Installation
 Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »), ou l'APK de la pre-release
 `latest-main` de ce depot.
