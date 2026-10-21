@@ -60,6 +60,7 @@ marquée `LibreHU fork:` en commentaire.
 | `librehu/LibreHuVideoService.kt` (nouveau) | image d'Android Auto dans une carte de LibreHU Launcher (expérimental) |
 | `librehu/RootRequestReceiver.kt` (nouveau) | root demandé une fois pour toutes depuis l'assistant du launcher |
 | `aap/AapControl.kt`, `aap/protocol/messages/ServiceDiscoveryResponse.kt` | capteurs de la voiture annoncés au téléphone et dernière valeur envoyée à sa demande |
+| `aap/AapControl.kt`, `librehu/LibreHuCar.kt` | `BatteryStatusNotification` (message de contrôle 23) du téléphone, s'il l'envoie : niveau de batterie journalisé et envoyé à LibreHU-service (`org.librehu.headunit.PHONE_BATTERY`) |
 | `aap/AapNavigationHelper.kt` | `NAVIGATION_UPDATE` envoyé avec la permission déclarée par ce paquet |
 | `app/BaseActivity.kt`, `app/SurfaceActivity.kt`, `main/AppDrawerFragment.kt`, `main/QuickSettingsFragment.kt` | accent du launcher sur chaque thème d'activité et de dialogue plein écran |
 | `main/HomeFragment.kt`, `main/KeymapFragment.kt` | couleur d'état et du débogueur de touches = accent du launcher au lieu du sarcelle |

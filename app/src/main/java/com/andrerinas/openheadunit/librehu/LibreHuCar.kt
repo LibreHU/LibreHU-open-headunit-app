@@ -290,5 +290,25 @@ object LibreHuCar {
 
     private const val LOW_FUEL_PCT = 12.0
     const val SERVICE_PACKAGE = "org.librehu.service"
+
+    /** Sent to LibreHU-service: the phone's battery from Android Auto (`level` %, `remaining_s`, `critical`). */
+    const val ACTION_PHONE_BATTERY = "org.librehu.headunit.PHONE_BATTERY"
+
+    fun reportBattery(
+        context: Context,
+        level: Int,
+        remainingS: Int,
+        critical: Boolean,
+    ) {
+        runCatching {
+            context.applicationContext.sendBroadcast(
+                Intent(ACTION_PHONE_BATTERY)
+                    .setPackage(SERVICE_PACKAGE)
+                    .putExtra("level", level)
+                    .putExtra("remaining_s", remainingS)
+                    .putExtra("critical", critical),
+            )
+        }
+    }
     private const val KEY_TAKEN = 1
 }

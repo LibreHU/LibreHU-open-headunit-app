@@ -329,6 +329,18 @@ internal class AapControlService(
                 val shutdownRequest = message.parse(Control.ByeByeRequest.newBuilder()).build()
                 return byebyeRequest(shutdownRequest, message.channel)
             }
+            Control.ControlMsgType.MESSAGE_BATTERY_STATUS_NOTIFICATION_VALUE -> {
+                // LibreHU: the phone's battery, when it sends it, for LibreHU-service's Phone page.
+                val battery = message.parse(Control.BatteryStatusNotification.newBuilder()).build()
+                AppLog.i("RX: Battery status ${battery.batteryLevel} % critical=${battery.criticalBattery}")
+                com.andrerinas.openheadunit.librehu.LibreHuCar.reportBattery(
+                    context,
+                    battery.batteryLevel,
+                    if (battery.hasTimeRemainingS()) battery.timeRemainingS else -1,
+                    battery.criticalBattery,
+                )
+                return 0
+            }
             Control.ControlMsgType.MESSAGE_BYEBYE_RESPONSE_VALUE -> {
                 AppLog.i("Byebye Response received")
                 return -1
