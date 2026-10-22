@@ -6,6 +6,11 @@ Licence inchangee : **AGPL-3.0** (voir `LICENSE` et `COPYRIGHT_MICHAEL_REID_GPLv
 est publie avec ses APK.
 
 ## Ce que change le fork
+- **Vidéo basse latence activée par le préréglage LibreHU** (version 3) : le réglage d'Open Headunit
+  « Request decoder low-latency mode » (`debug-video-low-latency`, désactivé en amont) passe à oui si personne ne l'a
+  encore touché : `vdec-lowlatency` sur le décodeur MediaTek (pas de `KEY_LOW_LATENCY` avant Android 11), retiré par
+  l'échelle de configuration du décodeur s'il est refusé, comme chez Moonlight. Interrupteur aussi dans LibreHU-service
+  (page Android Auto).
 - **Paquet `org.librehu.headunit`** (« Open Headunit LibreHU ») : s'installe a cote d'Open Headunit. Le namespace du
   code et les actions d'automatisation (`com.andrerinas.openheadunit.ACTION_*`) ne changent pas.
 - **Nom et icone** : affiche « Android Auto » sous l'icone (role de l'appli sur l'autoradio). L'icone est
