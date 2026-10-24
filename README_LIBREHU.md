@@ -31,7 +31,7 @@ est publie avec ses APK.
   recevait ces diffusions). LibreHU Launcher l'affiche sur le tableau de bord.
 - **Numero de version** : `versionCode` = celui d'amont (117) + nombre de commits du depot. LibreHU Apps propose une
   mise a jour quand le `versionCode` augmente ; celui d'amont ne bougeait pas d'un build du fork a l'autre, la mise a
-  jour n'apparaissait donc pas. Le `versionName` reste celui d'amont, suivi du commit dans `release.txt`.
+  jour n'apparaissait donc pas. Le `versionName` reste celui d'amont suivi de `-<branche>` ; le commit est sur sa propre ligne de `release.txt`.
 - **CI** (`.github/workflows/librehu.yml`) : saveur `github` en release, publiee en pre-release continue
   `latest-<branche>` avec `release.txt` (LibreHU Apps) et en compilations numerotees ; les workflows d'Open Headunit
   propres a son depot (revue Gemini, issues inactives, APK debug) sont retires, `android-ci.yml` garde.
