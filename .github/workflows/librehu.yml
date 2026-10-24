@@ -86,8 +86,10 @@ jobs:
           AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n1)
           CODE=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionCode='\([0-9]*\)'.*/\1/p")
           NAME=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")-$(git rev-parse --short HEAD)
-          printf 'versionCode=%s\nversionName=%s\nbranch=%s\ncommit=%s\n\n%s\n' \
-            "$CODE" "$NAME" "$BRANCH" "$GITHUB_SHA" "$(git log -1 --pretty=%s)" > notes.txt
+          # SHA-256 of the APK: LibreHU Apps checks the download against it.
+          SHA=$(sha256sum "$OUT" | cut -d' ' -f1)
+          printf 'versionCode=%s\nversionName=%s\nbranch=%s\ncommit=%s\nsha256=%s\n\n%s\n' \
+            "$CODE" "$NAME" "$BRANCH" "$GITHUB_SHA" "$SHA" "$(git log -1 --pretty=%s)" > notes.txt
           git tag -f "$TAG" "$GITHUB_SHA"
           git push -f origin "refs/tags/$TAG"
           if gh release view "$TAG" >/dev/null 2>&1; then

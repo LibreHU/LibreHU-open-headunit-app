@@ -9,6 +9,16 @@ plugins {
 
 // LibreHU fork: LibreHU Apps updates when versionCode grows, and upstream's stays the same between two builds of the
 // fork. versionCode = upstream's + number of commits: grows with every commit, upstream bumps included.
+// "-<branch>" at the end of versionName: the branch the APK was built from (GITHUB_REF_NAME in the CI).
+fun librehuBranch(dir: File): String =
+    System.getenv("GITHUB_REF_NAME")?.takeIf { it.isNotBlank() } ?: try {
+        val p = ProcessBuilder("git", "rev-parse", "--abbrev-ref", "HEAD").directory(dir).redirectErrorStream(true).start()
+        val text = p.inputStream.bufferedReader().readText().trim()
+        if (p.waitFor() == 0 && text.isNotEmpty()) text else "local"
+    } catch (e: Exception) {
+        "local"
+    }
+
 fun librehuCommitCount(dir: File): Int =
     try {
         val p = ProcessBuilder("git", "rev-list", "--count", "HEAD").directory(dir).redirectErrorStream(true).start()
@@ -110,7 +120,7 @@ android {
         minSdk = 16
         targetSdk = 36
         versionCode = 117 + librehuCommitCount(rootDir)
-        versionName = "3.5.0-beta4"
+        versionName = "3.5.0-beta4-" + librehuBranch(rootDir)
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
