@@ -85,7 +85,7 @@ jobs:
           # versionCode (upstream's + number of commits, see build.gradle.kts) and versionName of the APK itself, the commit.
           AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt | tail -n1)
           CODE=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionCode='\([0-9]*\)'.*/\1/p")
-          NAME=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")-$(git rev-parse --short HEAD)
+          NAME=$("$AAPT" dump badging "$OUT" | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")
           # SHA-256 of the APK: LibreHU Apps checks the download against it.
           SHA=$(sha256sum "$OUT" | cut -d' ' -f1)
           printf 'versionCode=%s\nversionName=%s\nbranch=%s\ncommit=%s\nsha256=%s\n\n%s\n' \
