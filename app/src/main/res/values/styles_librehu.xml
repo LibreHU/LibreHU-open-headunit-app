@@ -33,66 +33,8 @@
         <item name="librehuAccent">@color/librehu_accent_purple</item>
         <item name="librehuOnAccent">@color/librehu_on_accent</item>
     </style>
-    <!-- Retro style of LibreHU Launcher: its palette (day / night with the night mode) and the segment display font. -->
-    <style name="ThemeOverlay.LibreHU.Retro.Amber" parent="">
-        <item name="librehuAccent">@color/librehu_retro_amber_accent</item>
-        <item name="librehuOnAccent">@color/librehu_retro_amber_on_accent</item>
-        <item name="colorPrimary">@color/librehu_retro_amber_accent</item>
-        <item name="colorOnPrimary">@color/librehu_retro_amber_on_accent</item>
-        <item name="colorSecondary">@color/librehu_retro_amber_accent</item>
-        <item name="android:colorBackground">@color/librehu_retro_amber_background</item>
-        <item name="android:windowBackground">@color/librehu_retro_amber_background</item>
-        <item name="colorSurface">@color/librehu_retro_amber_surface</item>
-        <item name="colorSurfaceVariant">@color/librehu_retro_amber_surface_high</item>
-        <item name="colorSurfaceContainer">@color/librehu_retro_amber_surface</item>
-        <item name="colorSurfaceContainerHigh">@color/librehu_retro_amber_surface_high</item>
-        <item name="colorOnBackground">@color/librehu_retro_amber_text</item>
-        <item name="colorOnSurface">@color/librehu_retro_amber_text</item>
-        <item name="colorOnSurfaceVariant">@color/librehu_retro_amber_text_dim</item>
-        <item name="android:textColorPrimary">@color/librehu_retro_amber_text</item>
-        <item name="android:textColorSecondary">@color/librehu_retro_amber_text_dim</item>
-        <item name="android:fontFamily">@font/librehu_seg14</item>
-        <item name="fontFamily">@font/librehu_seg14</item>
-    </style>
-    <!-- Retro style of LibreHU Launcher: its palette (day / night with the night mode) and the segment display font. -->
-    <style name="ThemeOverlay.LibreHU.Retro.Green" parent="">
-        <item name="librehuAccent">@color/librehu_retro_green_accent</item>
-        <item name="librehuOnAccent">@color/librehu_retro_green_on_accent</item>
-        <item name="colorPrimary">@color/librehu_retro_green_accent</item>
-        <item name="colorOnPrimary">@color/librehu_retro_green_on_accent</item>
-        <item name="colorSecondary">@color/librehu_retro_green_accent</item>
-        <item name="android:colorBackground">@color/librehu_retro_green_background</item>
-        <item name="android:windowBackground">@color/librehu_retro_green_background</item>
-        <item name="colorSurface">@color/librehu_retro_green_surface</item>
-        <item name="colorSurfaceVariant">@color/librehu_retro_green_surface_high</item>
-        <item name="colorSurfaceContainer">@color/librehu_retro_green_surface</item>
-        <item name="colorSurfaceContainerHigh">@color/librehu_retro_green_surface_high</item>
-        <item name="colorOnBackground">@color/librehu_retro_green_text</item>
-        <item name="colorOnSurface">@color/librehu_retro_green_text</item>
-        <item name="colorOnSurfaceVariant">@color/librehu_retro_green_text_dim</item>
-        <item name="android:textColorPrimary">@color/librehu_retro_green_text</item>
-        <item name="android:textColorSecondary">@color/librehu_retro_green_text_dim</item>
-        <item name="android:fontFamily">@font/librehu_seg14</item>
-        <item name="fontFamily">@font/librehu_seg14</item>
-    </style>
-    <!-- Retro style of LibreHU Launcher: its palette (day / night with the night mode) and the segment display font. -->
-    <style name="ThemeOverlay.LibreHU.Retro.Cassette" parent="">
-        <item name="librehuAccent">@color/librehu_retro_cassette_accent</item>
-        <item name="librehuOnAccent">@color/librehu_retro_cassette_on_accent</item>
-        <item name="colorPrimary">@color/librehu_retro_cassette_accent</item>
-        <item name="colorOnPrimary">@color/librehu_retro_cassette_on_accent</item>
-        <item name="colorSecondary">@color/librehu_retro_cassette_accent</item>
-        <item name="android:colorBackground">@color/librehu_retro_cassette_background</item>
-        <item name="android:windowBackground">@color/librehu_retro_cassette_background</item>
-        <item name="colorSurface">@color/librehu_retro_cassette_surface</item>
-        <item name="colorSurfaceVariant">@color/librehu_retro_cassette_surface_high</item>
-        <item name="colorSurfaceContainer">@color/librehu_retro_cassette_surface</item>
-        <item name="colorSurfaceContainerHigh">@color/librehu_retro_cassette_surface_high</item>
-        <item name="colorOnBackground">@color/librehu_retro_cassette_text</item>
-        <item name="colorOnSurface">@color/librehu_retro_cassette_text</item>
-        <item name="colorOnSurfaceVariant">@color/librehu_retro_cassette_text_dim</item>
-        <item name="android:textColorPrimary">@color/librehu_retro_cassette_text</item>
-        <item name="android:textColorSecondary">@color/librehu_retro_cassette_text_dim</item>
+    <!-- Segment display font chosen in LibreHU Launcher (LibreHU Seg14, DSEG14, SIL OFL 1.1), over the accent. -->
+    <style name="ThemeOverlay.LibreHU.Segment" parent="">
         <item name="android:fontFamily">@font/librehu_seg14</item>
         <item name="fontFamily">@font/librehu_seg14</item>
     </style>

@@ -168,9 +168,9 @@ git fetch upstream && git merge upstream/main
 ```
 Les changements du fork sont petits et commentes « LibreHU fork » pour garder les fusions simples.
 
-**Style rétro de LibreHU Launcher** : quand le launcher est en style rétro (VFD ambre, LCD vert, cassette), cette appli
-prend sa palette (jour ou nuit) et sa police d'afficheur à segments, en majuscules sans accents (« LibreHU Seg14 »,
-tirée de DSEG14 © keshikan, SIL Open Font License 1.1, voir `third_party/DSEG-LICENSE.txt`). Le launcher publie le
-style et la palette par `content://org.librehu.launcher.theme/theme` (colonnes `style`, `background`, `surface`,
-`surface_high`, `on_accent`, `text`, `text_dim`) et par la diffusion `org.librehu.action.THEME_CHANGED` (mêmes noms
-en extras).
+**Thème de LibreHU Launcher** : l'accent du launcher (le plus proche des huit de ce fork, couleur RGB comprise) et,
+quand elle y est choisie, sa **police d'afficheur à segments** en majuscules sans accents (« LibreHU Seg14 », tirée de
+DSEG14 © keshikan, SIL Open Font License 1.1, voir `third_party/DSEG-LICENSE.txt`). Les couleurs du style rétro du
+launcher (tirées de n'importe quelle couleur) ne sont pas suivies ici : ces écrans gardent leurs thèmes. Le launcher
+publie son thème par `content://org.librehu.launcher.theme/theme` (colonnes `dark`, `accent`, `style`, `font`…) et
+par la diffusion `org.librehu.action.THEME_CHANGED` (mêmes noms en extras).

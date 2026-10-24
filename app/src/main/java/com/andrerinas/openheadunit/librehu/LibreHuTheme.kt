@@ -25,9 +25,9 @@ import com.andrerinas.openheadunit.utils.Settings
  *
  * While [following] (launcher installed and the option on, the default): the night mode of the app is the launcher's,
  * and the launcher accent (one of its 8, light or dark variant) replaces Open Headunit's teal through a
- * `ThemeOverlay.LibreHU.*` put on every activity theme ([applyTo]). A retro style of the launcher (`style` column /
- * extra: `retro_amber`, `retro_green`, `retro_cassette`) puts `ThemeOverlay.LibreHU.Retro.*` instead: its palette
- * and the segment display font. Otherwise nothing changes.
+ * `ThemeOverlay.LibreHU.*` put on every activity theme ([applyTo]); the launcher's segment display font (`font` column /
+ * extra `segment`) adds `ThemeOverlay.LibreHU.Segment`. Otherwise nothing changes. (The launcher's retro colours,
+ * drawn from any colour, are not followed here: these screens keep their themes, with the accent nearest to it.)
  */
 object LibreHuTheme {
     private val URI: Uri = Uri.parse("content://org.librehu.launcher.theme/theme")
@@ -46,14 +46,6 @@ object LibreHuTheme {
             Triple(0xFFC58AF9.toInt(), 0xFF9334E6.toInt(), R.style.ThemeOverlay_LibreHU_Purple),
         )
 
-    /** Overlays of the launcher's retro styles. */
-    private val RETRO =
-        mapOf(
-            "retro_amber" to R.style.ThemeOverlay_LibreHU_Retro_Amber,
-            "retro_green" to R.style.ThemeOverlay_LibreHU_Retro_Green,
-            "retro_cassette" to R.style.ThemeOverlay_LibreHU_Retro_Cassette,
-        )
-
     @Volatile private var available = false
 
     @Volatile private var enabled = false
@@ -62,6 +54,8 @@ object LibreHuTheme {
         private set
 
     @Volatile private var overlay = 0
+
+    @Volatile private var segment = false
     private var listening = false
 
     /** True when the app takes the launcher's theme. */
@@ -96,7 +90,7 @@ object LibreHuTheme {
                     intent: Intent,
                 ) {
                     if (!intent.hasExtra("dark") || !intent.hasExtra("accent")) return
-                    onLauncherTheme(intent.getBooleanExtra("dark", true), intent.getIntExtra("accent", 0), intent.getStringExtra("style"), notify = true)
+                    onLauncherTheme(intent.getBooleanExtra("dark", true), intent.getIntExtra("accent", 0), intent.getStringExtra("font"), notify = true)
                 }
             },
             IntentFilter(ACTION_THEME_CHANGED),
@@ -129,6 +123,7 @@ object LibreHuTheme {
     fun applyTo(theme: Resources.Theme) {
         val o = overlay
         if (following && o != 0) theme.applyStyle(o, true)
+        if (following && segment) theme.applyStyle(R.style.ThemeOverlay_LibreHU_Segment, true)
     }
 
     /** The accent of [context]'s theme: the launcher's while following, else Open Headunit's teal. */
@@ -147,7 +142,7 @@ object LibreHuTheme {
                 if (!c.moveToFirst()) return null
                 val d = c.getColumnIndex("dark").takeIf { it >= 0 }?.let { c.getInt(it) != 0 } ?: true
                 val a = c.getColumnIndex("accent").takeIf { it >= 0 }?.let { c.getInt(it) } ?: return null
-                val st = c.getColumnIndex("style").takeIf { it >= 0 }?.let { c.getString(it) }
+                val st = c.getColumnIndex("font").takeIf { it >= 0 }?.let { c.getString(it) }
                 Triple(d, a, st)
             }
         } catch (e: Exception) {
@@ -158,15 +153,17 @@ object LibreHuTheme {
     private fun onLauncherTheme(
         dark: Boolean,
         accent: Int,
-        style: String?,
+        font: String?,
         notify: Boolean,
     ) {
-        val o = RETRO[style] ?: nearest(accent)
-        if (dark == this.dark && o == overlay) return
-        val accentChanged = o != overlay
+        val o = nearest(accent)
+        val seg = font == "segment"
+        if (dark == this.dark && o == overlay && seg == segment) return
+        val accentChanged = o != overlay || seg != segment
+        segment = seg
         this.dark = dark
         overlay = o
-        AppLog.i("LibreHuTheme: launcher theme dark=$dark accent=#${Integer.toHexString(accent)} style=$style")
+        AppLog.i("LibreHuTheme: launcher theme dark=$dark accent=#${Integer.toHexString(accent)} font=$font")
         if (!notify || !following) return
         Handler(Looper.getMainLooper()).post {
             // The night mode recreates the activities by itself (the projection only gets a configuration change);
