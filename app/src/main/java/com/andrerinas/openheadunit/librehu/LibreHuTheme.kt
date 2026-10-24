@@ -25,7 +25,9 @@ import com.andrerinas.openheadunit.utils.Settings
  *
  * While [following] (launcher installed and the option on, the default): the night mode of the app is the launcher's,
  * and the launcher accent (one of its 8, light or dark variant) replaces Open Headunit's teal through a
- * `ThemeOverlay.LibreHU.*` put on every activity theme ([applyTo]). Otherwise nothing changes.
+ * `ThemeOverlay.LibreHU.*` put on every activity theme ([applyTo]). A retro style of the launcher (`style` column /
+ * extra: `retro_amber`, `retro_green`, `retro_cassette`) puts `ThemeOverlay.LibreHU.Retro.*` instead: its palette
+ * and the segment display font. Otherwise nothing changes.
  */
 object LibreHuTheme {
     private val URI: Uri = Uri.parse("content://org.librehu.launcher.theme/theme")
@@ -42,6 +44,14 @@ object LibreHuTheme {
             Triple(0xFFF28B82.toInt(), 0xFFD93025.toInt(), R.style.ThemeOverlay_LibreHU_Red),
             Triple(0xFFFF8BCB.toInt(), 0xFFC5221F.toInt(), R.style.ThemeOverlay_LibreHU_Pink),
             Triple(0xFFC58AF9.toInt(), 0xFF9334E6.toInt(), R.style.ThemeOverlay_LibreHU_Purple),
+        )
+
+    /** Overlays of the launcher's retro styles. */
+    private val RETRO =
+        mapOf(
+            "retro_amber" to R.style.ThemeOverlay_LibreHU_Retro_Amber,
+            "retro_green" to R.style.ThemeOverlay_LibreHU_Retro_Green,
+            "retro_cassette" to R.style.ThemeOverlay_LibreHU_Retro_Cassette,
         )
 
     @Volatile private var available = false
@@ -63,7 +73,7 @@ object LibreHuTheme {
         available = app.packageManager.resolveContentProvider(URI.authority!!, 0) != null
         enabled = Settings(app).librehuFollowLauncherTheme
         if (!available) return
-        read(app)?.let { (d, a) -> onLauncherTheme(d, a, notify = false) }
+        read(app)?.let { (d, a, st) -> onLauncherTheme(d, a, st, notify = false) }
         if (listening) return
         listening = true
         val handler = Handler(Looper.getMainLooper())
@@ -73,7 +83,7 @@ object LibreHuTheme {
                 false,
                 object : ContentObserver(handler) {
                     override fun onChange(selfChange: Boolean) {
-                        read(app)?.let { (d, a) -> onLauncherTheme(d, a, notify = true) }
+                        read(app)?.let { (d, a, st) -> onLauncherTheme(d, a, st, notify = true) }
                     }
                 },
             )
@@ -86,7 +96,7 @@ object LibreHuTheme {
                     intent: Intent,
                 ) {
                     if (!intent.hasExtra("dark") || !intent.hasExtra("accent")) return
-                    onLauncherTheme(intent.getBooleanExtra("dark", true), intent.getIntExtra("accent", 0), notify = true)
+                    onLauncherTheme(intent.getBooleanExtra("dark", true), intent.getIntExtra("accent", 0), intent.getStringExtra("style"), notify = true)
                 }
             },
             IntentFilter(ACTION_THEME_CHANGED),
@@ -102,7 +112,7 @@ object LibreHuTheme {
         val settings = Settings(context)
         settings.librehuFollowLauncherTheme = on
         enabled = on
-        if (on && available) read(context.applicationContext)?.let { (d, a) -> onLauncherTheme(d, a, notify = false) }
+        if (on && available) read(context.applicationContext)?.let { (d, a, st) -> onLauncherTheme(d, a, st, notify = false) }
         AppThemeManager.reapply(context, settings)
         AppThemeManager.signalVisualChange()
     }
@@ -131,13 +141,14 @@ object LibreHuTheme {
         }
     }
 
-    private fun read(context: Context): Pair<Boolean, Int>? =
+    private fun read(context: Context): Triple<Boolean, Int, String?>? =
         try {
             context.contentResolver.query(URI, null, null, null, null)?.use { c ->
                 if (!c.moveToFirst()) return null
                 val d = c.getColumnIndex("dark").takeIf { it >= 0 }?.let { c.getInt(it) != 0 } ?: true
                 val a = c.getColumnIndex("accent").takeIf { it >= 0 }?.let { c.getInt(it) } ?: return null
-                d to a
+                val st = c.getColumnIndex("style").takeIf { it >= 0 }?.let { c.getString(it) }
+                Triple(d, a, st)
             }
         } catch (e: Exception) {
             AppLog.w("LibreHuTheme: ${e.message}")
@@ -147,14 +158,15 @@ object LibreHuTheme {
     private fun onLauncherTheme(
         dark: Boolean,
         accent: Int,
+        style: String?,
         notify: Boolean,
     ) {
-        val o = nearest(accent)
+        val o = RETRO[style] ?: nearest(accent)
         if (dark == this.dark && o == overlay) return
         val accentChanged = o != overlay
         this.dark = dark
         overlay = o
-        AppLog.i("LibreHuTheme: launcher theme dark=$dark accent=#${Integer.toHexString(accent)}")
+        AppLog.i("LibreHuTheme: launcher theme dark=$dark accent=#${Integer.toHexString(accent)} style=$style")
         if (!notify || !following) return
         Handler(Looper.getMainLooper()).post {
             // The night mode recreates the activities by itself (the projection only gets a configuration change);

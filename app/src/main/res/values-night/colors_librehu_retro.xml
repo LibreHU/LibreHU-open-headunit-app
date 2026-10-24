@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LibreHU fork: retro palettes of LibreHU Launcher (ui/Theme.kt, CarPalette.retro), night. -->
+<resources>
+    <color name="librehu_retro_amber_background">#FF0A0805</color>
+    <color name="librehu_retro_amber_surface">#FF17120A</color>
+    <color name="librehu_retro_amber_surface_high">#FF2A2010</color>
+    <color name="librehu_retro_amber_accent">#FFFFB000</color>
+    <color name="librehu_retro_amber_on_accent">#FF1A1205</color>
+    <color name="librehu_retro_amber_text">#FFFFC14D</color>
+    <color name="librehu_retro_amber_text_dim">#FFB07D2A</color>
+    <color name="librehu_retro_green_background">#FF050A06</color>
+    <color name="librehu_retro_green_surface">#FF0C160E</color>
+    <color name="librehu_retro_green_surface_high">#FF16261A</color>
+    <color name="librehu_retro_green_accent">#FF39FF6A</color>
+    <color name="librehu_retro_green_on_accent">#FF04140A</color>
+    <color name="librehu_retro_green_text">#FF7DFF9B</color>
+    <color name="librehu_retro_green_text_dim">#FF3F9E57</color>
+    <color name="librehu_retro_cassette_background">#FF1B1410</color>
+    <color name="librehu_retro_cassette_surface">#FF2A1F18</color>
+    <color name="librehu_retro_cassette_surface_high">#FF3A2B21</color>
+    <color name="librehu_retro_cassette_accent">#FFE8743B</color>
+    <color name="librehu_retro_cassette_on_accent">#FF1B1410</color>
+    <color name="librehu_retro_cassette_text">#FFF2E2C4</color>
+    <color name="librehu_retro_cassette_text_dim">#FFB39A7A</color>
+</resources>
