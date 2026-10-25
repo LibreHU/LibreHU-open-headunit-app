@@ -183,3 +183,14 @@ DSEG14 © keshikan, SIL Open Font License 1.1, voir `third_party/DSEG-LICENSE.tx
 launcher (tirées de n'importe quelle couleur) ne sont pas suivies ici : ces écrans gardent leurs thèmes. Le launcher
 publie son thème par `content://org.librehu.launcher.theme/theme` (colonnes `dark`, `accent`, `style`, `font`…) et
 par la diffusion `org.librehu.action.THEME_CHANGED` (mêmes noms en extras).
+
+## Soutenir le projet
+
+LibreHU est développé bénévolement, sur le temps libre, et toutes ses applis restent gratuites. Si le projet vous est
+utile, vous pouvez le soutenir par un don sur [Liberapay](https://liberapay.com/DokT/donate) (association française à
+but non lucratif, dons récurrents) :
+
+[![Faire un don avec Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/DokT/donate)
+[![Donateurs sur Liberapay](https://img.shields.io/liberapay/patrons/DokT.svg?logo=liberapay)](https://liberapay.com/DokT/)
+
+Ces dons vont au projet LibreHU, pas aux auteurs de Open Headunit : pour les soutenir, voir leur dépôt.
