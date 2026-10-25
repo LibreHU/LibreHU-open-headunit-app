@@ -5,6 +5,15 @@ puis Andre Rinas), recepteur Android Auto en appli Android, pour les autoradios 
 Licence inchangee : **AGPL-3.0** (voir `LICENSE` et `COPYRIGHT_MICHAEL_REID_GPLv3AFFERO.txt`) ; le code de ce fork
 est publie avec ses APK.
 
+## Captures d'écran
+
+| | |
+|---|---|
+| ![Assistant de premier démarrage](docs/screenshots/welcome.png)<br>Assistant de premier démarrage | ![Configuration (2)](docs/screenshots/setup-2.png)<br>Configuration (2) |
+| ![Écran principal](docs/screenshots/main.png)<br>Écran principal |   |
+
+Captures sur l'émulateur Android 9 (1280×720, 160 dpi comme l'autoradio), sans autoradio branché : les valeurs du véhicule et de la MCU sont vides. Refaites-les avec l'action **Screenshots** de [LibreHU-OTA-app](https://github.com/LibreHU/LibreHU-OTA-app/tree/main/screenshots). Galerie : [librehu.github.io/screenshots/headunit.html](https://librehu.github.io/screenshots/headunit.html).
+
 ## Ce que change le fork
 - **Vidéo basse latence activée par le préréglage LibreHU** (version 3) : le réglage d'Open Headunit
   « Request decoder low-latency mode » (`debug-video-low-latency`, désactivé en amont) passe à oui si personne ne l'a
