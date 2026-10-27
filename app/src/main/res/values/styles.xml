@@ -7,8 +7,8 @@
         <item name="android:windowBackground">@drawable/bg</item>
         <item name="android:windowTranslucentNavigation">false</item>
         <item name="android:windowTranslucentStatus">false</item>
-        <!-- LibreHU fork: Open Headunit teal unless LibreHuTheme puts the launcher accent over it. -->
-        <item name="librehuAccent">@color/brand_teal</item>
+        <!-- LibreHU fork: Open Headunit brand colour unless LibreHuTheme puts the launcher accent over it. -->
+        <item name="librehuAccent">@color/brand_primary</item>
         <item name="librehuOnAccent">@android:color/white</item>
         <item name="colorPrimary">?attr/librehuAccent</item>
         <item name="colorSecondary">?attr/librehuAccent</item>
@@ -17,10 +17,24 @@
         <item name="android:dialogTheme">@style/DarkAlertDialog</item>
         <item name="android:alertDialogTheme">@style/DarkAlertDialog</item>
         <item name="materialAlertDialogTheme">@style/DarkAlertDialog</item>
+        <item name="settingsSurface">@color/md_surface</item>
+        <item name="settingsContainer">@color/md_surface_container</item>
+        <item name="settingsContainerHigh">@color/md_surface_container_high</item>
+        <item name="settingsContainerHighest">@color/md_surface_container_highest</item>
+        <item name="settingsOnSurface">@color/md_on_surface</item>
+        <item name="settingsOnSurfaceVariant">@color/md_on_surface_variant</item>
+        <item name="settingsOutline">@color/md_outline</item>
+        <item name="settingsOutlineVariant">@color/md_outline_variant</item>
+        <item name="settingsPrimary">@color/md_primary</item>
+        <item name="settingsOnPrimary">@color/md_on_primary</item>
+        <item name="settingsSecondaryContainer">@color/md_secondary_container</item>
+        <item name="settingsOnSecondaryContainer">@color/md_on_secondary_container</item>
+        <item name="settingsOutlinedGroups">false</item>
+        <item name="settingsFilledIcons">true</item>
     </style>
 
     <style name="AppTheme.Translucent" parent="android:Theme.Translucent.NoTitleBar">
-        <item name="librehuAccent">@color/brand_teal</item>
+        <item name="librehuAccent">@color/brand_primary</item>
         <item name="librehuOnAccent">@android:color/white</item>
     </style>
 
@@ -56,7 +70,7 @@
         <item name="android:textColor">?attr/librehuOnAccent</item>
         <item name="backgroundTint">?attr/librehuAccent</item>
         <item name="android:backgroundTint">?attr/librehuAccent</item>
-        <item name="android:background">@drawable/btn_primary_teal</item>
+        <item name="android:background">@drawable/btn_primary</item>
     </style>
 
     <style name="DialogButton.Negative" parent="Widget.Material3.Button.TextButton">
@@ -77,10 +91,62 @@
         <item name="colorSurface">@color/extreme_dark_background</item>
         <item name="android:colorBackground">@color/extreme_dark_background</item>
         <item name="android:windowBackground">@color/extreme_dark_background</item>
+        <item name="settingsSurface">@color/extreme_dark_background</item>
+        <item name="settingsContainer">@color/extreme_dark_background</item>
+        <item name="settingsContainerHigh">@color/extreme_dark_background</item>
+        <item name="settingsContainerHighest">@color/md_extreme_container_highest</item>
+        <item name="settingsOnSurface">@color/md_extreme_on_surface</item>
+        <item name="settingsOnSurfaceVariant">@color/md_extreme_on_surface_variant</item>
+        <item name="settingsOutline">@color/md_extreme_outline</item>
+        <item name="settingsOutlineVariant">@color/md_extreme_outline_variant</item>
+        <item name="settingsPrimary">@color/md_extreme_primary</item>
+        <item name="settingsOnPrimary">@color/extreme_dark_background</item>
+        <item name="settingsSecondaryContainer">@color/md_extreme_secondary_container</item>
+        <item name="settingsOnSecondaryContainer">@color/md_extreme_on_surface</item>
+        <item name="settingsOutlinedGroups">true</item>
+        <item name="settingsFilledIcons">false</item>
     </style>
 
     <style name="ThemeOverlay.GradientBackground" parent="">
         <item name="android:windowBackground">@drawable/bg_gradient</item>
+    </style>
+
+    <!-- One option of a segmented setting. Colors and corners are set in code from the
+         settings palette (SettingsAdapter.SegmentedButtonViewHolder). -->
+    <style name="SettingsSegment" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:checkable">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:minHeight">@dimen/settings_segment_min_height</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">6dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/settings_control_text_size</item>
+    </style>
+
+    <!-- Header controls of the settings screen (tabs, search, save). Colors set in code. -->
+    <style name="SettingsTab" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:checkable">true</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/settings_control_text_size</item>
+        <item name="iconPadding">6dp</item>
+        <item name="iconSize">@dimen/settings_control_icon_size</item>
+    </style>
+
+    <style name="SettingsIconButton">
+        <item name="android:layout_width">@dimen/settings_icon_button_size</item>
+        <item name="android:layout_height">@dimen/settings_icon_button_size</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:padding">@dimen/settings_icon_button_padding</item>
+        <item name="android:scaleType">fitCenter</item>
     </style>
 
     <!-- Segmented Button Shapes -->
@@ -108,4 +174,66 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">24dp</item>
     </style>
+
+    <!-- Home screen tiles: the driver bar and the favorite apps share one look. -->
+    <style name="HomeTile">
+        <item name="android:layout_width">@dimen/home_tile_size</item>
+        <item name="android:layout_height">@dimen/home_tile_size</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/home_tile_bg</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="HomeTile.Favorite">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/home_favorite_slot_bg</item>
+    </style>
+    <style name="HomeTileIcon">
+        <item name="android:layout_width">@dimen/home_tile_icon</item>
+        <item name="android:layout_height">@dimen/home_tile_icon</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+    <style name="HomeTileLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <!-- Centered, so a label that wraps ("Add app" on a narrow row) does not leave its
+             second line hanging against the left edge of the tile. -->
+        <item name="android:gravity">center</item>
+        <!-- One line, for the labels that sit beside their icon or have a one-word name (Exit,
+             All apps). See HomeTileLabel.Wrap for the bar's connection tiles and the favorites. -->
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">@dimen/home_tile_label</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="HomeTileLabel.Wrap">
+        <!-- Two lines, so a narrow tile stacks "Self Mode" instead of ellipsizing it to "Sel...".
+             Use it with WordFitTextView, which only breaks between words. The landscape bar's
+             tiles shrink with the screen, but their icon and label shrink with them, and two lines
+             still fit down to about 65% of the smallest tile size. -->
+        <item name="android:maxLines">2</item>
+    </style>
+    <style name="HomeCardText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+    <!-- HomeActionDialog draws its own rounded panel, so the window under it has to be clear:
+         the platform's dialog background showed in the panel's corners. -->
+    <style name="HomeActionDialog" parent="@android:style/Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
 </resources>

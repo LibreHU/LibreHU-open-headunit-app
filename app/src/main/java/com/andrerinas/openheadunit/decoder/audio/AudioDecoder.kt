@@ -57,7 +57,7 @@ class AudioDecoder {
     @Synchronized fun getTrack(channel: Int, session: PlaybackSession = activeSession): AudioTrackWrapper? {
         if (!accepts(session)) return null
         val track = audioTracks[channel] ?: return null
-        if (track.isPlaybackHealthy()) return track
+        if (track.isOutputOwnerAlive()) return track
         stop(channel, session)
         return null
     }
@@ -91,10 +91,11 @@ class AudioDecoder {
         track?.pauseForIdle()
     }
 
-    @Synchronized fun preparePlayback(channel: Int, session: PlaybackSession = activeSession): Any? = getTrack(channel, session)?.let {
-        it.preparePlayback()
-        it.playbackOwner
-    }
+    @Synchronized fun preparePlayback(channel: Int, session: PlaybackSession = activeSession): Any? =
+        getTrack(channel, session)?.takeIf { it.canAcceptAudioInput() }?.let {
+            it.preparePlayback()
+            it.playbackOwner
+        }
 
     /** Park all channels (e.g. on device sleep/screen-off) so AudioTrack does not block in ALSA. */
     fun pauseAll(session: PlaybackSession = activeSession) {
@@ -113,10 +114,10 @@ class AudioDecoder {
     }
 
     /**
-     * Each channel's bank uses [audioLatencyMultiplier], capped by the caller for short prompts.
-     * A shared static-focus output is tuned independently rather than inheriting the preference
-     * of whichever sink was set up first. Otherwise the guidance cap can silently size music's
-     * output too. [session] also fences replacement connections: an old setup must not rebuild
+     * Each channel's network bank uses the selected [audioLatencyMultiplier]. Short completed
+     * prompts drain below that target on Stop. Device output buffering is tuned independently,
+     * so a shared static-focus output does not inherit the first sink's network reserve.
+     * [session] also fences replacement connections: an old setup must not rebuild
      * or register a sink in a newer connection's mixer.
      */
     @Synchronized fun start(
@@ -133,7 +134,8 @@ class AudioDecoder {
         attachHwDspEqualizer: Boolean = false,
         preferAAudio: Boolean = false,
         isAdts: Boolean = false,
-        session: PlaybackSession = activeSession
+        session: PlaybackSession = activeSession,
+        matchingMode: AudioTimeCorrectionMode = AudioTimeCorrectionMode.OHU
     ) {
         if (!accepts(session)) return
         // This decoder is reused across connections. Retiring owners must keep their session's
@@ -153,7 +155,8 @@ class AudioDecoder {
             }
             if (staticAudioFocus && mixer == null) {
                 mixer = AudioMixer(stream, attachHwDspEqualizer, preferAAudio = preferAAudio,
-                    keepOutputActive = true, duckMediaForSpeech = true, canRender = callbacks.canRender)
+                    keepOutputActive = true, duckMediaForSpeech = true, canRender = callbacks.canRender,
+                    matchingMode = matchingMode)
                     .also { it.start() }
                 createdSharedMixer = true
                 AppLog.i("AudioDecoder: Created shared AudioMixer on channel $channel")
@@ -162,7 +165,7 @@ class AudioDecoder {
             sinkMixer = if (staticAudioFocus) checkNotNull(mixer) else {
                 AudioMixer(stream, attachHwDspEqualizer, audioLatencyMultiplier, preferAAudio,
                     canRender = callbacks.canRender,
-                    onRecoveryActivity = { callbacks.activity(channel, owner) }).also { it.start() }
+                    onRecoveryActivity = { callbacks.activity(channel, owner) }, matchingMode = matchingMode).also { it.start() }
             }
             val track = AudioTrackWrapper(
                 sampleRateInHz = sampleRate,
@@ -182,7 +185,7 @@ class AudioDecoder {
                 onOwnerRetired = retireOwner,
                 isAdts = isAdts
             ).also { candidate = it }
-            if (!track.isPlaybackHealthy() || !owner.publishIfActive {
+            if (!track.isOutputOwnerAlive() || !owner.publishIfActive {
                 callbacks.registered(channel, owner)
                 audioTracks.put(channel, track)?.stopPlayback()
             }) {

@@ -3,14 +3,19 @@ package com.andrerinas.openheadunit.main
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
 import android.util.DisplayMetrics
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.ViewFlipper
 import com.andrerinas.openheadunit.App
@@ -18,16 +23,34 @@ import com.andrerinas.openheadunit.R
 import com.andrerinas.openheadunit.aap.VehicleTypePolicy
 import com.andrerinas.openheadunit.app.BaseActivity
 import com.andrerinas.openheadunit.decoder.video.VideoDecoder
+import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightClipOutcome
+import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightFailure
+import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightNote
+import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightProgress
+import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightRecommendation
+import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightRun
+import com.andrerinas.openheadunit.decoder.video.preflight.VideoPreflightRunner
+import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.AppPermissions
-import com.andrerinas.openheadunit.utils.AudioStreamTester
 import com.andrerinas.openheadunit.utils.AppThemeManager
+import com.andrerinas.openheadunit.utils.CarLauncherManager
 import com.andrerinas.openheadunit.utils.LocaleHelper
 import com.andrerinas.openheadunit.utils.PermissionRowBinder
 import com.andrerinas.openheadunit.utils.Settings
+import com.andrerinas.openheadunit.utils.AnnouncedDensityPolicy
 import com.andrerinas.openheadunit.utils.OnboardingDisplayPolicy
+import com.andrerinas.openheadunit.utils.OnboardingLauncherPolicy
 import com.andrerinas.openheadunit.utils.SystemOptimizer
+import com.andrerinas.openheadunit.view.VideoPreviewLayout
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.widget.TextViewCompat
+import androidx.core.view.MarginLayoutParamsCompat
 import androidx.core.view.ViewCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.checkbox.MaterialCheckBox
@@ -36,6 +59,11 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Intelligent, device-aware first-run wizard. Replaces the old
@@ -45,7 +73,7 @@ import com.google.android.material.textfield.TextInputEditText
  * is older than CURRENT_ONBOARDING_VERSION, and re-launchable from Settings.
  *
  * Steps: Welcome(+language) / Safety(mandatory) / Connection / Display scan /
- * Appearance / Audio streams / Automation / Location / Ready.
+ * Appearance / Audio streams / Automation / Car launcher / Location / Ready.
  *
  * Every step reuses the real settings and their strings, and deep-links into the
  * full settings sub-screens for advanced configuration.
@@ -61,10 +89,20 @@ class OnboardingActivity : BaseActivity() {
 
     private var step = 0
     private var isBinding = false
+    // The launcher switch asked the system for the home role and the answer is not in yet, so
+    // enableCarLauncher is not written until the role is confirmed held (see resolveLauncherRequest).
+    private var launcherRequestPending = false
 
     private var selectedSize = SystemOptimizer.DisplaySizePreset.STANDARD_9_10
     private var selectedPortrait = false
     private var dpiPicker: com.andrerinas.openheadunit.view.DpiPickerView? = null
+
+    private var videoPreview: VideoPreviewLayout? = null
+    private var videoJob: Job? = null
+    private var videoRun: VideoPreflightRun? = null
+    private var videoApply = false
+    private var videoAttempted = false
+    private var audioStep: OnboardingAudioStep? = null
 
     // Permissions step (registered here, before the activity is RESUMED).
     private var permissionBinder: PermissionRowBinder? = null
@@ -74,6 +112,10 @@ class OnboardingActivity : BaseActivity() {
     private val permSpecialLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { permissionBinder?.rebind() }
+    // onResume settles launcherRequestPending once this has run.
+    private val homeRoleLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { CarLauncherManager.onRoleRequestResult(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,18 +134,23 @@ class OnboardingActivity : BaseActivity() {
         setContentView(R.layout.activity_onboarding)
 
         step = savedInstanceState?.getInt(KEY_STEP, 0) ?: 0
+        launcherRequestPending = savedInstanceState?.getBoolean(KEY_LAUNCHER_PENDING, false) ?: false
 
         flipper = findViewById(R.id.onb_flipper)
         backBtn = findViewById(R.id.onb_back)
         nextBtn = findViewById(R.id.onb_next)
         skipBtn = findViewById(R.id.onb_skip)
         stepper = findViewById(R.id.onb_stepper)
+        compactFooterOnShortScreens()
+
+        applyCompactChrome()
 
         selectedPortrait = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
         selectedSize = OnboardingDisplayPolicy.initialPreset(settings.displaySizePreset, estimateSizePreset())
 
         buildStepperDots()
         bindSteps()
+        audioStep?.restore(savedInstanceState)
         bindPermissionsStep()
 
         // Ready step: optional-extras card. Each row finishes the wizard and jumps straight into
@@ -128,6 +175,34 @@ class OnboardingActivity : BaseActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt(KEY_STEP, step)
+        audioStep?.save(outState)
+        outState.putBoolean(KEY_LAUNCHER_PENDING, launcherRequestPending)
+    }
+
+    /**
+     * Reclaim the wizard chrome's space on short panels.
+     *
+     * A 624x288 dp unit is a real target (a 720p panel at 400 dpi), and the standard 24 dp
+     * padding plus the tall footer leave less than a hundred dp for a step. Eight dp of padding
+     * and a tighter indicator keep the content usable without hiding any action.
+     */
+    private fun applyCompactChrome() {
+        val height = resources.configuration.screenHeightDp
+        if (height >= 400) return
+        val pad = dp(if (height < 300) 4 else 8)
+        flipper.setPadding(pad, pad, pad, pad)
+        if (height < 300) {
+            // A 240 dp panel has no room for a step indicator; the content is the step.
+            stepper.visibility = View.GONE
+        } else {
+            val indicator = stepper.layoutParams as LinearLayout.LayoutParams
+            indicator.topMargin = dp(4)
+            indicator.bottomMargin = dp(2)
+            stepper.layoutParams = indicator
+        }
+        findViewById<LinearLayout>(R.id.onb_footer).setPadding(dp(8), dp(2), dp(8), dp(4))
+        // "Do it later" is already on the Back/Next row: compactFooterOnShortScreens moves it on
+        // anything under 500 dp, and this only runs under 400.
     }
 
     override fun onResume() {
@@ -136,13 +211,32 @@ class OnboardingActivity : BaseActivity() {
         // returning from a special-permission settings screen (overlay / modify system settings).
         updateThemeButtonText()
         updateNightButtonText()
+        // Coming back from the home-role request (or the system home settings) is where its answer is.
+        resolveLauncherRequest()
+        updateLauncherStep()
         permissionBinder?.rebind()
         if (step == STEP_DPI) dpiPicker?.startDemo()
+        if (step == STEP_VIDEO) showVideoStep()
     }
 
     override fun onPause() {
         super.onPause()
         dpiPicker?.stopDemo()
+        audioStep?.onPause()
+        // A codec and a surface must not outlive the visible wizard. The result is lost, which is
+        // honest: the user can run the five second test again when they come back.
+        if (step == STEP_VIDEO && videoJob?.isActive == true) {
+            stopVideoTest()
+            videoAttempted = true
+            showVideoIdle()
+        }
+    }
+
+    override fun onDestroy() {
+        videoJob?.cancel()
+        videoJob = null
+        audioStep?.release()
+        super.onDestroy()
     }
 
     /**
@@ -158,6 +252,7 @@ class OnboardingActivity : BaseActivity() {
 
     /** Move forward to the next visible step, or finish on the last one. */
     private fun goForward() {
+        resolveLauncherRequest()
         var s = step + 1
         while (s < STEP_COUNT && isStepHidden(s)) s++
         if (s >= STEP_COUNT) { finishOnboarding(); return }
@@ -167,6 +262,7 @@ class OnboardingActivity : BaseActivity() {
 
     /** Move back to the previous visible step. */
     private fun goBack() {
+        resolveLauncherRequest()
         var s = step - 1
         while (s > 0 && isStepHidden(s)) s--
         step = s.coerceAtLeast(0)
@@ -317,8 +413,40 @@ class OnboardingActivity : BaseActivity() {
                 Settings.syncAutoStartOnWifiToDeviceStorage(this@OnboardingActivity, v)
             }
         }
-        // --- Audio streams: which system stream each Android Auto channel plays on ---
-        bindAudioStep()
+        // --- Audio: a guided sound check, with the technical switches one level down ---
+        audioStep = OnboardingAudioStep(this, settings, findViewById(R.id.onb_audio_root)).also {
+            it.bind()
+        }
+
+        // --- Car launcher: the unit's home screen, with the price of replacing the stock one ---
+        // A wizard reopened after the user picked this app as home must not show launcher mode off.
+        val launcherOn = OnboardingLauncherPolicy.launcherModeOnOpen(
+            settings.enableCarLauncher, CarLauncherManager.isDefaultLauncher(this))
+        if (launcherOn != settings.enableCarLauncher) {
+            settings.enableCarLauncher = true
+            AppLog.i("OnboardingActivity: the app already holds the home role, storing car launcher mode")
+        }
+        findViewById<SwitchMaterial>(R.id.onb_launcher_switch).apply {
+            isChecked = settings.enableCarLauncher || launcherRequestPending
+            setOnCheckedChangeListener { _, checked ->
+                settings.enableCarLauncher = checked
+                CarLauncherManager.setLauncherEnabled(this@OnboardingActivity, checked)
+                if (checked) {
+                    if (!CarLauncherManager.isDefaultLauncher(this@OnboardingActivity)) {
+                        launcherRequestPending = true
+                        CarLauncherManager.promptSetDefaultLauncher(this@OnboardingActivity, homeRoleLauncher)
+                    }
+                } else {
+                    launcherRequestPending = false
+                }
+                updateLauncherStep()
+            }
+        }
+        findViewById<MaterialButton>(R.id.onb_launcher_default_button).setOnClickListener {
+            // Only shown with the switch on, where a request is already pending or launcher mode
+            // is already stored, so asking again needs no extra bookkeeping.
+            CarLauncherManager.promptSetDefaultLauncher(this@OnboardingActivity, homeRoleLauncher)
+        }
 
         // --- Location: this device's GPS vs the connected phone's GPS ---
         val gpsGroup = findViewById<MaterialButtonToggleGroup>(R.id.onb_gps_group)
@@ -332,86 +460,14 @@ class OnboardingActivity : BaseActivity() {
 
         // --- Car brand: the display name sent to Android Auto, and the manufacturer with it ---
         bindVehicleStep()
-    }
 
-    /**
-     * Binds the audio-stream step: the separate-streams switch plus one picker per channel, each
-     * with a speaker button that plays a tone on the stream currently chosen.
-     *
-     * The tone is what makes this worth a wizard step: which stream a head unit's amplifier
-     * actually unmutes for is not knowable in advance, and finding out after the first drive is
-     * how people conclude the app has no sound.
-     */
-    private fun bindAudioStep() {
-        findViewById<SwitchMaterial>(R.id.onb_audio_separate_switch).apply {
-            isChecked = settings.separateAudioStreams
-            setOnCheckedChangeListener { _, checked ->
-                settings.separateAudioStreams = checked
-                applyAudioStepVisibility()
-            }
+        // --- Video test: the clips are played through the decoder and the renderer ---
+        videoPreview = findViewById(R.id.onb_video_preview)
+        findViewById<MaterialButton>(R.id.onb_video_run).setOnClickListener { startVideoTest() }
+        findViewById<MaterialButton>(R.id.onb_video_skip).setOnClickListener { skipVideoTest() }
+        findViewById<MaterialCheckBox>(R.id.onb_video_apply).setOnCheckedChangeListener { _, checked ->
+            videoApply = checked
         }
-
-        bindAudioStreamRow(
-            R.id.onb_audio_media_button, R.id.onb_audio_media_test,
-            { mediaPickerTitle() },
-            { settings.mediaAudioStream }, { settings.mediaAudioStream = it }
-        )
-        bindAudioStreamRow(
-            R.id.onb_audio_guidance_button, R.id.onb_audio_guidance_test,
-            { getString(R.string.audio_channel_guidance) },
-            { settings.guidanceAudioStream }, { settings.guidanceAudioStream = it }
-        )
-        bindAudioStreamRow(
-            R.id.onb_audio_system_button, R.id.onb_audio_system_test,
-            { getString(R.string.audio_channel_system) },
-            { settings.systemAudioStream }, { settings.systemAudioStream = it }
-        )
-
-        applyAudioStepVisibility()
-    }
-
-    private fun bindAudioStreamRow(
-        buttonId: Int,
-        testId: Int,
-        title: () -> String,
-        get: () -> Int,
-        set: (Int) -> Unit
-    ) {
-        val button = findViewById<MaterialButton>(buttonId)
-        button.text = AudioStreamTester.label(this, get())
-        button.setOnClickListener {
-            val labels = AudioStreamTester.labels(this)
-            MaterialAlertDialogBuilder(this, R.style.DarkAlertDialog)
-                .setTitle(getString(R.string.audio_stream_pick_title, title()))
-                .setSingleChoiceItems(labels, AudioStreamTester.indexOf(this, get())) { dialog, which ->
-                    set(AudioStreamTester.streamAt(this, which))
-                    button.text = AudioStreamTester.label(this, get())
-                    dialog.dismiss()
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .show()
-        }
-        findViewById<MaterialButton>(testId).setOnClickListener {
-            AudioStreamTester.play(this, get())
-        }
-    }
-
-    /** The picker title for the first row, which covers every channel while streams are shared. */
-    private fun mediaPickerTitle(): String = getString(
-        if (settings.separateAudioStreams) R.string.audio_channel_media
-        else R.string.audio_channel_all_short
-    )
-
-    /** With separate streams off every channel plays on the media stream, so hide the other two
-     *  and widen the heading above the one that remains to name all of them. */
-    private fun applyAudioStepVisibility() {
-        val separate = settings.separateAudioStreams
-        val vis = if (separate) View.VISIBLE else View.GONE
-        findViewById<View>(R.id.onb_audio_guidance_row).visibility = vis
-        findViewById<View>(R.id.onb_audio_system_row).visibility = vis
-        findViewById<TextView>(R.id.onb_audio_media_label).setText(
-            if (separate) R.string.audio_channel_media else R.string.audio_channel_all
-        )
     }
 
     /**
@@ -529,13 +585,16 @@ class OnboardingActivity : BaseActivity() {
         nextBtn.isEnabled = when (step) {
             STEP_SAFETY -> findViewById<MaterialCheckBox>(R.id.onb_safety_accept).isChecked
             STEP_CONNECTION -> settings.connectionModes.isNotEmpty()
+            STEP_VIDEO -> videoJob?.isActive != true
             else -> true
         }
         if (step == STEP_READY) findViewById<TextView>(R.id.onb_ready_summary).text = summaryText()
-        if (step == STEP_AUDIO) applyAudioStepVisibility()
+        if (step == STEP_AUDIO) audioStep?.onShown() else audioStep?.onHidden()
         if (step == STEP_AUTOMATION) applyAutomationVisibility()
+        if (step == STEP_LAUNCHER) updateLauncherStep()
         if (step == STEP_PERMISSIONS) permissionBinder?.rebind()
         if (step == STEP_VEHICLE) applyVehicleTypeNote()
+        if (step == STEP_VIDEO) showVideoStep() else stopVideoTest()
         if (step == STEP_DPI) {
             findViewById<TextView>(R.id.onb_dpi_recommended).text =
                 getString(R.string.onb_dpi_recommended, recommendedDpi())
@@ -557,6 +616,25 @@ class OnboardingActivity : BaseActivity() {
         permissionBinder?.rebind()
     }
 
+    /**
+     * On short screens (800x480 head units) the "Do it later" row costs a whole row of step
+     * content, enough to push the last switch of the longer steps below the fold. There it moves
+     * into the navigation row, just before Next. Taller screens keep it on its own row.
+     */
+    private fun compactFooterOnShortScreens() {
+        if (resources.configuration.screenHeightDp >= SHORT_SCREEN_MAX_HEIGHT_DP) return
+        val navRow = findViewById<LinearLayout>(R.id.onb_nav_row)
+        (skipBtn.parent as? ViewGroup)?.removeView(skipBtn)
+        val gap = (8 * resources.displayMetrics.density).toInt()
+        val params = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply {
+            rightMargin = gap
+            MarginLayoutParamsCompat.setMarginEnd(this, gap)
+        }
+        navRow.addView(skipBtn, navRow.indexOfChild(nextBtn), params)
+    }
+
     /** Show only the auto-start toggles that match the chosen connection type. Self Mode
      * connects without USB or WiFi, so both groups are hidden. */
     private fun applyAutomationVisibility() {
@@ -569,8 +647,69 @@ class OnboardingActivity : BaseActivity() {
             if (settings.showsWifi() && Build.VERSION.SDK_INT <= 32) View.VISIBLE else View.GONE
     }
 
+    // --- Car launcher ---
+
+    /**
+     * The switch state and the default-home button. The button only makes sense with the launcher
+     * registered, and its label flips once the system grants the home role, which can happen while
+     * the wizard is in the background, so this also runs from onResume.
+     */
+    private fun updateLauncherStep() {
+        val button = findViewById<MaterialButton>(R.id.onb_launcher_default_button) ?: return
+        val switchOn = findViewById<SwitchMaterial>(R.id.onb_launcher_switch).isChecked
+        button.visibility = if (switchOn) View.VISIBLE else View.GONE
+        button.setText(
+            if (CarLauncherManager.isDefaultLauncher(this)) R.string.onb_launcher_default_home_active
+            else R.string.onb_launcher_default_home
+        )
+        // Reopen on reconnection is ignored while the app is the home app (Settings.reopenOnReconnection),
+        // and the user may have just turned it on in the automation step, so say so here.
+        val showNote = OnboardingLauncherPolicy.showsReopenNote(
+            launcherSwitchOn = switchOn,
+            reopenOn = findViewById<SwitchMaterial>(R.id.onb_reopen_switch).isChecked,
+            reopenOffered = settings.showsUsb()
+        )
+        findViewById<View>(R.id.onb_launcher_reopen_note).visibility = if (showNote) View.VISIBLE else View.GONE
+    }
+
+    /**
+     * Settles a pending home-role request: launcher mode is stored only if the role is now held,
+     * otherwise the switch goes back off. Runs on resume and when leaving the step, so a request
+     * whose answer never arrives (the dialog did not show, or was dismissed) cannot leave the
+     * setting claiming launcher mode.
+     */
+    private fun resolveLauncherRequest() {
+        val held = CarLauncherManager.isDefaultLauncher(this)
+        when (OnboardingLauncherPolicy.resolve(launcherRequestPending, held)) {
+            OnboardingLauncherPolicy.Outcome.NONE -> return
+            OnboardingLauncherPolicy.Outcome.CONFIRMED -> {
+                launcherRequestPending = false
+                AppLog.i("OnboardingActivity: home role granted, OpenHU is default home app")
+            }
+            OnboardingLauncherPolicy.Outcome.UNCONFIRMED -> {
+                launcherRequestPending = false
+                AppLog.i("OnboardingActivity: home role not held yet, car launcher mode remains enabled")
+            }
+        }
+        updateLauncherStep()
+    }
+
+    /** What the wizard ended up doing about the launcher, or null while the switch is off. */
+    private fun launcherSummaryLine(): String? = when {
+        CarLauncherManager.isDefaultLauncher(this) -> getString(R.string.onb_summary_launcher_home)
+        settings.enableCarLauncher -> getString(R.string.onb_summary_launcher_registered)
+        else -> null
+    }
+
     private fun onNext() {
         if (step == STEP_SAFETY) settings.hasAcceptedDisclaimer = true
+        if (step == STEP_VIDEO) {
+            val run = videoRun
+            videoApply = run != null &&
+                VideoPreflightNote.NOT_TESTED !in run.recommendation.notes &&
+                findViewById<MaterialCheckBox>(R.id.onb_video_apply).isChecked
+            stopVideoTest()
+        }
         // Apply the display recommendation + chosen DPI on Next, so the user does not
         // have to press "Apply recommended settings" for it to take effect.
         if (step == STEP_DISPLAY || step == STEP_DPI) applyDisplaySettings()
@@ -605,6 +744,7 @@ class OnboardingActivity : BaseActivity() {
             render()
             return
         }
+        resolveLauncherRequest()
         deferredThisSession = true
         settings.onboardingVersion = CURRENT_ONBOARDING_VERSION
         settings.commit()
@@ -617,24 +757,41 @@ class OnboardingActivity : BaseActivity() {
     }
 
     private fun finishOnboarding() {
-        settings.hasAcceptedDisclaimer = true
-        settings.hasCompletedSetupWizard = true
-        settings.onboardingVersion = CURRENT_ONBOARDING_VERSION
-        settings.commit()
+        completeOnboarding()
         finish()
     }
 
     /** Complete the wizard and open a specific Settings sub-screen (e.g. the loading screen setup). */
     private fun finishOnboardingInto(destinationId: Int) {
-        settings.hasAcceptedDisclaimer = true
-        settings.hasCompletedSetupWizard = true
-        settings.onboardingVersion = CURRENT_ONBOARDING_VERSION
-        settings.commit()
+        completeOnboarding()
+        // NEW_TASK puts Settings in the app's own task, over the main screen, instead of in the
+        // wizard's task, which would linger out of Recents once the wizard is gone.
         startActivity(
             Intent(this, SettingsActivity::class.java)
                 .putExtra(SettingsActivity.EXTRA_DESTINATION, destinationId)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         )
         finish()
+    }
+
+    /**
+     * Marks the wizard as seen and applies the settings that only take effect when it ends. The
+     * launcher switch already enabled or disabled the home alias as it was flipped; syncing here
+     * also covers a value stored by an older build, which never touched the alias.
+     */
+    private fun completeOnboarding() {
+        resolveLauncherRequest()
+        settings.hasAcceptedDisclaimer = true
+        settings.hasCompletedSetupWizard = true
+        settings.onboardingVersion = CURRENT_ONBOARDING_VERSION
+        if (OnboardingLauncherPolicy.syncsAlias(
+                settings.enableCarLauncher, CarLauncherManager.isDefaultLauncher(this))
+        ) {
+            CarLauncherManager.syncWithSettings(this, settings.enableCarLauncher)
+        } else {
+            AppLog.i("OnboardingActivity: the app holds the home role, keeping the launcher alias")
+        }
+        settings.commit()
     }
 
     // --- Language ---
@@ -681,6 +838,301 @@ class OnboardingActivity : BaseActivity() {
         return parts.joinToString(", ")
     }
 
+    // --- Video test ---
+
+    private fun showVideoStep() {
+        // The preview needs a real window and a laid out surface. onCreate can restore the video
+        // step before the activity is resumed, and starting there spent the whole surface timeout
+        // on a view nobody could see; onResume calls this again once the window exists.
+        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return
+        if (videoJob?.isActive == true) return
+        when {
+            videoRun != null -> renderVideoResult()
+            videoAttempted -> showVideoIdle()
+            else -> startVideoTest()
+        }
+    }
+
+    private fun startVideoTest() {
+        if (videoJob?.isActive == true) return
+        val preview = videoPreview ?: return
+        preview.visibility = View.VISIBLE
+        preview.removeAllViews()
+        videoRun = null
+        videoAttempted = true
+        // Ticked for everyone, upgraders included: running the test is asking for its answer, and
+        // the box is right there to keep the current settings instead.
+        videoApply = true
+        setVideoRunning(true)
+        findViewById<TextView>(R.id.onb_video_status).text = getString(R.string.onb_video_preparing)
+        val runner = VideoPreflightRunner(
+            context = this,
+            settings = settings,
+            sizePreset = selectedSize,
+            portrait = selectedPortrait,
+            container = preview,
+            onProgress = { progress -> runOnUiThread { showVideoProgress(progress) } },
+        )
+        videoJob = lifecycleScope.launch {
+            try {
+                videoRun = runner.run()
+                videoApply = true
+                setVideoRunning(false)
+                renderVideoResult()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                setVideoRunning(false)
+                showVideoIdle()
+                showVideoSummary(
+                    passed = false,
+                    title = getString(R.string.onb_video_error, e.message ?: e.javaClass.simpleName),
+                    detail = null,
+                )
+            } finally {
+                videoJob = null
+            }
+        }
+    }
+
+    private fun skipVideoTest() {
+        videoAttempted = true
+        videoRun = null
+        videoApply = false
+        stopVideoTest()
+        showVideoIdle()
+        nextBtn.isEnabled = true
+    }
+
+    private fun stopVideoTest() {
+        videoJob?.cancel()
+        videoJob = null
+        videoPreview?.removeAllViews()
+    }
+
+    private fun showVideoIdle() {
+        videoPreview?.let {
+            it.visibility = View.GONE
+            it.removeAllViews()
+        }
+        findViewById<ProgressBar>(R.id.onb_video_progress).visibility = View.GONE
+        findViewById<TextView>(R.id.onb_video_status).apply {
+            visibility = View.VISIBLE
+            text = getString(R.string.onb_video_idle)
+        }
+        clearVideoResult()
+        findViewById<MaterialCheckBox>(R.id.onb_video_apply).visibility = View.GONE
+        findViewById<MaterialButton>(R.id.onb_video_run).apply {
+            visibility = View.VISIBLE
+            text = getString(R.string.onb_video_run)
+        }
+        findViewById<MaterialButton>(R.id.onb_video_skip).visibility = View.GONE
+        nextBtn.isEnabled = true
+    }
+
+    private fun setVideoRunning(running: Boolean) {
+        findViewById<ProgressBar>(R.id.onb_video_progress).visibility =
+            if (running) View.VISIBLE else View.GONE
+        findViewById<TextView>(R.id.onb_video_status).visibility =
+            if (running) View.VISIBLE else View.GONE
+        findViewById<MaterialButton>(R.id.onb_video_run).visibility =
+            if (running) View.GONE else View.VISIBLE
+        findViewById<MaterialButton>(R.id.onb_video_skip).visibility =
+            if (running) View.VISIBLE else View.GONE
+        if (running) {
+            findViewById<MaterialCheckBox>(R.id.onb_video_apply).visibility = View.GONE
+            clearVideoResult()
+        }
+        nextBtn.isEnabled = !running
+    }
+
+    private fun showVideoProgress(progress: VideoPreflightProgress) {
+        findViewById<TextView>(R.id.onb_video_status).text = getString(
+            R.string.onb_video_running,
+            progress.clip.label,
+            viewModeLabel(progress.backend),
+        )
+    }
+
+    private fun renderVideoResult() {
+        val run = videoRun ?: return
+        // The clips have already played; leaving a SurfaceView inside the scroll view would make
+        // the result harder to read on older units, and the last frame adds nothing to it.
+        videoPreview?.let {
+            it.visibility = View.GONE
+            it.removeAllViews()
+        }
+        val recommendation = run.recommendation
+        val passed = VideoPreflightNote.NOT_TESTED !in recommendation.notes
+        // The verdict leads. A recommendation is only named when something passed: saying one next
+        // to "nothing passed" read as a contradiction.
+        val notes = recommendation.notes
+            .filter { it != VideoPreflightNote.NOT_TESTED }
+            .sortedBy { it.ordinal }
+            .map { noteText(it, recommendation, run) }
+        if (passed) {
+            showVideoSummary(
+                passed = true,
+                title = getString(
+                    R.string.onb_video_summary_pass,
+                    recommendation.codec.settingsValue,
+                    recommendation.resolution.resName,
+                ),
+                detail = (listOf(getString(R.string.onb_video_summary_view_mode, viewModeLabel(recommendation.viewMode))) + notes)
+                    .joinToString("\n"),
+            )
+        } else {
+            showVideoSummary(
+                passed = false,
+                title = getString(R.string.onb_video_summary_none),
+                detail = (listOf(getString(R.string.onb_video_note_not_tested)) + notes).joinToString("\n"),
+            )
+        }
+        val rows = findViewById<LinearLayout>(R.id.onb_video_rows)
+        rows.removeAllViews()
+        val tried = run.backends.filter { it.clips.isNotEmpty() }
+        for (backend in tried) {
+            if (tried.size > 1) rows.addView(videoGroupHeader(viewModeLabel(backend.viewMode)))
+            for (outcome in backend.clips) rows.addView(videoRow(outcome))
+        }
+        findViewById<TextView>(R.id.onb_video_status).visibility = View.GONE
+        findViewById<ProgressBar>(R.id.onb_video_progress).visibility = View.GONE
+        findViewById<MaterialButton>(R.id.onb_video_skip).visibility = View.GONE
+        val apply = findViewById<MaterialCheckBox>(R.id.onb_video_apply)
+        val canApply = VideoPreflightNote.NOT_TESTED !in recommendation.notes
+        apply.visibility = if (canApply) View.VISIBLE else View.GONE
+        apply.isChecked = videoApply
+        findViewById<MaterialButton>(R.id.onb_video_run).apply {
+            visibility = View.VISIBLE
+            text = getString(R.string.onb_video_again)
+        }
+        nextBtn.isEnabled = true
+    }
+
+    /** The same names View mode shows in Settings, so a recommendation can be found there. */
+    private fun viewModeLabel(mode: Settings.ViewMode): String = getString(
+        when (mode) {
+            Settings.ViewMode.SURFACE -> R.string.surface_view
+            Settings.ViewMode.TEXTURE -> R.string.texture_view
+            Settings.ViewMode.GLES -> R.string.gles_view
+        }
+    )
+
+    private fun clearVideoResult() {
+        findViewById<View>(R.id.onb_video_summary).visibility = View.GONE
+        findViewById<LinearLayout>(R.id.onb_video_rows).removeAllViews()
+    }
+
+    /** The verdict box: a check on a green wash when something passed, a cross on red otherwise. */
+    private fun showVideoSummary(passed: Boolean, title: String, detail: String?) {
+        val accent = ContextCompat.getColor(this, if (passed) R.color.material_green_700 else R.color.material_red_700)
+        findViewById<View>(R.id.onb_video_summary).apply {
+            visibility = View.VISIBLE
+            background = GradientDrawable().apply {
+                cornerRadius = dp(12).toFloat()
+                setColor(withAlpha(accent, SUMMARY_WASH_ALPHA))
+            }
+        }
+        findViewById<ImageView>(R.id.onb_video_summary_icon).setImageDrawable(resultIcon(passed, accent))
+        findViewById<TextView>(R.id.onb_video_summary_title).text = title
+        findViewById<TextView>(R.id.onb_video_summary_detail).apply {
+            text = detail
+            visibility = if (detail.isNullOrEmpty()) View.GONE else View.VISIBLE
+        }
+    }
+
+    private fun videoGroupHeader(label: String): View = TextView(this).apply {
+        TextViewCompat.setTextAppearance(this, com.google.android.material.R.style.TextAppearance_MaterialComponents_Overline)
+        text = label
+        setPadding(0, dp(10), 0, dp(2))
+    }
+
+    /** One clip: whether it passed, what it was, what went wrong in plain words, and the count. */
+    private fun videoRow(outcome: VideoPreflightClipOutcome): View {
+        val passed = outcome.passed
+        // Played, but this Android cannot read the picture back: not a failure, so not a red cross.
+        val unchecked = outcome.failure == VideoPreflightFailure.UNREADABLE
+        val accent = ContextCompat.getColor(
+            this,
+            when {
+                passed -> R.color.material_green_700
+                unchecked -> R.color.material_orange_700
+                else -> R.color.material_red_700
+            }
+        )
+        val frames = if (outcome.drawnFrames >= 0) outcome.drawnFrames else outcome.renderedFrames
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(6), 0, dp(6))
+            addView(ImageView(context).apply {
+                setImageDrawable(
+                    if (unchecked) tinted(R.drawable.ic_warning_white, accent) else resultIcon(passed, accent)
+                )
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            }, LinearLayout.LayoutParams(dp(20), dp(20)))
+            addView(TextView(context).apply {
+                TextViewCompat.setTextAppearance(this, com.google.android.material.R.style.TextAppearance_MaterialComponents_Subtitle2)
+                text = outcome.clip.label
+            }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                leftMargin = dp(12)
+            })
+            addView(TextView(context).apply {
+                TextViewCompat.setTextAppearance(this, com.google.android.material.R.style.TextAppearance_MaterialComponents_Body2)
+                text = getString(failureLabel(outcome.failure))
+            }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                leftMargin = dp(12)
+            })
+            addView(TextView(context).apply {
+                TextViewCompat.setTextAppearance(this, com.google.android.material.R.style.TextAppearance_MaterialComponents_Caption)
+                text = getString(R.string.onb_video_frames, frames, outcome.clip.frameCount)
+            })
+        }
+    }
+
+    private fun failureLabel(failure: VideoPreflightFailure): Int = when (failure) {
+        VideoPreflightFailure.NONE -> R.string.onb_video_row_ok
+        VideoPreflightFailure.NO_SURFACE,
+        VideoPreflightFailure.NO_FIRST_FRAME,
+        VideoPreflightFailure.NO_DRAWN_FRAMES -> R.string.onb_video_row_no_picture
+        VideoPreflightFailure.DECODER_ERROR -> R.string.onb_video_row_decoder
+        VideoPreflightFailure.FEW_FRAMES -> R.string.onb_video_row_few_frames
+        VideoPreflightFailure.BAD_MARKER -> R.string.onb_video_row_bad_picture
+        VideoPreflightFailure.UNREADABLE -> R.string.onb_video_row_unverified
+    }
+
+    /** Vectors go through AppCompatResources so they also load on Android 4. */
+    private fun resultIcon(passed: Boolean, color: Int) =
+        tinted(if (passed) R.drawable.ic_check else R.drawable.ic_close_white, color)
+
+    private fun tinted(drawableRes: Int, color: Int) =
+        AppCompatResources.getDrawable(this, drawableRes)
+            ?.mutate()
+            ?.let { DrawableCompat.wrap(it).apply { DrawableCompat.setTint(this, color) } }
+
+    private fun withAlpha(color: Int, alpha: Int): Int =
+        Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color))
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density + 0.5f).toInt()
+
+    private fun noteText(
+        note: VideoPreflightNote,
+        recommendation: VideoPreflightRecommendation,
+        run: VideoPreflightRun,
+    ): String = when (note) {
+        VideoPreflightNote.H265_FAILED -> getString(R.string.onb_video_note_h265_failed)
+        VideoPreflightNote.RESOLUTION_CAPPED ->
+            getString(R.string.onb_video_note_resolution_capped, recommendation.resolution.resName)
+        VideoPreflightNote.RENDERER_CHANGED -> getString(
+            R.string.onb_video_note_renderer_changed,
+            viewModeLabel(run.staticViewMode),
+            viewModeLabel(recommendation.viewMode),
+        )
+        VideoPreflightNote.HIGH_RES_UNVERIFIED -> getString(R.string.onb_video_note_high_res_unverified)
+        VideoPreflightNote.PICTURE_UNVERIFIED -> getString(R.string.onb_video_note_unverified)
+        VideoPreflightNote.NOT_TESTED -> getString(R.string.onb_video_note_not_tested)
+    }
+
     // --- Display scan ---
 
     private fun realMetrics(): DisplayMetrics {
@@ -724,8 +1176,20 @@ class OnboardingActivity : BaseActivity() {
         return getString(R.string.onb_display_detected, m.widthPixels, m.heightPixels, m.densityDpi, codec)
     }
 
-    private fun recommendedDpi(): Int =
-        SystemOptimizer(this).calculateOptimalSettings(selectedSize, selectedPortrait).recommendedDpi
+    /** What Automatic will send for the stored resolution, after the margins, as connect decides it. */
+    private fun recommendedDpi(): Int {
+        val m = realMetrics()
+        val chosen = preflightToApply()?.resolution ?: Settings.Resolution.fromId(settings.resolutionId)
+        val r = if (chosen == null || chosen == Settings.Resolution.AUTO) {
+            SystemOptimizer.recommendedResolution(m.widthPixels, m.heightPixels)
+        } else chosen
+        val (pw, ph) = AnnouncedDensityPolicy.orientPanel(m.widthPixels, m.heightPixels, selectedPortrait)
+        val (w, h) = AnnouncedDensityPolicy.visibleSize(settings.videoFitMode, pw, ph, r.width, r.height)
+        val par = AnnouncedDensityPolicy.pixelAspectE4(
+            settings.videoFitMode, pw, ph, r.width, r.height, settings.pixelAspectRatioE4
+        )
+        return AnnouncedDensityPolicy.decide(0, selectedSize, w, h, par, panelW = pw, panelH = ph).announced
+    }
 
     /** Warn (in red) when the current resolution is higher than the panel: the DPI is computed for
      * the capped resolution the device actually projects (issue #767). Relevant mainly for
@@ -753,22 +1217,30 @@ class OnboardingActivity : BaseActivity() {
         settings.hasCompletedSetupWizard ||
             settings.onboardingVersion in 1 until CURRENT_ONBOARDING_VERSION
 
+    /** The recommendation the test produced, but only when the user chose to apply it. */
+    private fun preflightToApply(): VideoPreflightRecommendation? =
+        videoRun?.recommendation?.takeIf {
+            videoApply && VideoPreflightNote.NOT_TESTED !in it.notes
+        }
+
     /** Writes the recommended display settings plus the DPI chosen in the picker. Called when
      * leaving the Display and Android Auto size steps, so no separate Apply tap is needed. */
     private fun applyDisplaySettings() {
         val result = SystemOptimizer(this).calculateOptimalSettings(selectedSize, selectedPortrait)
         val panel = realMetrics()
+        val preflight = preflightToApply()
         // Only auto-apply the video setup on a genuinely fresh install. Upgraders already have a
         // working config (view mode, codec, resolution, orientation), and silently overwriting it
         // has stranded users on a black screen (issue #767), so we leave those untouched and only
-        // apply the DPI the user set in the picker.
-        if (!isUpgrader()) {
+        // apply the DPI the user set in the picker. A test they chose to apply is the exception.
+        if (!isUpgrader() || preflight != null) {
             val previousViewMode = settings.viewMode
             // Set the resolution the panel warrants (the shared panel ceiling; mild downscaling of a
             // slightly-larger standard resolution is allowed, heavy downscaling is not — see panelCeiling).
-            settings.resolutionId = SystemOptimizer.recommendedResolution(panel.widthPixels, panel.heightPixels).id
-            settings.videoCodec = result.recommendedVideoCodec
-            settings.viewMode = result.recommendedViewMode
+            settings.resolutionId = preflight?.resolution?.id
+                ?: SystemOptimizer.recommendedResolution(panel.widthPixels, panel.heightPixels).id
+            settings.videoCodec = preflight?.codec?.settingsValue ?: result.recommendedVideoCodec
+            settings.viewMode = preflight?.viewMode ?: result.recommendedViewMode
             settings.screenOrientation = result.suggestedOrientation
             // If we changed the renderer, confirm the picture on the first projection.
             if (settings.viewMode != previousViewMode) settings.pendingRendererConfirm = true
@@ -776,7 +1248,9 @@ class OnboardingActivity : BaseActivity() {
         // Next is a button, so it never takes focus off the DPI field; without this a value the
         // user typed and did not confirm would be dropped in favour of the previous one.
         dpiPicker?.commitPendingInput()
-        settings.dpiPixelDensity = dpiPicker?.dpi ?: result.recommendedDpi
+        val stored = settings.dpiPixelDensity
+        val dpi = dpiPicker?.let { OnboardingDisplayPolicy.dpiToSave(it.dpi, it.hasUserInteracted, stored) } ?: stored
+        if (dpi != stored) settings.dpiPixelDensity = dpi
         if (settings.displaySizePreset != selectedSize.name) settings.displaySizePreset = selectedSize.name
         settings.commit()
         updateDpiOverPanelWarning()
@@ -850,7 +1324,8 @@ class OnboardingActivity : BaseActivity() {
         val head = if (vehicle.isNotEmpty())
             getString(R.string.onb_summary_vehicle_format, vehicle) + "\n" + base
         else base
-        return head + "\n" + perms
+        val launcher = launcherSummaryLine()
+        return head + "\n" + perms + if (launcher == null) "" else "\n" + launcher
     }
 
     private fun resolveAttrColor(attr: Int): Int {
@@ -866,20 +1341,31 @@ class OnboardingActivity : BaseActivity() {
         @Volatile
         var deferredThisSession = false
         private const val KEY_STEP = "onb_step"
-        private const val STEP_COUNT = 12
+        private const val KEY_LAUNCHER_PENDING = "onb_launcher_pending"
+        private const val STEP_COUNT = 14
+        /** Below this available height (dp) the footer goes to a single row. 800x480 lands
+         * well under it; 1024x600 stays above, so its footer is unchanged. */
+        private const val SHORT_SCREEN_MAX_HEIGHT_DP = 500
+        /** The verdict box's wash: enough to tell pass from fail, light enough for its text. */
+        private const val SUMMARY_WASH_ALPHA = 0x24
         private const val STEP_SAFETY = 1
         private const val STEP_CONNECTION = 2
-        private const val STEP_DISPLAY = 3
-        private const val STEP_DPI = 4
-        private const val STEP_AUDIO = 6
-        private const val STEP_AUTOMATION = 7
-        private const val STEP_GPS = 8
-        private const val STEP_VEHICLE = 9
-        private const val STEP_PERMISSIONS = 10
-        private const val STEP_READY = 11
+        private const val STEP_VIDEO = 3
+        private const val STEP_DISPLAY = 4
+        private const val STEP_DPI = 5
+        private const val STEP_AUDIO = 7
+        private const val STEP_AUTOMATION = 8
+        private const val STEP_LAUNCHER = 9
+        private const val STEP_GPS = 10
+        private const val STEP_VEHICLE = 11
+        private const val STEP_PERMISSIONS = 12
+        private const val STEP_READY = 13
 
         // The manufacturer half of the Desktop Head Unit identity we report by default.
         private const val DHU_MAKE = "Google"
+        // Names for the two output backends, as product names rather than translated words.
+        private const val AUDIO_BACKEND_AAUDIO = "AAudio"
+        private const val AUDIO_BACKEND_AUDIOTRACK = "AudioTrack"
         // Names the car step offers that are not car brands: the head unit make itself and
         // the app's own name. Lowercase, compared against a lowercased input.
         private val NOT_A_MANUFACTURER = setOf("google", "open headunit")

@@ -50,7 +50,7 @@ Captures sur l'émulateur Android 9 (1280×720, 160 dpi comme l'autoradio), sans
   `org.librehu.headunit.permission.NAVIGATION_UPDATE`, declaree par ce paquet (celle d'Open Headunit,
   `com.andrerinas.headunitrevived.permission.NAVIGATION_UPDATE`, n'est declaree par aucune appli : personne ne
   recevait ces diffusions). LibreHU Launcher l'affiche sur le tableau de bord.
-- **Numero de version** : `versionCode` = celui d'amont (117) + nombre de commits du depot. LibreHU Apps propose une
+- **Numero de version** : `versionCode` = celui d'amont (121 depuis 4.0.0-beta1) + nombre de commits du depot. LibreHU Apps propose une
   mise a jour quand le `versionCode` augmente ; celui d'amont ne bougeait pas d'un build du fork a l'autre, la mise a
   jour n'apparaissait donc pas. Le `versionName` reste celui d'amont suivi de `-<branche>` ; le commit est sur sa propre ligne de `release.txt`.
 - **CI** (`.github/workflows/librehu.yml`) : saveur `github` en release, publiee en pre-release continue
@@ -68,13 +68,13 @@ au paquet indiqué dans `reply_to`. Rien d'autre que `id` n'est lancé ; une sec
 
 ## Fichiers modifiés par rapport à l'amont
 
-Base : commit amont `4ee1d58f` (Open Headunit, « Merge pull request #1098 », 10/10/2026), branche locale `librehu`
-publiée sur `main`. `git diff 4ee1d58f HEAD --stat` donne la liste complète ; chaque modification du code est
+Base : commit amont `2018d8f0` (Open Headunit « 4.0.0-beta1 », 27/10/2026 ; base précédente `4ee1d58f`, 10/10/2026),
+branche locale `librehu` publiée sur `main`. `git diff 2018d8f0 HEAD --stat` donne la liste complète ; chaque modification du code est
 marquée `LibreHU fork:` en commentaire.
 
 | Fichier(s) | Modification |
 |---|---|
-| `app/build.gradle.kts` | `applicationId` `org.librehu.headunit`, signature par la clé LibreHU, `versionCode` = 117 + nombre de commits |
+| `app/build.gradle.kts` | `applicationId` `org.librehu.headunit`, signature par la clé LibreHU, `versionCode` = 121 + nombre de commits |
 | `app/src/main/AndroidManifest.xml` | permissions signature `CONFIGURE` et `NAVIGATION_UPDATE` déclarées par ce paquet ; `LibreHuAutomationReceiver`, `LibreHuVideoService`, `RootRequestReceiver` ; lecture des fournisseurs LibreHU (thème du launcher, fiche voiture) ; icône thémable |
 | `App.kt` | démarrage de `LibreHuTheme`, `LibreHuDefaults`, `LibreHuVehicleSync`, `LibreHuCar` |
 | `automation/LibreHuAutomationReceiver.kt` (nouveau) | commandes d'automatisation réservées aux applis signées LibreHU, configuration comprise |
@@ -95,7 +95,7 @@ marquée `LibreHU fork:` en commentaire.
 | `utils/AppThemeManager.kt`, `utils/NightModeManager.kt` | mode « Signal des phares (ILL+) » nourri par les phares de LibreHU-service (puis `car_mode` comme l'amont) |
 | `utils/Settings.kt`, `utils/SettingsBackupManager.kt` | réglages LibreHU (suivi du thème, capteurs, touches, carte vidéo, version de pré-configuration), inclus dans les sauvegardes |
 | `res/values/attrs_librehu.xml`, `colors_librehu.xml`, `values-night/colors_librehu.xml`, `styles_librehu.xml`, `styles.xml` | attributs `librehuAccent` / `librehuOnAccent` et `ThemeOverlay.LibreHU.*` (8 accents du launcher) |
-| `res/layout/dialog_*.xml`, `fragment_add_network_address.xml`, `item_keymap.xml`, `layout_*_button.xml`, `res/color-v23/*`, `res/drawable-v21/btn_primary_teal.xml` | couleurs codées en sarcelle remplacées par `?attr/librehuAccent` |
+| `res/layout/dialog_*.xml`, `fragment_add_network_address.xml`, `item_keymap.xml`, `layout_*_button.xml`, `res/color-v23/*`, `res/drawable-v21/btn_primary.xml` | couleurs codées de la marque (`brand_primary`, ex-`brand_teal`) remplacées par `?attr/librehuAccent` |
 | `res/drawable/librehu_launcher_*.xml`, `res/mipmap-anydpi-v26/ic_launcher*.xml` | icône originale et glyphe thémable |
 | `res/values/strings.xml`, `values-fr/strings.xml` | nom « Android Auto » sous l'icône, textes LibreHU (anglais, français) |
 | `res/xml/shortcuts.xml` | raccourcis vers le paquet `org.librehu.headunit` |
@@ -189,6 +189,15 @@ git remote add upstream https://github.com/andreknieriem/headunit-revived.git   
 git fetch upstream && git merge upstream/main
 ```
 Les changements du fork sont petits et commentes « LibreHU fork » pour garder les fusions simples.
+
+Derniere fusion : 4.0.0-beta1 (27/10/2026, 331 commits : FFmpeg H.264 en ARM32, reprise du decodeur, correction PCM
+adaptative, AAudio, identifiants WPP, nouveaux reglages et accueil, politique media XYAuto…). Conflits resolus en
+gardant les ajouts LibreHU : accent du launcher dans les layouts et styles (`brand_teal` devenu `brand_primary` en
+amont), ecran « Voiture et touches (LibreHU) » a cote du nouvel ecran d'amont propre a l'appareil, chaines LibreHU,
+nom de l'appli. Le choix du canal Wi-Fi Direct d'apres le Wi-Fi de l'autoradio (`c77f7d3`) fusionne sans conflit.
+Le test d'amont `AapPresentationTest` attend la permission `NAVIGATION_UPDATE` d'Open Headunit : adapte a celle de
+ce paquet. Tests : 4 286, un seul en echec dans la suite complete (`WppTcpTlsTest`, test d'amont, passe seul ici
+comme en amont : interaction d'ordre entre tests, code non touche par le fork).
 
 **Thème de LibreHU Launcher** : l'accent du launcher (le plus proche des huit de ce fork, couleur RGB comprise) et,
 quand elle y est choisie, sa **police d'afficheur à segments** en majuscules sans accents (« LibreHU Seg14 », tirée de

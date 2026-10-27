@@ -8,6 +8,10 @@ Android framework and I/O endpoints are test doubles; no device is needed.
 When the playback host suite is present, the runner also exercises the settings/publication
 boundary with the real AapAudio and AudioDecoder owners. This optional integration check
 retains standalone execution of the connection PR without a playback dependency.
+It also exercises scan-control calls from the extracted connection observer with the real
+route policy and strategy enum. Recording doubles replace the launcher and Shizuku APIs:
+Direct/Hotspot startup, skipped live phases, disconnect/error, replacement connection identity,
+USB/loopback/non-native exclusion and the Android 8 SDK gate are covered without radio changes.
 
 ## CI and local execution
 
@@ -23,3 +27,11 @@ after the first full run.
 
 Production member lookup uses exact declarations; a missing or renamed member raises an
 error and must be updated together with its fixture. These tools complement JVM unit tests.
+
+The wireless cleanup suite extracts the complete service disconnect callback. It checks
+late notifications, rearm during teardown, session-resource release and Exit waiter ownership
+with a queued Main dispatcher; platform services are recording doubles.
+
+The VPN command suite extracts the GitHub flavor's actual start/stop and service command
+handlers, then delivers a queued configuration after stop while the instance stays bound.
+It checks that the old request cannot recreate the tunnel or replace a newer configuration.

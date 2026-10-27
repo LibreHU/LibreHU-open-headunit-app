@@ -5,7 +5,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import androidx.activity.result.ActivityResultLauncher
 import android.os.Build
+import android.os.SystemClock
 import android.provider.Settings
 
 object CarLauncherManager {
@@ -58,9 +60,24 @@ object CarLauncherManager {
     }
 
     /**
-     * Checks whether Open Headunit is currently resolved as the default Home handler.
+     * Checks whether Open Headunit is the unit's home app.
+     *
+     * From Android 10 the home app is a role, and the package manager answers this question with
+     * this app's own alias as soon as the alias is enabled, which is not the same as the system
+     * having picked it. The role manager is the one that knows, and the intent check stays for the
+     * older units and for the ones where the role is not available.
      */
     fun isDefaultLauncher(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                val roleManager = context.getSystemService(RoleManager::class.java)
+                if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_HOME)) {
+                    return roleManager.isRoleHeld(RoleManager.ROLE_HOME)
+                }
+            } catch (e: Exception) {
+                AppLog.w("CarLauncherManager: RoleManager failed: ${e.message}, falling back to the intent check")
+            }
+        }
         return try {
             val pm = context.packageManager ?: return false
             val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
@@ -74,31 +91,54 @@ object CarLauncherManager {
 
     /**
      * Prompts the user to set Open Headunit as the default Home app.
-     * Uses RoleManager on Android 10+ (API 29+), or ACTION_HOME_SETTINGS / Home intent on older APIs.
+     * From Android 10 the role request goes through [roleRequest]: the system drops it unless it is
+     * started for a result, because it reads the requesting app from the caller of that result.
+     * Older units, and units without the role, get the system Home settings instead.
      */
-    fun promptSetDefaultLauncher(context: Context) {
-        // Android 10+ (API 29+) RoleManager
+    fun promptSetDefaultLauncher(context: Context, roleRequest: ActivityResultLauncher<Intent>) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
                 val roleManager = context.getSystemService(RoleManager::class.java)
                 if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_HOME)) {
-                    if (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                        val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_HOME).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        context.startActivity(intent)
-                        return
-                    } else {
+                    if (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
                         AppLog.i("CarLauncherManager: OpenHU is already the default Home app (ROLE_HOME held)")
                         return
                     }
+                    roleRequestedAt = SystemClock.elapsedRealtime()
+                    roleRequest.launch(roleManager.createRequestRoleIntent(RoleManager.ROLE_HOME))
+                    AppLog.i("CarLauncherManager: asked the system for the home role")
+                    return
                 }
             } catch (e: Exception) {
                 AppLog.w("CarLauncherManager: RoleManager failed: ${e.message}, falling back to settings")
             }
         }
+        openHomeSettings(context)
+    }
 
-        // Fallback: Open system Home settings or trigger Home chooser
+    /**
+     * Settles a home-role request when its result comes back. A request the system closed before
+     * anyone could answer it (a denied-always app, or a ROM that refuses it) opens the Home settings.
+     */
+    fun onRoleRequestResult(context: Context) {
+        val held = isDefaultLauncher(context)
+        val elapsedMs = SystemClock.elapsedRealtime() - roleRequestedAt
+        when {
+            held -> {
+                com.andrerinas.openheadunit.utils.Settings(context).enableCarLauncher = true
+                AppLog.i("CarLauncherManager: home role granted after ${elapsedMs}ms, car launcher mode stored")
+            }
+            HomeRoleRequestPolicy.opensHomeSettings(held, elapsedMs) -> {
+                AppLog.i("CarLauncherManager: the home role request closed in ${elapsedMs}ms with no answer, opening the Home settings")
+                openHomeSettings(context)
+            }
+            else -> AppLog.i("CarLauncherManager: home role not granted after ${elapsedMs}ms")
+        }
+    }
+
+    private var roleRequestedAt = 0L
+
+    private fun openHomeSettings(context: Context) {
         try {
             val homeSettingsIntent = Intent(Settings.ACTION_HOME_SETTINGS).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

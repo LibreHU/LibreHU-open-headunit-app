@@ -1,9 +1,11 @@
 package com.andrerinas.openheadunit.connection
+
 import android.app.Application
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import com.andrerinas.openheadunit.aap.AapSslContext
+import com.andrerinas.openheadunit.aap.AaPresentationSession
 import com.andrerinas.openheadunit.aap.AapTransport
 import com.andrerinas.openheadunit.aap.NarrowBandProfilePolicy
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
@@ -16,6 +18,10 @@ import com.andrerinas.openheadunit.main.BackgroundNotification
 import com.andrerinas.openheadunit.ssl.SingleKeyKeyManager
 import com.andrerinas.openheadunit.utils.Settings
 import com.andrerinas.openheadunit.utils.HeadUnitScreenConfig
+import com.andrerinas.openheadunit.utils.ProjectionHealthPolicy
+import com.andrerinas.openheadunit.utils.ProjectionHealthRecorder
+import com.andrerinas.openheadunit.utils.ProjectionHealthStore
+import com.andrerinas.openheadunit.utils.ProjectionSessionSummary
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import com.andrerinas.openheadunit.decoder.audio.AudioDecoder
@@ -35,6 +41,7 @@ import com.andrerinas.openheadunit.connection.projection.ProjectionConnection
 import com.andrerinas.openheadunit.connection.projection.LibusbProjectionConnection
 import com.andrerinas.openheadunit.connection.projection.SocketProjectionConnection
 import com.andrerinas.openheadunit.connection.projection.StandardUsbProjectionConnection
+import com.andrerinas.openheadunit.connection.usb.UsbRecoveryDevice
 import com.andrerinas.openheadunit.connection.usb.UsbDeviceCompat
 import com.andrerinas.openheadunit.connection.wifi.modes.helper.NearbySocket
 
@@ -115,6 +122,10 @@ class CommManager(
             // Only a failed physical USB open may inherit Save. Ordinary link failures and
             // newer sessions must not grant its retry loop permission to replace their state.
             val settingsRetryOwner: Disconnected? = null,
+            // The connectionAttempt this terminal ended, read under transportLifecycleLock with
+            // the publication. A launcher armed while that attempt was still Connecting uses it
+            // to recognise the attempt's later end as older than the arm (see rearmSnapshot).
+            internal val endedAttempt: Any? = null,
         ) : ConnectionState() {
             override fun toString() = "Disconnected(isClean=$isClean, isUserExit=$isUserExit, " +
                 "reason=$reason, restartEndpoint=$restartEndpoint, settingsRestartUntilMs=$settingsRestartUntilMs, " +
@@ -204,10 +215,12 @@ class CommManager(
     /** Callback for audio focus state changes (isPlaying). Set by AapService. */
     var onAudioFocusStateChanged: ((Boolean) -> Unit)? = null
 
-    /** Now-playing metadata from the phone (AAP media channel). Set by AapService. */
-    var onAaMediaMetadata: ((MediaPlayback.MediaMetaData) -> Unit)? = null
-    /** Playback status from the phone (AAP media channel), includes current position. */
-    var onAaPlaybackStatus: ((MediaPlayback.MediaPlaybackStatus) -> Unit)? = null
+    /** Latest now-playing metadata, delivered on Main with its owning session. Set by AapService. */
+    var onAaMediaMetadata: ((MediaPlayback.MediaMetaData, AaPresentationSession) -> Unit)? = null
+    /** Merged playback status/position, delivered on Main with its owning session. */
+    var onAaPlaybackStatus: ((MediaPlayback.MediaPlaybackStatus, AaPresentationSession) -> Unit)? = null
+    /** Runs on Main after the retired transport's final claimed display callback. */
+    var onAaPresentationClosed: ((AaPresentationSession) -> Unit)? = null
 
     // Creation/publication, saved audio settings and the first disconnect decision share one
     // boundary. Network handshake and final connection teardown run outside this lock.
@@ -220,6 +233,15 @@ class CommManager(
     private var physicalConnectionReached = false
     /** @Volatile: written on IO thread, read on Main and IO threads. */
     @Volatile private var _transport: AapTransport? = null
+    @Volatile private var projectionVideoFocusSuppressed = false
+    val isProjectionVideoFocusSuppressed: Boolean
+        get() = projectionVideoFocusSuppressed
+    val deviceVideoControl = com.andrerinas.openheadunit.device.ProjectionVideoSuppression { suppressed ->
+        setProjectionVideoFocusSuppressed(suppressed)
+        if (suppressed) {
+            send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = false, unsolicited = false))
+        }
+    }
 
     /**
      * `ip:port` of the most recent connection attempt, or `null` when it was not a socket
@@ -256,11 +278,15 @@ class CommManager(
     // Written with the connection token under transportLifecycleLock.
     private var outgoingEndpoint: Pair<String, Int>? = null
 
+    /** Carries the attempted enumeration and its recovery interval across delivery to Main. */
+    data class UsbHandshakeOutcome(val failure: AapTransport.HandshakeFailure,
+        val device: UsbDevice, val recoveryOwner: Any, val identity: UsbRecoveryDevice? = null)
+
     /**
      * Called after a USB handshake ends, [AapTransport.HandshakeFailure.NONE] on success, and after
      * `disconnect()` on failure. The `Error` state never reaches a collector.
      */
-    var onUsbHandshakeEnded: ((AapTransport.HandshakeFailure) -> Unit)? = null
+    var onUsbHandshakeEnded: ((UsbHandshakeOutcome) -> Unit)? = null
     @Volatile private var _connection: ProjectionConnection? = null
 
     /**
@@ -330,6 +356,32 @@ class CommManager(
     val isWirelessSession: Boolean
         get() = _connection is SocketProjectionConnection
 
+    /**
+     * Identity of an opened, accepted radio socket. The launcher can remain active while an
+     * IP/deep-link client dials out, so launcher state alone cannot authorize scan control.
+     * Read the socket, direction and attempt together; use the attempt as the session key so
+     * a conflated disconnect/reconnect still cancels the previous FYT startup.
+     */
+    internal val acceptedWirelessSession: Any?
+        get() = synchronized(transportLifecycleLock) {
+            val socket = _connection as? SocketProjectionConnection
+            if (socket != null && !socket.isLoopbackPeer && !socket.isSingleMessage &&
+                outgoingEndpoint == null && physicalConnectionReached && !disconnectRequested)
+                connectionAttempt else null
+        }
+
+    /**
+     * Vendor A2DP suppression belongs only to an accepted session that actually receives audio.
+     * Read the immutable transport config with its identity: Save may already hold the next
+     * session's preference while the old transport is still retiring.
+     */
+    internal val acceptedWirelessAudioSession: Any?
+        get() = synchronized(transportLifecycleLock) {
+            val state = _connectionState.value
+            if ((state is ConnectionState.HandshakeComplete || state is ConnectionState.TransportStarted) &&
+                _transport?.aapAudio?.sessionConfig?.enabled == true) acceptedWirelessSession else null
+        }
+
     /** `true` when this session, or the attempt in flight, runs over a USB cable. */
     val isUsbSession: Boolean
         get() = _connection is AbstractUsbProjectionConnection
@@ -370,6 +422,27 @@ class CommManager(
         val claim = claimUsb(tier, "USB ${UsbDeviceCompat.getUniqueName(device)}", expectedState)
             ?: return@withContext
         try { connectUsb(device, expectedState) } finally { releaseClaim(claim) }
+    }
+
+    /** A recovery retry cannot borrow the authority of a later Save, Exit or completed session. */
+    internal suspend fun reconnectUsb(device: UsbDevice, recoveryOwner: Any,
+        recoveryClaim: ConnectionArbiter.Claim,
+        admission: ConnectionAdmission = ConnectionAdmission.UNRESTRICTED) = withContext(Dispatchers.IO) {
+        val job = kotlinx.coroutines.currentCoroutineContext()[kotlinx.coroutines.Job]
+        val claim = synchronized(transportLifecycleLock) {
+            job?.ensureActive()
+            if (usbRecoveryOwner !== recoveryOwner) return@withContext
+            if (_connectionState.value !is ConnectionState.Disconnected &&
+                _connectionState.value !is ConnectionState.Error) return@withContext
+            var next: ConnectionArbiter.Claim? = null
+            admission.run {
+                next = ConnectionArbiter.claim(ConnectionPriorityPolicy.Tier.USB, ConnectionPriorityPolicy.Owner.USB,
+                    "USB recovery of ${UsbDeviceCompat.getUniqueName(device)}", expectedHolder = recoveryClaim)
+            }
+            next
+        } ?: return@withContext
+        attemptUserRequested = false
+        try { connectUsb(device, recoveryOwner = recoveryOwner, recoveryClaim = claim, recoveryAdmission = admission) } finally { releaseClaim(claim) }
     }
 
     internal fun claimUsb(
@@ -437,7 +510,10 @@ class CommManager(
         }
     }
 
-    private suspend fun connectUsb(device: UsbDevice, expectedState: ConnectionState.Disconnected? = null) {
+    private suspend fun connectUsb(device: UsbDevice, expectedState: ConnectionState.Disconnected? = null,
+        recoveryOwner: Any? = null, recoveryClaim: ConnectionArbiter.Claim? = null,
+        recoveryAdmission: ConnectionAdmission = ConnectionAdmission.UNRESTRICTED) {
+        if (recoveryOwner != null && !ownsUsbRecheck(recoveryOwner)) return
         if (expectedState != null && !expectedState.acceptsSettingsRestart(_connectionState.value)) return
         // Another caller already started the connection — do nothing.
         if (_connectionState.value is ConnectionState.Connecting)
@@ -450,7 +526,7 @@ class CommManager(
         if (usbManager == null || !usbManager.hasPermission(device)) {
             // USB re-enumeration revokes the old UsbDevice's permission. Keep Save's
             // terminal token so a fresh attach/permission reply can continue this recovery.
-            if (expectedState != null) return
+            if (expectedState != null || recoveryOwner != null) return
             onSessionFailure?.invoke("connect_failed")
             _connectionState.emit(ConnectionState.Error("USB permission not granted for device"))
             return
@@ -461,58 +537,99 @@ class CommManager(
         // UsbDeviceConnection hasn't been close()d yet.
         _disconnectJob?.join()
 
+        // A same-path detach/re-attach can preserve every descriptor. Carry the producer's
+        // detach evidence across dispatcher handoff and teardown, not only the device list.
+        if (recoveryOwner != null && !recoveryAdmission.run {}) return
+
+        // Teardown can suspend while USB re-enumerates. Recovery opens the latest matching
+        // bus object, and never turns a lost permission into an error for a newer connection.
+        val currentDevice = if (recoveryOwner == null) device else {
+            val current = if (recoveryAdmission is UsbRecoveryAdmission) recoveryAdmission.resolve(usbManager) ?: return
+                else usbManager.deviceList[device.deviceName] ?: return
+            if (current.vendorId != device.vendorId || current.productId != device.productId ||
+                !UsbDeviceCompat.isInAccessoryMode(current) || !UsbDeviceCompat.isConnectable(context, current) ||
+                !usbManager.hasPermission(current)) return
+            current
+        }
+
+        // Call only under transportLifecycleLock (lifecycle -> recovery identity/detach admission -> arbiter).
+        // A same-owner USB claim can be replaced without a preempt callback. Keep its
+        // check and each state transfer together; a separate holds() check is not enough.
+        fun publishIfOwned(action: () -> Unit): Boolean {
+            if (recoveryOwner == null) { action(); return true }
+            if (usbRecoveryOwner !== recoveryOwner || recoveryClaim == null) return false
+            var published = false
+            recoveryAdmission.run { published = ConnectionArbiter.runIfHeld(recoveryClaim, action) }
+            return published
+        }
+
         var conn: ProjectionConnection? = null
         val (attempt, previous) = synchronized(transportLifecycleLock) {
             // Retirement can suspend after admission. Recheck the same Save permission at
             // publication, before opening hardware or replacing another connection's state.
             if (expectedState != null && !expectedState.acceptsSettingsRestart(_connectionState.value)) return
-            settingsUsbRestartInFlight = expectedState
-            usbSaveOwner = expectedState
-            outgoingEndpoint = null
+            if (recoveryOwner != null && _connectionState.value !is ConnectionState.Disconnected &&
+                _connectionState.value !is ConnectionState.Error) return
             val token = Any()
-            connectionAttempt = token
-            physicalConnectionReached = false
-            disconnectRequested = false
-            _connectionState.value = ConnectionState.Connecting
-            val previous = _connection
-            _connection = null
+            var previous: ProjectionConnection? = null
+            if (!publishIfOwned {
+                settingsUsbRestartInFlight = expectedState
+                usbSaveOwner = expectedState
+                outgoingEndpoint = null
+                connectionAttempt = token
+                physicalConnectionReached = false
+                disconnectRequested = false
+                _connectionState.value = ConnectionState.Connecting
+                previous = _connection
+                _connection = null
+            }) return
             token to previous
         }
         try {
             previous?.disconnect()
             conn = if (settings.useLibusb) {
-                LibusbProjectionConnection(usbManager, device)
+                LibusbProjectionConnection(usbManager, currentDevice)
             } else {
-                StandardUsbProjectionConnection(usbManager, device)
+                StandardUsbProjectionConnection(usbManager, currentDevice)
             }
             val candidate = conn
             val registered = synchronized(transportLifecycleLock) {
                 if (connectionAttempt !== attempt || disconnectRequested) false
-                else { _connection = candidate; true }
+                else {
+                    val accepted = publishIfOwned { _connection = candidate }
+                    // Cleanup may invoke callbacks; it must stay outside the arbiter monitor.
+                    if (!accepted) disconnect(sendByeBye = false, isUserExit = false, honorKillOnDisconnect = false)
+                    accepted
+                }
             }
             if (!registered) return
 
             val opened = candidate.connect()
+            // A targeted fallback may wait inside openDevice while the bus changes again.
+            val targetStillCurrent = recoveryAdmission !is UsbRecoveryAdmission || recoveryAdmission.resolve(usbManager) != null
             synchronized(transportLifecycleLock) {
                 if (connectionAttempt !== attempt || disconnectRequested || _connection !== candidate) {
                     // The cancelled candidate is closed below, outside the lifecycle monitor.
                     return@synchronized
                 }
-                // openDevice may finish after its coroutine was cancelled. The Save token
-                // is revoked under this same lock; a late success must close, not publish.
-                if (opened && expectedState?.isSettingsRestartCancelled != true) {
-                    physicalConnectionReached = true
-                    settings.saveLastConnection(type = Settings.CONNECTION_TYPE_USB, usbDevice = UsbDeviceCompat.getUniqueName(device))
-                    _connectionState.value = ConnectionState.Connected
-                } else {
-                    disconnect(sendByeBye = false, isUserExit = false, honorKillOnDisconnect = false, settingsRetryOwner = expectedState)
+                // Settings persistence can run callbacks and must not hold the arbiter monitor.
+                // Recheck ownership atomically with publication after it returns.
+                if (opened && targetStillCurrent && expectedState?.isSettingsRestartCancelled != true) {
+                    settings.saveLastConnection(type = Settings.CONNECTION_TYPE_USB, usbDevice = UsbDeviceCompat.getUniqueName(currentDevice))
+                    if (publishIfOwned {
+                        physicalConnectionReached = true
+                        _connectionState.value = ConnectionState.Connected
+                    }) return@synchronized
                 }
+                disconnect(sendByeBye = false, isUserExit = false, honorKillOnDisconnect = false, settingsRetryOwner = expectedState)
             }
         } catch (e: Exception) {
             synchronized(transportLifecycleLock) {
                 if (connectionAttempt !== attempt || disconnectRequested) return
-                onSessionFailure?.invoke("connect_failed")
-                _connectionState.value = ConnectionState.Error("Connection failed: ${e.message}")
+                val published = publishIfOwned {
+                    _connectionState.value = ConnectionState.Error("Connection failed: ${e.message}")
+                }
+                if (published) onSessionFailure?.invoke("connect_failed")
                 // A thrown open failure has the same retry policy as connect() returning false.
                 // No user chose Exit, and an unopened session must not close the service either.
                 disconnect(sendByeBye = false, isUserExit = false, honorKillOnDisconnect = false, settingsRetryOwner = expectedState)
@@ -803,6 +920,17 @@ class CommManager(
         }
     }
 
+    /**
+     * What a launcher arm supersedes: the terminal already published, or else the attempt
+     * still in progress. One lock read, because IO publishes Connecting and its terminal
+     * under this lock while the arm runs on Main; reading state and attempt separately
+     * could pair an old terminal with a newer attempt, or miss the attempt between them.
+     */
+    internal fun rearmSnapshot(): Pair<ConnectionState.Disconnected?, Any?> = synchronized(transportLifecycleLock) {
+        val terminal = _connectionState.value as? ConnectionState.Disconnected
+        terminal to (if (terminal == null) connectionAttempt else null)
+    }
+
     /** A manual start or stop supersedes Save before it publishes an AAP connection. */
     fun cancelPendingSettingsRestart(): Unit = synchronized(transportLifecycleLock) {
         val terminal = _connectionState.value as? ConnectionState.Disconnected
@@ -888,6 +1016,10 @@ class CommManager(
         if (_connectionState.value !is ConnectionState.Connected) return@withContext
 
         val attemptedConnection = _connection
+        var recoveryOwner = usbRecheckOwner()
+        // Preserve known identity before handshake failure/cleanup can revoke USB permission.
+        // A delayed callback must not replace it with another enumeration at the same address.
+        val usbIdentity = (attemptedConnection as? AbstractUsbProjectionConnection)?.accessoryDevice?.let(UsbRecoveryDevice::capture)
         try {
             if (_connectionState.value is ConnectionState.Connected) {
                 val conn = attemptedConnection ?: return@withContext
@@ -899,9 +1031,11 @@ class CommManager(
                         val candidate = AapTransport(
                             audioDecoder, videoDecoder, audioManager, settings, _backgroundNotification,
                             context, externalSsl = aapSslContext,
-                            onAaMediaMetadata = { meta -> onAaMediaMetadata?.invoke(meta) },
-                            onAaPlaybackStatus = { status -> onAaPlaybackStatus?.invoke(status) }
+                            onAaMediaMetadata = { meta, session -> onAaMediaMetadata?.invoke(meta, session) },
+                            onAaPlaybackStatus = { status, session -> onAaPlaybackStatus?.invoke(status, session) },
+                            onAaPresentationClosed = { session -> onAaPresentationClosed?.invoke(session) }
                         )
+                        candidate.setProjectionVideoFocusSuppressed(projectionVideoFocusSuppressed)
                         // A late quit belongs only to the transport that installed this callback.
                         candidate.onQuit = { isClean -> transportedQuited(candidate, isClean) }
                         candidate.onAudioFocusStateChanged = { isPlaying -> onAudioFocusStateChanged?.invoke(isPlaying) }
@@ -919,16 +1053,19 @@ class CommManager(
                         // A session that got this far had a working link to carry video on. See
                         // VideoStarvationPolicy for what it means when one ends without carrying any.
                         usbRecoveryOwner = Any()
+                        recoveryOwner = usbRecoveryOwner
                         usbSaveOwner = null
                         sessionReachedHandshake = true
-                        videoDecoder.framesRenderedThisSession = 0L
+                        videoDecoder.beginSession()
+                        ProjectionHealthRecorder.reset()
                         silentPeerFailures = 0
                         // The peer answered, which is what the deaf-server record claims it cannot.
                         ConnectionIssues.clear(context, ConnectionIssue.HEADUNIT_SERVER_NOT_ANSWERING)
                         settleSessionClaim(formed = true)
                         _connectionState.value = ConnectionState.HandshakeComplete
                     }
-                    if (live && usb) onUsbHandshakeEnded?.invoke(AapTransport.HandshakeFailure.NONE)
+                    if (live && usb) onUsbHandshakeEnded?.invoke(UsbHandshakeOutcome(
+                        AapTransport.HandshakeFailure.NONE, (conn as AbstractUsbProjectionConnection).accessoryDevice, recoveryOwner, usbIdentity))
                 } else {
                     val failure = transport.lastHandshakeFailure
                     val live = withLiveTransport(transport, ConnectionState.StartingTransport) {
@@ -945,7 +1082,8 @@ class CommManager(
                         disconnect(sendByeBye = false, isUserExit = false)
                     }
                     // Outside the lock: the USB side starts recovery, which can connect again.
-                    if (live && usb) onUsbHandshakeEnded?.invoke(failure)
+                    if (live && usb) onUsbHandshakeEnded?.invoke(UsbHandshakeOutcome(
+                        failure, (conn as AbstractUsbProjectionConnection).accessoryDevice, recoveryOwner, usbIdentity))
                 }
             }
         } catch (e: Exception) {
@@ -960,7 +1098,8 @@ class CommManager(
                 settleSessionClaim(formed = false)
                 disconnect(sendByeBye = false, isUserExit = false)
             }
-            if (usb) onUsbHandshakeEnded?.invoke(AapTransport.HandshakeFailure.OTHER)
+            if (usb) onUsbHandshakeEnded?.invoke(UsbHandshakeOutcome(
+                AapTransport.HandshakeFailure.OTHER, (attemptedConnection as AbstractUsbProjectionConnection).accessoryDevice, recoveryOwner, usbIdentity))
         }
     }
 
@@ -1130,7 +1269,8 @@ class CommManager(
         // precedes final cleanup, so reconnect must await its actual termination as well.
         // Publish cleanup before state: a reconnect observer must be able to await this job.
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye = false) }
-        _connectionState.value = ConnectionState.Disconnected(isClean, isUserExit = wasUserExit, wasLoopbackSession = isLoopbackSession, hadPhysicalConnection = physicalConnectionReached, settingsRetryOwner = save)
+        source.retirePresentation()
+        _connectionState.value = ConnectionState.Disconnected(isClean, isUserExit = wasUserExit, wasLoopbackSession = isLoopbackSession, hadPhysicalConnection = physicalConnectionReached, settingsRetryOwner = save, endedAttempt = connectionAttempt)
         if (settings.killOnDisconnect) {
             context.sendBroadcast(android.content.Intent("com.andrerinas.openheadunit.ACTION_FINISH_ACTIVITIES").apply {
                 setPackage(context.packageName)
@@ -1141,6 +1281,7 @@ class CommManager(
                     action = com.andrerinas.openheadunit.aap.AapService.ACTION_STOP_SERVICE
                 }
                 com.andrerinas.openheadunit.aap.AapService.killProcessOnDestroy = true
+                com.andrerinas.openheadunit.aap.AapService.destroyIsUserStop = wasUserExit
                 context.stopService(stopIntent)
                 // Finish all tasks (API 21+)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -1330,7 +1471,16 @@ class CommManager(
         // requests on a live stream: the phone acknowledged every one and its keyframe cadence never
         // moved off its fixed ~69s period. Kept because it costs one message and nothing has measured
         // the surface-mismatch path this serves without it.
-        send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
+        if (!projectionVideoFocusSuppressed) {
+            send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
+        }
+    }
+
+    private fun setProjectionVideoFocusSuppressed(suppressed: Boolean) {
+        synchronized(transportLifecycleLock) {
+            projectionVideoFocusSuppressed = suppressed
+            _transport?.setProjectionVideoFocusSuppressed(suppressed)
+        }
     }
 
     /**
@@ -1357,6 +1507,7 @@ class CommManager(
     class VideoFocusCycle internal constructor(internal val transport: AapTransport)
 
     fun releaseVideoFocusForKeyframe(): VideoFocusCycle? {
+        if (projectionVideoFocusSuppressed) return null
         if (_connectionState.value !is ConnectionState.TransportStarted) return null
         val transport = _transport ?: return null
         if (!transport.beginFocusCycle()) {
@@ -1370,6 +1521,10 @@ class CommManager(
 
     /** Complete only the cycle whose transport sent the release, and only while it is live. */
     fun retakeVideoFocusForKeyframe(cycle: VideoFocusCycle): Boolean {
+        if (projectionVideoFocusSuppressed) {
+            cycle.transport.endFocusCycle()
+            return false
+        }
         val transport = cycle.transport
         if (_transport !== transport || _connectionState.value !is ConnectionState.TransportStarted) return false
         transport.send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
@@ -1379,6 +1534,11 @@ class CommManager(
 
     /** Regain focus for the current transport during wake/resume; warm relaunch uses its cycle token. */
     fun retakeVideoFocusForKeyframe() {
+        if (projectionVideoFocusSuppressed) return
+        if (_connectionState.value !is ConnectionState.TransportStarted) {
+            AppLog.w("CommManager: skipping retakeVideoFocusForKeyframe because transport is not started (${_connectionState.value})")
+            return
+        }
         _transport?.let {
             it.send(com.andrerinas.openheadunit.aap.protocol.messages.VideoFocusEvent(gain = true, unsolicited = true))
             it.endFocusCycle()
@@ -1453,6 +1613,7 @@ class CommManager(
             _transport?.wasUserExit = true
         }
         _disconnectJob = _scope.launch { doDisconnect(sendByeBye, byeByeReason, reason) }
+        _transport?.retirePresentation()
         _connectionState.value = ConnectionState.Disconnected(
             isUserExit = isUserExit, reason = reason,
             settingsRetryOwner = save,
@@ -1461,6 +1622,7 @@ class CommManager(
             restartEndpoint = if (reason == DisconnectReason.SETTINGS_RESTART) outgoingEndpoint else null,
             settingsRestartUntilMs = if (reason == DisconnectReason.SETTINGS_RESTART)
                 SystemClock.elapsedRealtime() + SettingsRestartRecovery.WINDOW_MS else 0L,
+            endedAttempt = connectionAttempt,
         )
         if (settings.killOnDisconnect && honorKillOnDisconnect) {
             context.sendBroadcast(android.content.Intent("com.andrerinas.openheadunit.ACTION_FINISH_ACTIVITIES").apply {
@@ -1472,6 +1634,7 @@ class CommManager(
                     action = com.andrerinas.openheadunit.aap.AapService.ACTION_STOP_SERVICE
                 }
                 com.andrerinas.openheadunit.aap.AapService.killProcessOnDestroy = true
+                com.andrerinas.openheadunit.aap.AapService.destroyIsUserStop = isUserExit
                 context.stopService(stopIntent)
                 // Finish all tasks (API 21+)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -1516,9 +1679,11 @@ class CommManager(
             // destroy() also reaches this path without a preceding disconnect(). Retire an
             // unpublished candidate before the owner-null fast path, just like an active owner.
             disconnectRequested = true
+            val endedAttempt = connectionAttempt
             connectionAttempt = null
             if (_connectionState.value !is ConnectionState.Disconnected) {
-                _connectionState.value = ConnectionState.Disconnected(wasLoopbackSession = isLoopbackSession, hadPhysicalConnection = physicalConnectionReached)
+                _transport?.retirePresentation()
+                _connectionState.value = ConnectionState.Disconnected(wasLoopbackSession = isLoopbackSession, hadPhysicalConnection = physicalConnectionReached, endedAttempt = endedAttempt)
             }
             val transport = _transport
             val connection = _connection
@@ -1538,6 +1703,7 @@ class CommManager(
         // Self-guarding against the re-entrant second call described above: the flag is consumed
         // here, so the second pass sees a session that never reached the handshake and counts
         // nothing.
+        recordProjectionHealth()
         noteSessionEnded(renderedAnyFrame = videoDecoder.framesRenderedThisSession > 0L, deliberateEnd = reason != DisconnectReason.CONNECTION_ENDED)
         // The close is in its own phase because it is the one that must happen: a throw from the
         // ByeBye send or either decoder stop used to skip it, leaving the phone's head unit server
@@ -1610,6 +1776,38 @@ class CommManager(
     }
 
     /**
+     * Stores one projection's local faults for the home screen's repeated-problem suggestion.
+     *
+     * Called before [videoDecoder.stop], which is where the frame counters are cleared. A session
+     * that reached the handshake but carried too little video is skipped: that is a link or a
+     * short drive, not something a codec or resolution change would fix.
+     */
+    private fun recordProjectionHealth() {
+        if (!sessionReachedHandshake) return
+        val decoder = videoDecoder.sessionHealth()
+        if (decoder.framesFed < ProjectionHealthPolicy.MIN_FED_FRAMES) return
+        if (decoder.framesRendered == 0L) return
+        val renderer = ProjectionHealthRecorder.snapshot()
+        ProjectionHealthStore(context).append(
+            ProjectionSessionSummary(
+                endedAtMs = System.currentTimeMillis(),
+                codec = decoder.finalCodec.settingsValue,
+                viewMode = settings.viewMode,
+                resolutionId = settings.resolutionId,
+                fpsLimit = settings.fpsLimit,
+                codecFallback = decoder.codecFallbackUsed,
+                rendererRecoveries = renderer.recoveries,
+                forcedSurface = renderer.forcedSurface,
+                framesFed = decoder.framesFed,
+                framesDropped = decoder.framesDropped,
+                framesSkipped = decoder.framesSkipped,
+                framesRendered = decoder.framesRendered,
+            )
+        )
+        ProjectionHealthRecorder.reset()
+    }
+
+    /**
      * Closes the session because the link carrying it is about to go away, and blocks until the
      * socket is actually closed or [timeoutMs] elapses. Never call from the main thread.
      *
@@ -1629,7 +1827,8 @@ class CommManager(
             HeadUnitScreenConfig.unlockResolution()
             val cleanup = _scope.launch { doDisconnect(sendByeBye = true) }
             _disconnectJob = cleanup
-            _connectionState.value = ConnectionState.Disconnected(isClean = false, isUserExit = false, wasLoopbackSession = isLoopbackSession, hadPhysicalConnection = physicalConnectionReached)
+            _transport?.retirePresentation()
+            _connectionState.value = ConnectionState.Disconnected(isClean = false, isUserExit = false, wasLoopbackSession = isLoopbackSession, hadPhysicalConnection = physicalConnectionReached, endedAttempt = connectionAttempt)
             cleanup
         }
         runBlocking { withTimeoutOrNull(timeoutMs) { job.join() } }

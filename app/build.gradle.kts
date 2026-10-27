@@ -119,8 +119,8 @@ android {
         applicationId = "org.librehu.headunit"
         minSdk = 16
         targetSdk = 36
-        versionCode = 117 + librehuCommitCount(rootDir)
-        versionName = "3.5.0-beta4-" + librehuBranch(rootDir)
+        versionCode = 121 + librehuCommitCount(rootDir)
+        versionName = "4.0.0-beta1-" + librehuBranch(rootDir)
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -147,6 +147,13 @@ android {
         create("github") {
             dimension = "distribution"
             // Default minSdk 16 from defaultConfig is used
+        }
+    }
+
+    testOptions {
+        unitTests {
+            // Robolectric needs the merged resources and manifest to resolve the app themes.
+            isIncludeAndroidResources = true
         }
     }
 
@@ -242,6 +249,17 @@ android {
     lint {
         abortOnError = false
         disable += "PackagedPrivateKey"
+
+        // All three come from androidx.fragment's UnsafeFragmentLifecycleObserverDetector, which
+        // walks a Fragment's call graph from its lifecycle methods with no depth limit in 1.6.2,
+        // the newest version this module can use (1.7.x, 1.8.x and 1.9.x need minSdk 19, 21 and
+        // 23). On HomeFragment that walk does not finish, so lint never produces a report. The
+        // first fragment release with a depth cap is 1.9.0 and it also needs minSdk 23, so these
+        // stay off while the app keeps minSdk 16. They report nothing today; every Fragment here
+        // already passes viewLifecycleOwner.
+        disable += "FragmentLiveDataObserve"
+        disable += "FragmentBackPressedCallback"
+        disable += "FragmentAddMenuProvider"
     }
 
     compileOptions {
@@ -288,6 +306,8 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     // Inline mocks exercise the final Android transport classes on JDK 21.
     testImplementation("org.mockito:mockito-core:5.14.2")
+    // Runs the parts that need real Android classes (theme attributes, drawables) on the JVM.
+    testImplementation("org.robolectric:robolectric:4.16")
 
     implementation(project(":contract"))
 
@@ -309,7 +329,17 @@ dependencies {
 
     // Shizuku for root / shell access
     implementation("dev.rikka.shizuku:api:13.1.5")
+    implementation("dev.rikka.shizuku:provider:13.1.5")
     implementation("com.github.topjohnwu.libsu:core:6.0.0")
+}
+
+// Robolectric installs Conscrypt's OpenSSL provider, which needs the desktop JNI library. The app
+// ships the Android build of Conscrypt, so the unit test classpath drops it and keeps Robolectric's
+// openjdk-uber copy, which includes that library.
+configurations.configureEach {
+    if (name.endsWith("UnitTestRuntimeClasspath")) {
+        exclude(group = "org.conscrypt", module = "conscrypt-android")
+    }
 }
 
 kotlin {

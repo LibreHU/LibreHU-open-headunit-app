@@ -132,7 +132,7 @@ object LibreHuTheme {
         return if (context.theme.resolveAttribute(R.attr.librehuAccent, v, true) && v.type in TypedValue.TYPE_FIRST_COLOR_INT..TypedValue.TYPE_LAST_COLOR_INT) {
             v.data
         } else {
-            ContextCompat.getColor(context, R.color.brand_teal)
+            ContextCompat.getColor(context, R.color.brand_primary)
         }
     }
 
