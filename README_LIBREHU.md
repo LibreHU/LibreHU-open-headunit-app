@@ -15,6 +15,15 @@ est publie avec ses APK.
 Captures sur l'émulateur Android 9 (1280×720, 160 dpi comme l'autoradio), sans autoradio branché : les valeurs du véhicule et de la MCU sont vides. Refaites-les avec l'action **Screenshots** de [LibreHU-OTA-app](https://github.com/LibreHU/LibreHU-OTA-app/tree/main/screenshots). Galerie : [librehu.github.io/screenshots/headunit.html](https://librehu.github.io/screenshots/headunit.html).
 
 ## Ce que change le fork
+- **Appairage Bluetooth automatique d'un nouveau téléphone branché en USB** : Android Auto demande l'appairage par
+  la session USB (service Bluetooth, message PairingRequest 0x8001) ; Open Headunit ne répondait pas, le téléphone ne
+  s'appairait donc jamais et ne pouvait pas continuer sans fil au débranchement. Le fork reprend l'assistance
+  d'appairage de la PR amont #1156 (emotionbug, non fusionnée en amont) et, sur un autoradio LibreHU : l'active aussi
+  en USB ; se fie à l'adresse Bluetooth lue par LibreHU-service (Android 8+ cache celle de l'adaptateur aux applis) ;
+  lance l'appairage depuis l'autoradio vers l'adresse donnée par le téléphone, lui demande d'attendre
+  (PAIRING_DELAYED), envoie le nombre de comparaison à Android Auto (AuthenticationData 0x8003) et répond le résultat
+  (SUCCESS ou UNAVAILABLE). Côté autoradio, LibreHU-service accepte l'appairage quand il gère le Bluetooth. Activé
+  par le préréglage LibreHU (version 4). Non encore testé sur un vrai téléphone : journal `AAP Bluetooth`.
 - **Canal du groupe Wi-Fi Direct choisi d'après le Wi-Fi de l'autoradio** (mode Android Auto natif, sans fil) : la
   puce de l'AC8257 n'a qu'une radio, sans DBDC ; un groupe sur un autre canal que le réseau auquel l'autoradio est
   connecté la fait alterner entre les deux (MCC). Journaux du 27/10/2026 : box sur 2462 MHz, groupe sur 5180 MHz,
@@ -68,8 +77,8 @@ au paquet indiqué dans `reply_to`. Rien d'autre que `id` n'est lancé ; une sec
 
 ## Fichiers modifiés par rapport à l'amont
 
-Base : commit amont `2018d8f0` (Open Headunit « 4.0.0-beta1 », 27/10/2026 ; base précédente `4ee1d58f`, 10/10/2026),
-branche locale `librehu` publiée sur `main`. `git diff 2018d8f0 HEAD --stat` donne la liste complète ; chaque modification du code est
+Base : commit amont `620af558` (Open Headunit 4.0.0-beta1 + 3 commits audio, 27/10/2026 ; bases précédentes `2018d8f0`, `4ee1d58f`),
+branche locale `librehu` publiée sur `main`. `git diff 620af558 HEAD --stat` donne la liste complète ; chaque modification du code est
 marquée `LibreHU fork:` en commentaire.
 
 | Fichier(s) | Modification |
@@ -100,6 +109,7 @@ marquée `LibreHU fork:` en commentaire.
 | `res/values/strings.xml`, `values-fr/strings.xml` | nom « Android Auto » sous l'icône, textes LibreHU (anglais, français) |
 | `res/xml/shortcuts.xml` | raccourcis vers le paquet `org.librehu.headunit` |
 | `app/src/test/.../AutomationCommandPolicyTest.kt` | test du mode nuit `car` |
+| `aap/AapBluetoothControl.kt`, `aap/bluetooth/*`, `proto/bluetooth.proto`, `aap/AapControl.kt`, `protocol/messages/ServiceDiscoveryResponse.kt` (PR amont #1156) ; `librehu/LibreHuDefaults.kt` ; `app/src/test/.../BluetoothPairingSessionTest.kt` | messages d'appairage Bluetooth d'Android Auto ; ajouts LibreHU : sessions USB, adresse de LibreHU-service, appairage lancé par l'autoradio, préréglage v4 ; tests |
 | `connection/wifi/direct/WifiP2pOperatingChannelPolicy.kt`, `NativeGroupBandPolicy.kt`, `WifiDirectManager.kt`, `app/src/test/.../WifiP2pOperatingChannelPolicyTest.kt` | canal du groupe Wi-Fi Direct = celui du Wi-Fi client quand c'est un canal 5 GHz utilisable (sinon 5 GHz hors DFS), palier 2,4 GHz sur le canal du client ; tests |
 | `.github/workflows/librehu.yml` (nouveau) ; `build-debug-apk.yml`, `close-inactive-issues.yml`, `gemini-code-review.yml` (retirés) | CI LibreHU (APK signé, `latest-main`, `release.txt`) ; workflows propres au dépôt d'amont retirés |
 | `README.md`, `README_LIBREHU.md` | renvoi vers ce fichier ; ce fichier |
