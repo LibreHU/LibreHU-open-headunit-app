@@ -18,6 +18,9 @@ class BluetoothPairingSessionTest {
         override fun reply(status: MessageStatus, alreadyPaired: Boolean) { replies += status to alreadyPaired }
         override fun authentication(value: String) { keys += value }
         override fun now() = time
+        var bondAllowed = false
+        val bondsStarted = mutableListOf<String>()
+        override fun startBond(address: String): Boolean { if (bondAllowed) bondsStarted += address; return bondAllowed }
     }
     @Test fun pairedIsActualBondNotConnectionReadiness() {
         val p = Fake(); val s = BluetoothPairingSession(p)
@@ -156,5 +159,40 @@ class BluetoothPairingSessionTest {
         s.request(phone, 2, receivedAt = 0)
         s.request(phone, 2, receivedAt = p.time) { false }
         assertTrue(p.replies.isEmpty()); s.comparison(phone, 1); assertTrue(p.keys.isEmpty())
+    }
+
+    // LibreHU fork: a new phone over USB is paired from the head unit.
+    @Test fun librehuNewPhoneIsBondedByTheUnitAndAnsweredWithTheOutcome() {
+        val p = Fake(); p.state = Bond.NONE; p.bondAllowed = true; val s = BluetoothPairingSession(p)
+        s.request(phone, 2)
+        assertEquals(listOf(phone), p.bondsStarted)
+        assertEquals(MessageStatus.STATUS_BLUETOOTH_PAIRING_DELAYED to false, p.replies.last())
+        // The phone retries while bonding: it is told to wait again, no second bond.
+        p.state = Bond.BONDING; s.request(phone, 2)
+        assertEquals(MessageStatus.STATUS_BLUETOOTH_PAIRING_DELAYED to false, p.replies.last())
+        assertEquals(1, p.bondsStarted.size)
+        // The comparison number reaches Android Auto during that bond.
+        s.comparison(phone, 123456)
+        assertEquals(listOf("123456"), p.keys)
+        s.bondChanged(phone, Bond.BONDED, Bond.BONDING)
+        assertEquals(MessageStatus.STATUS_SUCCESS to true, p.replies.last())
+        assertFalse(p.replies.any { it == MessageStatus.STATUS_SUCCESS to false })
+    }
+    @Test fun librehuFailedBondIsAnsweredUnavailable() {
+        val p = Fake(); p.state = Bond.NONE; p.bondAllowed = true; val s = BluetoothPairingSession(p)
+        s.request(phone, 2)
+        s.bondChanged(phone, Bond.NONE, Bond.BONDING)
+        assertEquals(MessageStatus.STATUS_BLUETOOTH_UNAVAILABLE to false, p.replies.last())
+        // Window closed: a late comparison is not forwarded.
+        s.comparison(phone, 1); assertTrue(p.keys.isEmpty())
+    }
+    @Test fun noBondStartedWhenNotAllowedOrUnknown() {
+        val p = Fake(); p.state = Bond.UNAVAILABLE; p.bondAllowed = true
+        BluetoothPairingSession(p).request(phone, 2)
+        assertTrue(p.bondsStarted.isEmpty())
+        assertEquals(MessageStatus.STATUS_BLUETOOTH_UNAVAILABLE to false, p.replies.last())
+        p.state = Bond.NONE; p.bondAllowed = false
+        BluetoothPairingSession(p).request(phone, 2)
+        assertEquals(MessageStatus.STATUS_BLUETOOTH_UNAVAILABLE to false, p.replies.last())
     }
 }

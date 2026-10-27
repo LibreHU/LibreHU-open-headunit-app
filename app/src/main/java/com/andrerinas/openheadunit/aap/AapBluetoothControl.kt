@@ -46,12 +46,18 @@ internal class AapBluetoothControl(
     private val handler by lazy { Handler(worker.looper) }
     private val queued = AtomicInteger(0)
     private val overflowLogged = AtomicBoolean(false)
+    private val ignoredLogged = AtomicBoolean(false)
     val announcement = BluetoothAnnouncePolicy.decide(settings.bluetoothAnnounceMode,
         settings.bluetoothAddress, com.andrerinas.openheadunit.App.provide(context).commManager.isUsbSession)
     // Disabled by default: merely replying SUCCESS advances AA's phone-side pairing/HFP FSM.
     // USB has a separate legacy phone-side unpair/re-pair recovery, so leave that path alone.
+    // LibreHU fork: on a head unit running LibreHU-service, USB sessions too. That is where a new phone is first
+    // plugged in: Android Auto asks over USB to pair (PairingRequest) and, unanswered, never pairs on its own, so the
+    // phone never gets the hands-free link that wireless Android Auto starts from.
+    private val librehu = com.andrerinas.openheadunit.librehu.LibreHuCar.available(context)
     private val enabled = settings.bluetoothPairingAssist &&
-        com.andrerinas.openheadunit.App.provide(context).commManager.isWirelessSession &&
+        (com.andrerinas.openheadunit.App.provide(context).commManager.isWirelessSession ||
+            (librehu && com.andrerinas.openheadunit.App.provide(context).commManager.isUsbSession)) &&
         !com.andrerinas.openheadunit.App.provide(context).commManager.isLoopbackSession
     private val carAddress = announcement.carAddress
     private val managerServiceName = settings.bluetoothManagerServiceName
@@ -71,6 +77,16 @@ internal class AapBluetoothControl(
                 Bluetooth.AuthenticationData.newBuilder().setAuthData(value).build()))
         }
         override fun now() = SystemClock.elapsedRealtime()
+        // LibreHU fork: this unit bonds with the new phone itself (BluetoothPairingSession.startBond).
+        override fun startBond(address: String): Boolean {
+            if (!librehu || closed.get()) return false
+            val started = try {
+                adapter?.takeIf { it.isEnabled }?.getRemoteDevice(address)?.createBond() == true
+            } catch (_: RuntimeException) { false }
+            AppLog.i("AAP Bluetooth: phone not paired with this unit, " +
+                if (started) "pairing started from the head unit" else "could not start pairing")
+            return started
+        }
     })
     private val requests = BluetoothPairingRequests(
         now = { SystemClock.elapsedRealtime() },
@@ -140,9 +156,16 @@ internal class AapBluetoothControl(
     }
 
     override fun execute(message: AapMessage): Int {
+        // LibreHU fork: said once, so a log shows why a phone that asked to pair got no answer.
+        if (!registered && message.type == PAIRING_REQUEST && ignoredLogged.compareAndSet(false, true)) {
+            AppLog.i("AAP Bluetooth: the phone asked to pair, not answered (pairing assistance off or unavailable here)")
+        }
         if (closed.get() || !registered) return 0
         when (val input = BluetoothPairingWire.decode(message)) {
-            is BluetoothPairingWire.Input.Request -> requests.offer(input.address, input.method)
+            is BluetoothPairingWire.Input.Request -> {
+                AppLog.i("AAP Bluetooth: the phone asks to pair (method ${input.method})")
+                requests.offer(input.address, input.method)
+            }
             is BluetoothPairingWire.Input.Result -> enqueue {
                 if (!closed.get()) {
                     AppLog.i("AAP Bluetooth authentication result: ${input.status}")
@@ -209,8 +232,12 @@ internal class AapBluetoothControl(
             val candidate = (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
                 ?: return unavailable("no default adapter")
             val actual = BluetoothPairingSession.normalize(candidate.address)
-                ?: return unavailable("adapter address is hidden or invalid")
-            if (actual != BluetoothPairingSession.normalize(carAddress)) return unavailable("announced address differs from adapter")
+            // LibreHU fork: Android 8+ hides the adapter's address from apps (02:00:00:00:00:00). On a LibreHU unit
+            // the announced one is the real address, read by LibreHU-service (LibreHuVehicleSync, bt_mac).
+            if (actual == null && !(librehu && BluetoothPairingSession.normalize(carAddress) != null)) {
+                return unavailable("adapter address is hidden or invalid")
+            }
+            if (actual != null && actual != BluetoothPairingSession.normalize(carAddress)) return unavailable("announced address differs from adapter")
             candidate
         } catch (_: SecurityException) { unavailable("Bluetooth permission denied") }
         catch (e: RuntimeException) { unavailable("adapter query failed: ${e.javaClass.simpleName}") }

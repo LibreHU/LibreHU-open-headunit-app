@@ -11,11 +11,18 @@ internal class BluetoothPairingSession(private val port: Port) {
         fun reply(status: MessageStatus, alreadyPaired: Boolean)
         fun authentication(value: String)
         fun now(): Long
+        /**
+         * LibreHU fork: asks this head unit to bond with a phone it does not know yet, the address taken from the
+         * phone's own PairingRequest. False when not allowed or refused: the answer then stays UNAVAILABLE.
+         */
+        fun startBond(address: String): Boolean = false
     }
     private var phone: String? = null
     private var deadline = 0L
     private var sentKey: Int? = null
     private var closed = false
+    /** LibreHU fork: this window is a bond the head unit started itself; its outcome is answered to the phone. */
+    private var awaitingBond = false
 
     fun request(address: String, method: Int, receivedAt: Long = port.now(), isCurrent: () -> Boolean = { true }) {
         fun current() = !closed && isCurrent() && port.now() - receivedAt in 0 until TIMEOUT_MS
@@ -45,11 +52,24 @@ internal class BluetoothPairingSession(private val port: Port) {
             // A retry must not retire a valid challenge window during old-key cleanup.
             // Only repeat a positive answer when the current record still confirms it.
             if (bond == Bond.BONDED) port.reply(MessageStatus.STATUS_SUCCESS, true)
+            // LibreHU fork: the bond this unit started is still running, the phone keeps waiting.
+            else if (awaitingBond) port.reply(MessageStatus.STATUS_BLUETOOTH_PAIRING_DELAYED, false)
             return
         }
         when (bond) {
             Bond.NONE, Bond.UNAVAILABLE -> {
                 clear()
+                // LibreHU fork: a new phone over USB. This unit bonds with it itself (the phone gave its address), the
+                // phone is told to wait, the comparison number goes to it (comparison()) so Android Auto can accept the
+                // pairing, and the bond's outcome is the answer (bondChanged()). Only a positive NONE, never a guess.
+                if (bond == Bond.NONE && port.startBond(target)) {
+                    phone = target
+                    deadline = port.now() + TIMEOUT_MS
+                    sentKey = null
+                    awaitingBond = true
+                    port.reply(MessageStatus.STATUS_BLUETOOTH_PAIRING_DELAYED, false)
+                    return
+                }
                 port.reply(MessageStatus.STATUS_BLUETOOTH_UNAVAILABLE, false)
             }
             Bond.BONDING -> {
@@ -98,12 +118,19 @@ internal class BluetoothPairingSession(private val port: Port) {
         if (closed || phone != normalize(address)) return
         // A stale link key can disappear (BONDED -> NONE) before the phone starts a new
         // challenge. Retire only a completed bond or a failed *pairing attempt*, not that cleanup.
-        if (bond == Bond.BONDED || (bond == Bond.NONE && previous == Bond.BONDING)) clear()
+        if (bond == Bond.BONDED || (bond == Bond.NONE && previous == Bond.BONDING)) {
+            // LibreHU fork: the bond this unit started is done, either way; the phone gets the outcome.
+            if (awaitingBond) {
+                if (bond == Bond.BONDED) port.reply(MessageStatus.STATUS_SUCCESS, true)
+                else port.reply(MessageStatus.STATUS_BLUETOOTH_UNAVAILABLE, false)
+            }
+            clear()
+        }
     }
 
     fun close() { closed = true; clear() }
     private fun expire() { if (phone != null && port.now() >= deadline) clear() }
-    private fun clear() { phone = null; sentKey = null; deadline = 0L }
+    private fun clear() { phone = null; sentKey = null; deadline = 0L; awaitingBond = false }
 
     companion object {
         const val NUMERIC_COMPARISON = 2 // AAP pairing method; Android's variant uses a separate enum.
