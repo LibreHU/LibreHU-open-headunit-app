@@ -82,6 +82,9 @@ class AapNavigationHelper(
             estimatedArrival = prepared.estimatedArrival,
             currentRoad = prepared.currentRoad
         )
+        // LibreHU fork: whether the projection is on screen, so LibreHU Launcher shows its direction popup only over
+        // other screens (Android Auto already shows the maneuver there).
+        intent.putExtra(EXTRA_LIBREHU_PROJECTION_ON_SCREEN, AapProjectionActivity.isForeground)
         // LibreHU fork: the permission this package declares (signature), held by the LibreHU apps; the contract's
         // name is Open Headunit's own package, which this one cannot declare beside it.
         context.applicationContext.sendBroadcast(intent, "${com.andrerinas.openheadunit.BuildConfig.APPLICATION_ID}.permission.NAVIGATION_UPDATE")
@@ -403,6 +406,9 @@ val actionText = state?.stepsList?.firstOrNull()?.maneuver?.type?.let { maneuver
     }
 
     companion object {
+        /** LibreHU fork: extra of NAVIGATION_UPDATE, true while AapProjectionActivity is in front. */
+        const val EXTRA_LIBREHU_PROJECTION_ON_SCREEN = "org.librehu.projection_on_screen"
+
         const val NAV_CHANNEL_ID = "headunit_navigation"
         private const val NAV_NOTIFICATION_ID = 2
 
