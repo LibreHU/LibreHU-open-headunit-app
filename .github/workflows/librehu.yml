@@ -69,7 +69,8 @@ jobs:
           if-no-files-found: error
 
       - name: Rolling release of the branch (LibreHU OTA)
-        if: github.event_name == 'push'
+        # Also when started by hand (Actions tab): a [skip ci] head commit leaves the branch's code unpublished otherwise.
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ github.ref_name }}
