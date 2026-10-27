@@ -126,10 +126,22 @@ object NativeGroupBandPolicy {
      * would be a contradiction, and the setting is shared with the hotspot route, so it is set on
      * units that are not on this band at all.
      */
-    fun requestedFrequencyMhz(band: Band, chosenChannel: Int): Int {
+    fun requestedFrequencyMhz(
+        band: Band,
+        chosenChannel: Int,
+        stationChannel: Int = WifiP2pOperatingChannelPolicy.CHANNEL_UNRESTRICTED,
+    ): Int {
         if (band != Band.GHZ_5) return 0
         val channel = FiveGhzChannelPolicy.pinnedChannel(chosenChannel)
-        if (channel == FiveGhzChannelPolicy.AUTOMATIC) return 0
+        if (channel == FiveGhzChannelPolicy.AUTOMATIC) {
+            // LibreHU fork: no pin, so the station's own 5 GHz channel when a group owner can use it
+            // (WifiP2pOperatingChannelPolicy.sharedStationChannel): one channel, no time-sharing.
+            return if (WifiP2pOperatingChannelPolicy.isGroupOwnerCapable(stationChannel)) {
+                WifiP2pOperatingChannelPolicy.frequencyMhzFor(stationChannel)
+            } else {
+                0
+            }
+        }
         return WifiP2pOperatingChannelPolicy.frequencyMhzFor(channel)
     }
 

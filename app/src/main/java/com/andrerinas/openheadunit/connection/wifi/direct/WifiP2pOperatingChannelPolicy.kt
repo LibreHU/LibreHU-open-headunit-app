@@ -106,22 +106,49 @@ object WifiP2pOperatingChannelPolicy {
         sdkInt: Int,
         preference: P2pBandPreference,
         chosenChannel: Int = CHANNEL_UNRESTRICTED,
-        supports5Ghz: Boolean? = null
+        supports5Ghz: Boolean? = null,
+        stationChannel: Int = CHANNEL_UNRESTRICTED,
     ): List<Int> {
         if (!appliesTo(sdkInt)) return emptyList()
         // Total rather than trusting the caller: anything a group owner cannot be hosted on falls
         // back to the rung that shipped before the choice existed.
-        val fiveGhz =
-            if (isGroupOwnerCapable(chosenChannel)) fiveGhzWalk(chosenChannel) else listOf(CHANNEL_LOWER)
+        val fiveGhz = when {
+            isGroupOwnerCapable(chosenChannel) -> fiveGhzWalk(chosenChannel)
+            // LibreHU fork: no pin, and the station is on a 5 GHz channel a group owner can use: share it
+            // (see sharedStationChannel), then the usual rung if the driver refuses it there.
+            isGroupOwnerCapable(stationChannel) -> listOf(stationChannel, CHANNEL_LOWER).distinct()
+            else -> listOf(CHANNEL_LOWER)
+        }
+        // The 2.4 GHz rung on the station's own 2.4 GHz channel too, for the same reason.
+        val twoFour = if (stationChannel in 1..13) stationChannel else CHANNEL_24_GHZ
         return when (preference) {
             // Spending the 5 GHz rung on a radio with no 5 GHz band costs a whole bring-up: the
             // request is a disallowed-frequency list, so the group is not formed on the other band,
             // it is not formed at all, and the ladder only advances on that failure.
             P2pBandPreference.AUTO ->
-                if (supports5Ghz == false) listOf(CHANNEL_24_GHZ) else fiveGhz + CHANNEL_24_GHZ
+                if (supports5Ghz == false) listOf(twoFour) else fiveGhz + twoFour
             P2pBandPreference.FORCE_5GHZ -> fiveGhz
-            P2pBandPreference.FORCE_2_4GHZ -> listOf(CHANNEL_24_GHZ)
+            P2pBandPreference.FORCE_2_4GHZ -> listOf(twoFour)
         }
+    }
+
+    /**
+     * LibreHU fork: the channel of the network the unit's own WiFi (station) is joined to, from its
+     * frequency, or [CHANNEL_UNRESTRICTED] when it is not joined / the frequency is unknown.
+     *
+     * Why the group follows it: a radio without DBDC (the AC8257's connsys, gen4m driver) that serves
+     * a station on one channel and a group owner on another time-shares between them (MCC). Logs of
+     * 27/10/2026: station 2462 MHz, group 5180 MHz, ~95 absence / presence switches per BSS in 85 s,
+     * station throughput down to 23 kB/s and the phone not joining the group in time. On the same
+     * channel (SCC) there is nothing to switch. Only a channel a group owner can be hosted on is
+     * shared on 5 GHz ([isGroupOwnerCapable]: not DFS); otherwise the group keeps its own 5 GHz
+     * channel, since wireless Android Auto wants 5 GHz, and time-sharing is the price of it.
+     */
+    fun sharedStationChannel(stationFrequencyMhz: Int): Int = when (stationFrequencyMhz) {
+        in 2412..2472 -> (stationFrequencyMhz - 2407) / 5
+        2484 -> CHANNEL_24_GHZ_TOP
+        in 5170..5900 -> ((stationFrequencyMhz - 5000) / 5).takeIf { isGroupOwnerCapable(it) } ?: CHANNEL_UNRESTRICTED
+        else -> CHANNEL_UNRESTRICTED
     }
 
     /**

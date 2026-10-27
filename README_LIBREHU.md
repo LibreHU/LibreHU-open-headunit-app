@@ -15,6 +15,18 @@ est publie avec ses APK.
 Captures sur l'émulateur Android 9 (1280×720, 160 dpi comme l'autoradio), sans autoradio branché : les valeurs du véhicule et de la MCU sont vides. Refaites-les avec l'action **Screenshots** de [LibreHU-OTA-app](https://github.com/LibreHU/LibreHU-OTA-app/tree/main/screenshots). Galerie : [librehu.github.io/screenshots/headunit.html](https://librehu.github.io/screenshots/headunit.html).
 
 ## Ce que change le fork
+- **Canal du groupe Wi-Fi Direct choisi d'après le Wi-Fi de l'autoradio** (mode Android Auto natif, sans fil) : la
+  puce de l'AC8257 n'a qu'une radio, sans DBDC ; un groupe sur un autre canal que le réseau auquel l'autoradio est
+  connecté la fait alterner entre les deux (MCC). Journaux du 27/10/2026 : box sur 2462 MHz, groupe sur 5180 MHz,
+  ~95 bascules par réseau en 85 s, Wi-Fi client à 23 Ko/s et téléphone qui ne rejoint pas le groupe à temps.
+  Maintenant, sans canal imposé dans les réglages : **Wi-Fi client sur un canal 5 GHz hors DFS** (36-48, 149-161) →
+  le groupe est demandé **sur ce canal** (plus d'alternance) ; client en 2,4 GHz, en DFS ou non connecté → groupe sur
+  un canal 5 GHz hors DFS (36 d'abord), car Android Auto sans fil demande le 5 GHz (alternance inévitable avec une
+  seule radio quand le client reste connecté) ; le palier 2,4 GHz de secours prend le canal 2,4 GHz du client. Un canal
+  choisi à la main dans les réglages reste prioritaire. Android 9 : échelle `setWifiP2pChannels`
+  (`WifiP2pOperatingChannelPolicy.attemptChannels`, `sharedStationChannel`) ; Android 10+ :
+  `setGroupOperatingFrequency` (`NativeGroupBandPolicy.requestedFrequencyMhz`). Journal :
+  « station on channel N … the group is asked for it first ».
 - **Vidéo basse latence activée par le préréglage LibreHU** (version 3) : le réglage d'Open Headunit
   « Request decoder low-latency mode » (`debug-video-low-latency`, désactivé en amont) passe à oui si personne ne l'a
   encore touché : `vdec-lowlatency` sur le décodeur MediaTek (pas de `KEY_LOW_LATENCY` avant Android 11), retiré par
@@ -88,6 +100,7 @@ marquée `LibreHU fork:` en commentaire.
 | `res/values/strings.xml`, `values-fr/strings.xml` | nom « Android Auto » sous l'icône, textes LibreHU (anglais, français) |
 | `res/xml/shortcuts.xml` | raccourcis vers le paquet `org.librehu.headunit` |
 | `app/src/test/.../AutomationCommandPolicyTest.kt` | test du mode nuit `car` |
+| `connection/wifi/direct/WifiP2pOperatingChannelPolicy.kt`, `NativeGroupBandPolicy.kt`, `WifiDirectManager.kt`, `app/src/test/.../WifiP2pOperatingChannelPolicyTest.kt` | canal du groupe Wi-Fi Direct = celui du Wi-Fi client quand c'est un canal 5 GHz utilisable (sinon 5 GHz hors DFS), palier 2,4 GHz sur le canal du client ; tests |
 | `.github/workflows/librehu.yml` (nouveau) ; `build-debug-apk.yml`, `close-inactive-issues.yml`, `gemini-code-review.yml` (retirés) | CI LibreHU (APK signé, `latest-main`, `release.txt`) ; workflows propres au dépôt d'amont retirés |
 | `README.md`, `README_LIBREHU.md` | renvoi vers ce fichier ; ce fichier |
 

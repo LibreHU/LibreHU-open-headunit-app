@@ -357,4 +357,45 @@ class WifiP2pOperatingChannelPolicyTest {
         // The same holds for the empty ladder an Android 10+ device produces.
         assertFalse(WifiP2pOperatingChannelPolicy.refusedEveryFiveGhzRung(emptyList(), 9, 44))
     }
+
+    // --- LibreHU: share the station's channel -----------------------------------------------------
+
+    @Test
+    fun `a station on a 5 GHz channel a group owner can use is asked for first`() {
+        assertEquals(listOf(44, 36, 6), WifiP2pOperatingChannelPolicy.attemptChannels(27, P2pBandPreference.AUTO, stationChannel = 44))
+        assertEquals(listOf(36, 6), WifiP2pOperatingChannelPolicy.attemptChannels(27, P2pBandPreference.AUTO, stationChannel = 36))
+        assertEquals(listOf(149, 36), WifiP2pOperatingChannelPolicy.attemptChannels(27, P2pBandPreference.FORCE_5GHZ, stationChannel = 149))
+    }
+
+    @Test
+    fun `a station on 2_4 GHz keeps the group on 5 GHz first, then on the station's own 2_4 GHz channel`() {
+        // The case of the logs of 27/10/2026: station on channel 11 (2462 MHz)
+        assertEquals(listOf(36, 11), WifiP2pOperatingChannelPolicy.attemptChannels(27, P2pBandPreference.AUTO, stationChannel = 11))
+        assertEquals(listOf(11), WifiP2pOperatingChannelPolicy.attemptChannels(27, P2pBandPreference.FORCE_2_4GHZ, stationChannel = 11))
+    }
+
+    @Test
+    fun `a channel the user pinned still wins over the station`() {
+        assertEquals(149, WifiP2pOperatingChannelPolicy.attemptChannels(27, P2pBandPreference.AUTO, chosenChannel = 149, stationChannel = 44).first())
+    }
+
+    @Test
+    fun `the station frequency becomes a channel only where a group owner can share it`() {
+        assertEquals(11, WifiP2pOperatingChannelPolicy.sharedStationChannel(2462))
+        assertEquals(1, WifiP2pOperatingChannelPolicy.sharedStationChannel(2412))
+        assertEquals(36, WifiP2pOperatingChannelPolicy.sharedStationChannel(5180))
+        assertEquals(161, WifiP2pOperatingChannelPolicy.sharedStationChannel(5805))
+        // DFS (52..144) and 165: a group owner cannot be hosted there, so nothing to share
+        assertEquals(0, WifiP2pOperatingChannelPolicy.sharedStationChannel(5260))
+        assertEquals(0, WifiP2pOperatingChannelPolicy.sharedStationChannel(5500))
+        assertEquals(0, WifiP2pOperatingChannelPolicy.sharedStationChannel(5825))
+        assertEquals(0, WifiP2pOperatingChannelPolicy.sharedStationChannel(0))
+    }
+
+    @Test
+    fun `on Android 10 and up the station's 5 GHz channel becomes the requested frequency`() {
+        assertEquals(5220, NativeGroupBandPolicy.requestedFrequencyMhz(NativeGroupBandPolicy.Band.GHZ_5, 0, stationChannel = 44))
+        assertEquals(0, NativeGroupBandPolicy.requestedFrequencyMhz(NativeGroupBandPolicy.Band.GHZ_5, 0, stationChannel = 11))
+        assertEquals(0, NativeGroupBandPolicy.requestedFrequencyMhz(NativeGroupBandPolicy.Band.GHZ_2_4, 0, stationChannel = 44))
+    }
 }

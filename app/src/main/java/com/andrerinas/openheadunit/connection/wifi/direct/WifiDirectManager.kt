@@ -1598,6 +1598,21 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
      * [SupplicantState] rather than the SSID because the SSID is redacted without the location gate,
      * which a head unit routinely cannot satisfy.
      */
+    /**
+     * LibreHU fork: the channel to share with the station ([WifiP2pOperatingChannelPolicy.sharedStationChannel]),
+     * or [WifiP2pOperatingChannelPolicy.CHANNEL_UNRESTRICTED] when the unit's WiFi is not joined.
+     */
+    private fun stationChannelNow(): Int = try {
+        val info = (context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager).connectionInfo
+        if (info != null && info.supplicantState == SupplicantState.COMPLETED && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            WifiP2pOperatingChannelPolicy.sharedStationChannel(info.frequency)
+        } else {
+            WifiP2pOperatingChannelPolicy.CHANNEL_UNRESTRICTED
+        }
+    } catch (e: Exception) {
+        WifiP2pOperatingChannelPolicy.CHANNEL_UNRESTRICTED
+    }
+
     private fun describeStationForRefusal(): String = try {
         val wifiManager = context.applicationContext
             .getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -2211,12 +2226,15 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         val band = NativeGroupBandPolicy.bandFor(preference, supports5Ghz)
         val bandLabel = NativeGroupBandPolicy.label(band)
         val chosenChannel = appSettings.fiveGhzChannel
+        // LibreHU fork: the station's channel, so that the group can share it instead of time-sharing
+        // the radio between two channels (WifiP2pOperatingChannelPolicy.sharedStationChannel).
+        val stationChannel = stationChannelNow()
         // Asking for the 5 GHz *band* is answered by picking a random one of eight frequencies,
         // four of them in UNII-3, which several regulatory domains forbid phones from joining - so
         // on those phones half of all bring-ups are invisible. A pinned channel replaces the band
         // request with a frequency, which the platform treats as forced. 0 means ask for the band.
         val requestedFrequency = if (pinnedChannelAbandoned) 0
-            else NativeGroupBandPolicy.requestedFrequencyMhz(band, chosenChannel)
+            else NativeGroupBandPolicy.requestedFrequencyMhz(band, chosenChannel, stationChannel)
 
         AppLog.i("WifiDirectManager: Attempting createGroup for Native AA (Attempt $retryCount)...")
         ConnectionStageTracker.report(ConnectionStage.CREATING_NETWORK)
@@ -2225,6 +2243,14 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         // which two open issues spent weeks guessing at.
         AppLog.i("WifiDirectManager: ${WifiBandCapability.describe(supports5Ghz)}.")
         AppLog.i("WifiDirectManager: Band preference is ${NativeGroupBandPolicy.describePreference(preference, supports5Ghz)}.")
+        AppLog.i(
+            "WifiDirectManager: " + if (stationChannel == WifiP2pOperatingChannelPolicy.CHANNEL_UNRESTRICTED) {
+                "no station channel to share (not joined, or on a DFS / unknown channel)."
+            } else {
+                "station on channel $stationChannel (${WifiP2pOperatingChannelPolicy.frequencyMhzFor(stationChannel)} MHz): " +
+                    "the group is asked for it first, so the radio stays on one channel."
+            }
+        )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
@@ -2319,6 +2345,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
             preference = preference,
             chosenChannel = pinnedChannel,
             supports5Ghz = supports5Ghz,
+            stationChannel = stationChannel,
         )
         val ladderLabel = ladder.joinToString { channel ->
             "$channel (${WifiP2pOperatingChannelPolicy.frequencyMhzFor(channel)} MHz)"
