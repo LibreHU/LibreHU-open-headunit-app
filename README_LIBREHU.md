@@ -90,7 +90,7 @@ marquée `LibreHU fork:` en commentaire.
 | `automation/AutomationCommandPolicy.kt`, `AutomationEffectRunner.kt` | mode nuit `car` (signal des phares) avec `headlight=on/off` venant de LibreHU-service |
 | `librehu/LibreHuCar.kt` (nouveau) | état de la voiture et touches venant de LibreHU-service → capteurs Android Auto (frein à main, vitesse, régime, carburant, température, phares / clignotants, rapport), chacun désactivable ; phares pour le mode nuit et le thème |
 | `librehu/LibreHuDefaults.kt` (nouveau) | pré-configuration LibreHU (version 2), seulement pour les réglages jamais choisis |
-| `librehu/LibreHuTheme.kt` (nouveau) | clair / sombre et accent de LibreHU Launcher, posés sur chaque thème d'activité |
+| `librehu/LibreHuTheme.kt` (nouveau) | clair / sombre, accent et style (usine / ambiance) de LibreHU Launcher, posés sur chaque thème d'activité |
 | `librehu/LibreHuVehicleSync.kt` (nouveau) | fiche voiture de LibreHU-service → réglages véhicule envoyés au téléphone |
 | `librehu/LibreHuVideoService.kt` (nouveau) | image d'Android Auto dans une carte de LibreHU Launcher (expérimental) |
 | `librehu/RootRequestReceiver.kt` (nouveau) | root demandé une fois pour toutes depuis l'assistant du launcher |
@@ -131,7 +131,11 @@ Depuis **LibreHU Apps** (catalogue : « Android Auto (Open Headunit LibreHU) »)
   et les mises en page passent par l'attribut `?attr/librehuAccent` (et `?attr/librehuOnAccent` pour le texte pose
   dessus), et un `ThemeOverlay.LibreHU.*` est pose sur chaque theme d'activite et de dialogue plein ecran. Le mode
   jour / nuit de l'appli devient celui du launcher ; le moteur d'Open Headunit (capteur de lumiere, lever du soleil…)
-  est alors en pause. Option **Reglages → Mode sombre → « Suivre le launcher LibreHU »** : activee par defaut et
+  est alors en pause. Le launcher demande aussi son **style** a l'appli (colonne / extra `style`) : style
+  « Modularer Infotainment-Baukasten » (`factory`) → `ThemeOverlay.LibreHU.Factory` (police Source Sans 3, Adobe,
+  SIL OFL 1.1 : `third_party/SourceSans3-LICENSE.md`, coins carres) ; style « LHU-Link » (`ambient`) →
+  `ThemeOverlay.LibreHU.Ambient` (texte fin, coins carres). Pas de fond d'ecran impose : la surcouche va aussi sur
+  les activites transparentes. Option **Reglages → Mode sombre → « Suivre le launcher LibreHU »** : activee par defaut et
   visible seulement si le launcher est installe. Desactivee, les reglages de theme d'Open Headunit reviennent. La
   projection n'est pas recreee (seulement un changement de configuration), donc la video continue.
 - **Pre-configuration LibreHU** (`librehu/LibreHuDefaults.kt`) : appliquee une fois, si LibreHU Launcher ou

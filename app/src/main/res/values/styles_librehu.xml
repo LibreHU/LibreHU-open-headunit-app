@@ -38,4 +38,27 @@
         <item name="android:fontFamily">@font/librehu_seg14</item>
         <item name="fontFamily">@font/librehu_seg14</item>
     </style>
+    <!-- LibreHU Launcher's factory style (Modularer Infotainment-Baukasten): Source Sans 3, square corners
+         (no window background here: the overlay also goes on the translucent activities). -->
+    <style name="ThemeOverlay.LibreHU.Factory" parent="">
+        <item name="android:fontFamily">@font/source_sans3</item>
+        <item name="fontFamily">@font/source_sans3</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.LibreHU.Square</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.LibreHU.Square</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.LibreHU.Square</item>
+        <item name="shapeAppearanceCornerExtraSmall">@style/ShapeAppearance.LibreHU.Square</item>
+        <item name="shapeAppearanceCornerSmall">@style/ShapeAppearance.LibreHU.Square</item>
+        <item name="shapeAppearanceCornerMedium">@style/ShapeAppearance.LibreHU.Square</item>
+        <item name="shapeAppearanceCornerLarge">@style/ShapeAppearance.LibreHU.Square</item>
+        <item name="shapeAppearanceCornerExtraLarge">@style/ShapeAppearance.LibreHU.Square</item>
+    </style>
+    <!-- LibreHU Launcher's ambient style (LHU-Link): light text, square corners. -->
+    <style name="ThemeOverlay.LibreHU.Ambient" parent="ThemeOverlay.LibreHU.Factory">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="fontFamily">sans-serif-light</item>
+    </style>
+    <style name="ShapeAppearance.LibreHU.Square" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">0dp</item>
+    </style>
 </resources>

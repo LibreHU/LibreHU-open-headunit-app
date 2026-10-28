@@ -26,7 +26,10 @@ import com.andrerinas.openheadunit.utils.Settings
  * While [following] (launcher installed and the option on, the default): the night mode of the app is the launcher's,
  * and the launcher accent (one of its 8, light or dark variant) replaces Open Headunit's teal through a
  * `ThemeOverlay.LibreHU.*` put on every activity theme ([applyTo]); the launcher's segment display font (`font` column /
- * extra `segment`) adds `ThemeOverlay.LibreHU.Segment`. Otherwise nothing changes. (The launcher's retro colours,
+ * extra `segment`) adds `ThemeOverlay.LibreHU.Segment`. The launcher also asks the apps for its style (`style`
+ * column / extra): factory (Modularer Infotainment-Baukasten) adds `ThemeOverlay.LibreHU.Factory` (Source Sans 3, square
+ * corners), ambient (LHU-Link) `ThemeOverlay.LibreHU.Ambient` (light text, square corners).
+ * Otherwise nothing changes. (The launcher's retro colours,
  * drawn from any colour, are not followed here: these screens keep their themes, with the accent nearest to it.)
  */
 object LibreHuTheme {
@@ -56,6 +59,9 @@ object LibreHuTheme {
     @Volatile private var overlay = 0
 
     @Volatile private var segment = false
+
+    /** The launcher's style (modern, retro…, factory, ambient). */
+    @Volatile private var style: String? = null
     private var listening = false
 
     /** True when the app takes the launcher's theme. */
@@ -67,7 +73,7 @@ object LibreHuTheme {
         available = app.packageManager.resolveContentProvider(URI.authority!!, 0) != null
         enabled = Settings(app).librehuFollowLauncherTheme
         if (!available) return
-        read(app)?.let { (d, a, st) -> onLauncherTheme(d, a, st, notify = false) }
+        read(app)?.let { (d, a, st) -> onLauncherTheme(d, a, st.first, st.second, notify = false) }
         if (listening) return
         listening = true
         val handler = Handler(Looper.getMainLooper())
@@ -77,7 +83,7 @@ object LibreHuTheme {
                 false,
                 object : ContentObserver(handler) {
                     override fun onChange(selfChange: Boolean) {
-                        read(app)?.let { (d, a, st) -> onLauncherTheme(d, a, st, notify = true) }
+                        read(app)?.let { (d, a, st) -> onLauncherTheme(d, a, st.first, st.second, notify = true) }
                     }
                 },
             )
@@ -90,7 +96,13 @@ object LibreHuTheme {
                     intent: Intent,
                 ) {
                     if (!intent.hasExtra("dark") || !intent.hasExtra("accent")) return
-                    onLauncherTheme(intent.getBooleanExtra("dark", true), intent.getIntExtra("accent", 0), intent.getStringExtra("font"), notify = true)
+                    onLauncherTheme(
+                        intent.getBooleanExtra("dark", true),
+                        intent.getIntExtra("accent", 0),
+                        intent.getStringExtra("font"),
+                        intent.getStringExtra("style"),
+                        notify = true,
+                    )
                 }
             },
             IntentFilter(ACTION_THEME_CHANGED),
@@ -106,7 +118,7 @@ object LibreHuTheme {
         val settings = Settings(context)
         settings.librehuFollowLauncherTheme = on
         enabled = on
-        if (on && available) read(context.applicationContext)?.let { (d, a, st) -> onLauncherTheme(d, a, st, notify = false) }
+        if (on && available) read(context.applicationContext)?.let { (d, a, st) -> onLauncherTheme(d, a, st.first, st.second, notify = false) }
         AppThemeManager.reapply(context, settings)
         AppThemeManager.signalVisualChange()
     }
@@ -123,6 +135,8 @@ object LibreHuTheme {
     fun applyTo(theme: Resources.Theme) {
         val o = overlay
         if (following && o != 0) theme.applyStyle(o, true)
+        if (following && style == "factory") theme.applyStyle(R.style.ThemeOverlay_LibreHU_Factory, true)
+        if (following && style == "ambient") theme.applyStyle(R.style.ThemeOverlay_LibreHU_Ambient, true)
         if (following && segment) theme.applyStyle(R.style.ThemeOverlay_LibreHU_Segment, true)
     }
 
@@ -136,14 +150,16 @@ object LibreHuTheme {
         }
     }
 
-    private fun read(context: Context): Triple<Boolean, Int, String?>? =
+    /** dark, accent and (font, style). */
+    private fun read(context: Context): Triple<Boolean, Int, Pair<String?, String?>>? =
         try {
             context.contentResolver.query(URI, null, null, null, null)?.use { c ->
                 if (!c.moveToFirst()) return null
                 val d = c.getColumnIndex("dark").takeIf { it >= 0 }?.let { c.getInt(it) != 0 } ?: true
                 val a = c.getColumnIndex("accent").takeIf { it >= 0 }?.let { c.getInt(it) } ?: return null
-                val st = c.getColumnIndex("font").takeIf { it >= 0 }?.let { c.getString(it) }
-                Triple(d, a, st)
+                val font = c.getColumnIndex("font").takeIf { it >= 0 }?.let { c.getString(it) }
+                val style = c.getColumnIndex("style").takeIf { it >= 0 }?.let { c.getString(it) }
+                Triple(d, a, font to style)
             }
         } catch (e: Exception) {
             AppLog.w("LibreHuTheme: ${e.message}")
@@ -154,16 +170,18 @@ object LibreHuTheme {
         dark: Boolean,
         accent: Int,
         font: String?,
+        style: String?,
         notify: Boolean,
     ) {
         val o = nearest(accent)
         val seg = font == "segment"
-        if (dark == this.dark && o == overlay && seg == segment) return
-        val accentChanged = o != overlay || seg != segment
+        if (dark == this.dark && o == overlay && seg == segment && style == this.style) return
+        val accentChanged = o != overlay || seg != segment || style != this.style
         segment = seg
+        this.style = style
         this.dark = dark
         overlay = o
-        AppLog.i("LibreHuTheme: launcher theme dark=$dark accent=#${Integer.toHexString(accent)} font=$font")
+        AppLog.i("LibreHuTheme: launcher theme dark=$dark accent=#${Integer.toHexString(accent)} font=$font style=$style")
         if (!notify || !following) return
         Handler(Looper.getMainLooper()).post {
             // The night mode recreates the activities by itself (the projection only gets a configuration change);
