@@ -85,6 +85,7 @@ marquée `LibreHU fork:` en commentaire.
 |---|---|
 | `app/build.gradle.kts` | `applicationId` `org.librehu.headunit`, signature par la clé LibreHU, `versionCode` = 121 + nombre de commits |
 | `app/src/main/AndroidManifest.xml` | permissions signature `CONFIGURE` et `NAVIGATION_UPDATE` déclarées par ce paquet ; `LibreHuAutomationReceiver`, `LibreHuVideoService`, `RootRequestReceiver` ; lecture des fournisseurs LibreHU (thème du launcher, fiche voiture) ; icône thémable |
+| `aap/AapService.kt` | verrou de réveil du démarrage automatique (`HeadunitRevived::BootAutoStart`, 10 min) relâché à l'extinction de l'écran quand LibreHU-service est installé : sur l'autoradio LibreHU (QuickBoot Autochips) il empêchait le SoC de se mettre en veille contact coupé, et la MCU coupait l'alimentation |
 | `App.kt` | démarrage de `LibreHuTheme`, `LibreHuDefaults`, `LibreHuVehicleSync`, `LibreHuCar` |
 | `automation/LibreHuAutomationReceiver.kt` (nouveau) | commandes d'automatisation réservées aux applis signées LibreHU, configuration comprise |
 | `automation/AutomationCommandPolicy.kt`, `AutomationEffectRunner.kt` | mode nuit `car` (signal des phares) avec `headlight=on/off` venant de LibreHU-service |

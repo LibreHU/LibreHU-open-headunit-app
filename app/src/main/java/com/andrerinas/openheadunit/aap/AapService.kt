@@ -740,6 +740,10 @@ class AapService : Service() {
                 Intent.ACTION_SCREEN_OFF -> {
                     screenOffTimestamp = SystemClock.elapsedRealtime()
                     AppLog.i("WakeDetect: SCREEN_OFF")
+                    // LibreHU fork: on a LibreHU head unit (Autochips QuickBoot) this wake lock kept the SoC from
+                    // suspending after the ignition went off, and the MCU then cut the power. LibreHU-service keeps
+                    // the apps through the standby itself.
+                    if (com.andrerinas.openheadunit.librehu.LibreHuCar.available(this@AapService)) releaseBootWakeLock()
                     commManager.pauseForSleep()
                     maybeInferredAccPowerLoss { goAsync() }
                 }
