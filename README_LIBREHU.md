@@ -71,9 +71,15 @@ Captures sur l'émulateur Android 9 (1280×720, 160 dpi comme l'autoradio), sans
 Le fork utilise le root (comme Open Headunit, pour certaines connexions) par SuperSU (installé dans la ROM) ; chaque demande doit être accordée avec « Se
 souvenir ». Pour que toutes les fenêtres SuperSU arrivent au même moment, l'assistant de premier démarrage de LibreHU
 Launcher (« Autoriser le root pour toutes les applis LibreHU ») interroge chaque appli LibreHU l'une après l'autre :
-`RootRequestReceiver`, sur `org.librehu.action.REQUEST_ROOT` envoyé à ce paquet, lance une fois `su -c id` (SuperSU
+`RootRequestReceiver`, sur `org.librehu.action.REQUEST_ROOT` envoyé à ce paquet, lance une fois `id` par `su` (SuperSU
 affiche alors la demande de cette appli), puis répond `org.librehu.action.ROOT_RESULT` (extras `package`, `granted`)
 au paquet indiqué dans `reply_to`. Rien d'autre que `id` n'est lancé ; une seconde demande dans les 20 s est ignorée. Seule une appli signée avec la clé LibreHU peut l'envoyer (permission de signature `org.librehu.permission.ROOT_REQUEST`, déclarée dans `AndroidManifest.xml`).
+
+`RootRequestReceiver` passe par `librehu/Su.kt` : `su -c id` (Magisk, KernelSU, KernelSU Next, APatch, SuperSU), ou
+`su 0 sh -c id` pour le vieux `su` d'AOSP de certaines ROM Jancar (`/system/xbin/su` : `su [UID [COMMANDE…]]`, refuse
+`-c` avec « invalid uid/gid »), reconnu une fois par `su -v` (les autres y répondent par leur version, sans demande de
+root). Le root d'Open Headunit lui-même passe par libsu (`su --mount-master`, sinon `su` avec les commandes sur l'entrée
+standard), que ce vieux `su` accepte aussi.
 
 ## Fichiers modifiés par rapport à l'amont
 
@@ -95,6 +101,7 @@ marquée `LibreHU fork:` en commentaire.
 | `librehu/LibreHuVehicleSync.kt` (nouveau) | fiche voiture de LibreHU-service → réglages véhicule envoyés au téléphone |
 | `librehu/LibreHuVideoService.kt` (nouveau) | image d'Android Auto dans une carte de LibreHU Launcher (expérimental) |
 | `librehu/RootRequestReceiver.kt` (nouveau) | root demandé une fois pour toutes depuis l'assistant du launcher |
+| `librehu/Su.kt` (nouveau) | arguments de `su` : `su -c`, ou `su 0 sh -c` pour le vieux `su` d'AOSP de certaines ROM Jancar |
 | `aap/AapControl.kt`, `aap/protocol/messages/ServiceDiscoveryResponse.kt` | capteurs de la voiture annoncés au téléphone et dernière valeur envoyée à sa demande |
 | `aap/AapControl.kt`, `librehu/LibreHuCar.kt` | `BatteryStatusNotification` (message de contrôle 23) du téléphone, s'il l'envoie : niveau de batterie journalisé et envoyé à LibreHU-service (`org.librehu.headunit.PHONE_BATTERY`) |
 | `aap/AapNavigationHelper.kt` | `NAVIGATION_UPDATE` envoyé avec la permission déclarée par ce paquet ; extra `org.librehu.projection_on_screen` (projection au premier plan ou non) pour le popup des directions de LibreHU Launcher |
