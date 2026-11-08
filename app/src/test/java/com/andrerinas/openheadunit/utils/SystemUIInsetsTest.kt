@@ -286,7 +286,11 @@ class SystemUIInsetsTest {
             else checkNotNull(lastTransport) { "No prior transport for a repeated response" }
         lastTransport = responseTransport
         val settings = App.provide(projectionContext).settings
-        val message = ServiceDiscoveryResponse(projectionContext, AudioSessionConfig.from(settings), responseTransport)
+        // LibreHU fork: the Bluetooth announcement and pairing methods of PR #1156; no Bluetooth service here.
+        val message = ServiceDiscoveryResponse(projectionContext, AudioSessionConfig.from(settings), responseTransport,
+            com.andrerinas.openheadunit.aap.protocol.messages.BluetoothAnnouncePolicy.Announce(
+                com.andrerinas.openheadunit.aap.protocol.messages.BluetoothAnnouncePolicy.Mode.REAL, null, false),
+            emptyList())
         return message.parse(Control.ServiceDiscoveryResponse.newBuilder()).build()
     }
 
