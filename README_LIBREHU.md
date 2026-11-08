@@ -225,6 +225,9 @@ LibreHU : `versionCode` 122 + commits, `AapMessageHandlerType` garde son `aapCon
 phares de LibreHU-service avant `car_mode`, chaines francaises des deux cotes. Les tests d'amont des chaines
 (`SettingsStringLimitsTest`) demandent des resumes de 80 caracteres au plus : les trois descriptions LibreHU plus
 longues (`librehu_gps_description`, `librehu_car_keys_description`, `librehu_video_card_description`) raccourcies.
+Deux nouveaux tests d'amont adaptes au fork : `SystemUIInsetsTest` donne a `ServiceDiscoveryResponse` l'annonce
+Bluetooth et les methodes d'appairage du fork (PR #1156), le test du voile de nuit d'`AapPresentationTest` simule
+`aapControl` comme les autres tests du fork. Tests : 4 817, tous verts (Android CI sur `main`, 08/11/2026).
 
 Fusion precedente : 4.0.0-beta1 (27/10/2026, 331 commits : FFmpeg H.264 en ARM32, reprise du decodeur, correction PCM
 adaptative, AAudio, identifiants WPP, nouveaux reglages et accueil, politique media XYAuto…). Conflits resolus en
