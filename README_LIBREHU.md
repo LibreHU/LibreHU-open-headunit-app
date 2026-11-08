@@ -65,6 +65,11 @@ Captures sur l'émulateur Android 9 (1280×720, 160 dpi comme l'autoradio), sans
 - **CI** (`.github/workflows/librehu.yml`) : saveur `github` en release, publiee en pre-release continue
   `latest-<branche>` avec `release.txt` (LibreHU Apps) et en compilations numerotees ; les workflows d'Open Headunit
   propres a son depot (revue Gemini, issues inactives, APK debug) sont retires, `android-ci.yml` garde.
+- **Regex verifiees sur toutes les versions d'Android** : le workflow **LibreHU regex check** (a la main) compile toutes
+  les regex de l'appli (et celles de LibreHU Helper) avec le moteur d'Android 4.1, 4.4, 5.0, 6.0, 8.0, 9, 10, 11, 12,
+  13, 14 et 15 sur emulateurs (`tools/librehu/RegexCheck.java`). Le 08/11/2026 : toutes passent, dont l'adresse MAC de
+  `MacAddressPolicy` (`[:-]`, soupconnee a tort) ; le moteur d'Android (ICU) ne refuse `[:` que suivi plus loin de `:]`
+  (lu comme une classe `[:…:]`), ce qui faisait planter LibreHU Helper sur toutes ces versions.
 
 ## Root (SuperSU) : demandé une fois pour toutes
 

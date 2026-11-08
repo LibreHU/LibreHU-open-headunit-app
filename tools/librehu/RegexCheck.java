@@ -3,12 +3,13 @@ import java.util.regex.Pattern;
 /**
  * LibreHU fork: compiles the regular expressions of the app, and LibreHU Helper's, with the regex engine of the Android
  * it runs on (ICU, which differs from the JDK's and from one Android version to the next), and checks the MAC address
- * ones on a few strings. A pattern one engine refuses stops the app at the first use of its object: MacAddressPolicy's
- * set starting with « [: » on Android 9. Run on emulators from Android 4.1 (the app's minSdk 16) by
+ * ones on a few strings. A pattern the engine refuses stops the app at the first use of its object: LibreHU Helper's MAC
+ * pattern had « [: » and, further on, « :] », which ICU reads as one « [:…:] » property (refused on every Android from
+ * 4.1 to 15; the JDK accepts it). Run on emulators from Android 4.1 (the app's minSdk 16) by
  * .github/workflows/librehu-regex-check.yml, through app_process (tools/librehu/regex_check.sh).
  *
- * Output: one line per pattern (OK / FAIL), « RESULT new_fail=N old_fail=M » at the end; « old » are the patterns
- * replaced by the fix, expected to fail somewhere, « new » must all pass.
+ * Output: one line per pattern (OK / FAIL), « RESULT new_fail=N old_fail=M » at the end; « old » are patterns replaced
+ * by a fix, kept to show the failure, « new » are today's and must all pass.
  */
 public class RegexCheck {
     static int newFail = 0;
@@ -53,8 +54,8 @@ public class RegexCheck {
         String[] macNo = {"AABBCCDDEEFF", "AA:BB:CC:DD:EE", "AA_BB_CC_DD_EE_FF"};
 
         // Open Headunit (app/src/main/java/com/andrerinas/openheadunit/…), in the order of the sources.
-        check("old", "MacAddressPolicy.SEPARATED (before the fix)", "^[0-9A-F]{2}([:-][0-9A-F]{2}){5}$", macYes, macNo);
-        check("new", "MacAddressPolicy.SEPARATED", "^[0-9A-F]{2}([\\-:][0-9A-F]{2}){5}$", macYes, macNo);
+        // « [:-] » with no « :] » after it: ICU reads a normal set (passes from Android 4.1 to 15, checked 08/11/2026).
+        check("new", "MacAddressPolicy.SEPARATED", "^[0-9A-F]{2}([:-][0-9A-F]{2}){5}$", macYes, macNo);
         check("new", "MacAddressPolicy.BARE", "^[0-9A-F]{12}$", new String[] {"AABBCCDDEEFF"}, new String[] {"AA:BB:CC:DD:EE:FF"});
         check("new", "AutomationOutputPolicy", "/+", new String[] {"a//b"}, new String[0]);
         check("new", "BluetoothPairingSession", "[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}", new String[] {"aa:bb:cc:dd:ee:ff"}, new String[] {"aa-bb"});

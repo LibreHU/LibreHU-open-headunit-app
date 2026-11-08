@@ -1,8 +1,8 @@
 name: LibreHU regex check
 
 # LibreHU fork: compiles every regular expression of the app (and LibreHU Helper's) with the regex engine (ICU) of each
-# Android version the app runs on (minSdk 16): a pattern one engine refuses stops the app, as MacAddressPolicy's set
-# starting with « [: » on Android 9. tools/librehu/RegexCheck.java, run through app_process on emulators.
+# Android version the app runs on (minSdk 16): a pattern the engine refuses stops the app, as LibreHU Helper's MAC
+# pattern (« [: » then « :] ») on every Android. tools/librehu/RegexCheck.java, run through app_process on emulators.
 on:
   workflow_dispatch:
 
