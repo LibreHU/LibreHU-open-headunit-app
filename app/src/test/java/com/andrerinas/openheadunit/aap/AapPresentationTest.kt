@@ -21,9 +21,10 @@ class AapPresentationTest {
             mockConstruction(AapNavigationHelper::class.java).use {
                 val scheduler = PresentationScheduler()
                 val state = NightOverlayState()
+                // LibreHU fork: aapControl mocked as in the other tests (the fork's gateway reads the Bluetooth settings).
                 val handler = AapMessageHandlerType(
                     mock(), mock(), mock(), mock(), mock(), mock(),
-                    presentation = scheduler.queue(), nightOverlayState = state
+                    presentation = scheduler.queue(), aapControl = mock(), nightOverlayState = state
                 )
                 handler.handle(AapMessage(Channel.ID_MPB, 32771, MediaPlayback.MediaMetaData.newBuilder()
                     .setSong("Song").setArtist("Artist").build()))
