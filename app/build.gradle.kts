@@ -119,8 +119,8 @@ android {
         applicationId = "org.librehu.headunit"
         minSdk = 16
         targetSdk = 36
-        versionCode = 121 + librehuCommitCount(rootDir)
-        versionName = "4.0.0-beta1-" + librehuBranch(rootDir)
+        versionCode = 122 + librehuCommitCount(rootDir)
+        versionName = "4.0.0-beta2-" + librehuBranch(rootDir)
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -304,6 +304,7 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     // Inline mocks exercise the final Android transport classes on JDK 21.
     testImplementation("org.mockito:mockito-core:5.14.2")
     // Runs the parts that need real Android classes (theme attributes, drawables) on the JVM.

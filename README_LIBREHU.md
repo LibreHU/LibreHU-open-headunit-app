@@ -59,7 +59,7 @@ Captures sur l'émulateur Android 9 (1280×720, 160 dpi comme l'autoradio), sans
   `org.librehu.headunit.permission.NAVIGATION_UPDATE`, declaree par ce paquet (celle d'Open Headunit,
   `com.andrerinas.headunitrevived.permission.NAVIGATION_UPDATE`, n'est declaree par aucune appli : personne ne
   recevait ces diffusions). LibreHU Launcher l'affiche sur le tableau de bord.
-- **Numero de version** : `versionCode` = celui d'amont (121 depuis 4.0.0-beta1) + nombre de commits du depot. LibreHU Apps propose une
+- **Numero de version** : `versionCode` = celui d'amont (122 depuis 4.0.0-beta2, 121 pour 4.0.0-beta1) + nombre de commits du depot. LibreHU Apps propose une
   mise a jour quand le `versionCode` augmente ; celui d'amont ne bougeait pas d'un build du fork a l'autre, la mise a
   jour n'apparaissait donc pas. Le `versionName` reste celui d'amont suivi de `-<branche>` ; le commit est sur sa propre ligne de `release.txt`.
 - **CI** (`.github/workflows/librehu.yml`) : saveur `github` en release, publiee en pre-release continue
@@ -88,13 +88,13 @@ standard), que ce vieux `su` accepte aussi.
 
 ## Fichiers modifiés par rapport à l'amont
 
-Base : commit amont `620af558` (Open Headunit 4.0.0-beta1 + 3 commits audio, 27/10/2026 ; bases précédentes `2018d8f0`, `4ee1d58f`),
+Base : commit amont `ae74788d` (Open Headunit 4.0.0-beta2, 03/11/2026 ; bases précédentes `620af558`, `2018d8f0`, `4ee1d58f`),
 branche locale `librehu` publiée sur `main`. `git diff 620af558 HEAD --stat` donne la liste complète ; chaque modification du code est
 marquée `LibreHU fork:` en commentaire.
 
 | Fichier(s) | Modification |
 |---|---|
-| `app/build.gradle.kts` | `applicationId` `org.librehu.headunit`, signature par la clé LibreHU, `versionCode` = 121 + nombre de commits |
+| `app/build.gradle.kts` | `applicationId` `org.librehu.headunit`, signature par la clé LibreHU, `versionCode` = 122 + nombre de commits |
 | `app/src/main/AndroidManifest.xml` | permissions signature `CONFIGURE` et `NAVIGATION_UPDATE` déclarées par ce paquet ; `LibreHuAutomationReceiver`, `LibreHuVideoService`, `RootRequestReceiver` ; lecture des fournisseurs LibreHU (thème du launcher, fiche voiture) ; icône thémable |
 | `aap/AapService.kt` | verrou de réveil du démarrage automatique (`HeadunitRevived::BootAutoStart`, 10 min) relâché à l'extinction de l'écran quand LibreHU-service est installé : sur l'autoradio LibreHU (QuickBoot Autochips) il empêchait le SoC de se mettre en veille contact coupé, et la MCU coupait l'alimentation |
 | `App.kt` | démarrage de `LibreHuTheme`, `LibreHuDefaults`, `LibreHuVehicleSync`, `LibreHuCar` |
@@ -217,7 +217,17 @@ git fetch upstream && git merge upstream/main
 ```
 Les changements du fork sont petits et commentes « LibreHU fork » pour garder les fusions simples.
 
-Derniere fusion : 4.0.0-beta1 (27/10/2026, 331 commits : FFmpeg H.264 en ARM32, reprise du decodeur, correction PCM
+Derniere fusion : 4.0.0-beta2 (fusionnee le 08/11/2026, 98 commits : relais Bluetooth ESP32, gestes a deux doigts et
+variateur, reconnexion USB apres une perte du lien, aide sur chaque reglage et reglages Bluetooth regroupes, socket ZJ /
+ZBT pour les modules Bluetooth externes, libsu et ADB sous l'API 19…). Conflits resolus en gardant les ajouts
+LibreHU : `versionCode` 122 + commits, `AapMessageHandlerType` garde son `aapControl` en parametre (PR #1156) a cote du
+`nightOverlayState` d'amont, bascule « Suivre le launcher LibreHU » autour du bloc theme de l'amont (avec ses aides),
+phares de LibreHU-service avant `car_mode`, chaines francaises des deux cotes. Les tests d'amont des chaines
+(`SettingsStringLimitsTest`) demandent des resumes de 80 caracteres au plus : trois descriptions LibreHU sont plus
+longues (`librehu_gps_description`, `librehu_car_keys_description`, `librehu_video_card_description`) ; la CI du
+fork construit l'APK sans lancer ces tests.
+
+Fusion precedente : 4.0.0-beta1 (27/10/2026, 331 commits : FFmpeg H.264 en ARM32, reprise du decodeur, correction PCM
 adaptative, AAudio, identifiants WPP, nouveaux reglages et accueil, politique media XYAuto…). Conflits resolus en
 gardant les ajouts LibreHU : accent du launcher dans les layouts et styles (`brand_teal` devenu `brand_primary` en
 amont), ecran « Voiture et touches (LibreHU) » a cote du nouvel ecran d'amont propre a l'appareil, chaines LibreHU,
