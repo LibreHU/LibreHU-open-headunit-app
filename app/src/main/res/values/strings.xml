@@ -1927,7 +1927,7 @@
     <string name="librehu_car_settings_summary">Steering wheel keys, parking brake, speed, GPS sent to Android Auto</string>
     <string name="librehu_car_keys_header">Keys</string>
     <string name="librehu_car_keys">Steering wheel and front panel keys</string>
-    <string name="librehu_car_keys_description">Forwarded by LibreHU-service during a session: track, play / pause, voice assistant, answer, hang up</string>
+    <string name="librehu_car_keys_description">From LibreHU-service in a session: tracks, play / pause, voice, answer, hang up</string>
     <string name="librehu_sensors_header">Car information sent to the phone</string>
     <string name="librehu_sensors_info">From LibreHU-service (MCU, OBD adapter). A switched-on item is announced at the next phone connection; a switched-off one stops being sent at once and the phone relies on its own estimate.</string>
     <string name="librehu_sensor_parking_brake">Parking brake</string>
@@ -1944,7 +1944,7 @@
     <string name="librehu_sensor_gear_description">Only reverse is known: R in reverse, D otherwise</string>
     <string name="librehu_gps_header">GPS</string>
     <string name="librehu_gps">Head unit GPS</string>
-    <string name="librehu_gps_description">Position from the head unit\'s antenna sent to the phone for navigation (next connection)</string>
+    <string name="librehu_gps_description">The head unit\'s GPS position sent to the phone for navigation (next connection)</string>
     <string name="librehu_live_header">Last values received</string>
     <string name="librehu_live_none">Nothing received from LibreHU-service yet</string>
     <string name="librehu_live_reverse">Reverse</string>
@@ -1953,5 +1953,5 @@
     <string name="librehu_no">no</string>
     <string name="librehu_video_header">LibreHU Launcher</string>
     <string name="librehu_video_card">Picture in the launcher card (experimental)</string>
-    <string name="librehu_video_card_description">While the projection is not on screen, the Android Auto picture can be shown and touched in the LibreHU Launcher dashboard card (option also in the launcher)</string>
+    <string name="librehu_video_card_description">Android Auto shown and touched in the LibreHU Launcher card (also set there)</string>
 </resources>

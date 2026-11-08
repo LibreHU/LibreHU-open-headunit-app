@@ -223,9 +223,8 @@ ZBT pour les modules Bluetooth externes, libsu et ADB sous l'API 19…). Conflit
 LibreHU : `versionCode` 122 + commits, `AapMessageHandlerType` garde son `aapControl` en parametre (PR #1156) a cote du
 `nightOverlayState` d'amont, bascule « Suivre le launcher LibreHU » autour du bloc theme de l'amont (avec ses aides),
 phares de LibreHU-service avant `car_mode`, chaines francaises des deux cotes. Les tests d'amont des chaines
-(`SettingsStringLimitsTest`) demandent des resumes de 80 caracteres au plus : trois descriptions LibreHU sont plus
-longues (`librehu_gps_description`, `librehu_car_keys_description`, `librehu_video_card_description`) ; la CI du
-fork construit l'APK sans lancer ces tests.
+(`SettingsStringLimitsTest`) demandent des resumes de 80 caracteres au plus : les trois descriptions LibreHU plus
+longues (`librehu_gps_description`, `librehu_car_keys_description`, `librehu_video_card_description`) raccourcies.
 
 Fusion precedente : 4.0.0-beta1 (27/10/2026, 331 commits : FFmpeg H.264 en ARM32, reprise du decodeur, correction PCM
 adaptative, AAudio, identifiants WPP, nouveaux reglages et accueil, politique media XYAuto…). Conflits resolus en

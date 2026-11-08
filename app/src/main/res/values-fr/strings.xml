@@ -1895,7 +1895,7 @@
     <string name="librehu_car_settings_summary">Touches volant, frein à main, vitesse, GPS envoyés à Android Auto</string>
     <string name="librehu_car_keys_header">Touches</string>
     <string name="librehu_car_keys">Touches du volant et de la façade</string>
-    <string name="librehu_car_keys_description">Transmises par LibreHU-service pendant une session : piste, lecture / pause, Assistant vocal, décrocher, raccrocher</string>
+    <string name="librehu_car_keys_description">Par LibreHU-service : pistes, lecture / pause, assistant, décrocher, raccrocher</string>
     <string name="librehu_sensors_header">Informations de la voiture envoyées au téléphone</string>
     <string name="librehu_sensors_info">Fournies par LibreHU-service (MCU, adaptateur OBD). Une information activée est annoncée à la prochaine connexion du téléphone ; une information coupée n\'est plus envoyée tout de suite, le téléphone se fie alors à sa propre estimation.</string>
     <string name="librehu_sensor_parking_brake">Frein à main</string>
@@ -1912,7 +1912,7 @@
     <string name="librehu_sensor_gear_description">Seule la marche arrière est connue : R en marche arrière, D sinon</string>
     <string name="librehu_gps_header">GPS</string>
     <string name="librehu_gps">GPS de l\'autoradio</string>
-    <string name="librehu_gps_description">Position de l\'antenne de l\'autoradio envoyée au téléphone pour la navigation (prochaine connexion)</string>
+    <string name="librehu_gps_description">Position GPS de l\'autoradio envoyée au téléphone (prochaine connexion)</string>
     <string name="librehu_live_header">Dernières valeurs reçues</string>
     <string name="librehu_live_none">Rien reçu de LibreHU-service pour l\'instant</string>
     <string name="librehu_live_reverse">Marche arrière</string>
@@ -1921,5 +1921,5 @@
     <string name="librehu_no">non</string>
     <string name="librehu_video_header">LibreHU Launcher</string>
     <string name="librehu_video_card">Image dans la carte du launcher (expérimental)</string>
-    <string name="librehu_video_card_description">Quand la projection n\'est pas à l\'écran, l\'image d\'Android Auto peut s\'afficher et se toucher dans la carte du tableau de bord de LibreHU Launcher (option aussi dans le launcher)</string>
+    <string name="librehu_video_card_description">Android Auto dans la carte de LibreHU Launcher, tactile (réglable là-bas aussi)</string>
 </resources>
