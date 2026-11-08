@@ -19,8 +19,13 @@ enum class MacAddressOrigin {
  */
 object MacAddressPolicy {
 
-    /** Six hex pairs separated by colons or dashes. */
-    private val SEPARATED = Regex("^[0-9A-F]{2}([:-][0-9A-F]{2}){5}$")
+    /**
+     * Six hex pairs separated by colons or dashes. No set starting with « [: »: Android's regex engine (ICU) reads it as
+     * a POSIX class and Android 9's refuses the whole pattern (U_ILLEGAL_ARGUMENT_ERROR), which stopped the app at the
+     * first use of this object (LibreHU Helper hit it on Android 9). Checked from Android 4.1 to 15:
+     * tools/librehu/RegexCheck.java, workflow « LibreHU regex check ».
+     */
+    private val SEPARATED = Regex("^[0-9A-F]{2}([\\-:][0-9A-F]{2}){5}$")
 
     /** The same twelve digits with nothing between them. Vendor properties publish this form. */
     private val BARE = Regex("^[0-9A-F]{12}$")
