@@ -120,6 +120,7 @@ marquée `LibreHU fork:` en commentaire.
 | `res/layout/dialog_*.xml`, `fragment_add_network_address.xml`, `item_keymap.xml`, `layout_*_button.xml`, `res/color-v23/*`, `res/drawable-v21/btn_primary.xml` | couleurs codées de la marque (`brand_primary`, ex-`brand_teal`) remplacées par `?attr/librehuAccent` |
 | `res/drawable/librehu_launcher_*.xml`, `res/mipmap-anydpi-v26/ic_launcher*.xml` | icône originale et glyphe thémable |
 | `res/values/strings.xml`, `values-fr/strings.xml` | nom « Android Auto » sous l'icône, textes LibreHU (anglais, français) |
+| `res/values-<langue>/strings.xml` (les 24 autres langues de l'amont) | textes LibreHU traduits par IA (Claude), en bloc `<!-- Fork LibreHU -->` en fin de fichier (les traductions de l'amont ne bougent pas) ; termes de l'amont repris (« Autoradio », « unidad central », « 主机 »…) ; corrections bienvenues |
 | `res/xml/shortcuts.xml` | raccourcis vers le paquet `org.librehu.headunit` |
 | `app/src/test/.../AutomationCommandPolicyTest.kt` | test du mode nuit `car` |
 | `aap/AapBluetoothControl.kt`, `aap/bluetooth/*`, `proto/bluetooth.proto`, `aap/AapControl.kt`, `protocol/messages/ServiceDiscoveryResponse.kt` (PR amont #1156) ; `librehu/LibreHuDefaults.kt` ; `app/src/test/.../BluetoothPairingSessionTest.kt` | messages d'appairage Bluetooth d'Android Auto ; ajouts LibreHU : sessions USB, adresse de LibreHU-service, appairage lancé par l'autoradio, préréglage v4 ; tests |
