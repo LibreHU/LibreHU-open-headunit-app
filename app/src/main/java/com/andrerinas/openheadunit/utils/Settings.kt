@@ -13,13 +13,18 @@ import android.location.Location
 import android.media.AudioManager
 import android.os.Build
 import com.andrerinas.openheadunit.aap.DimPolicy
+import com.andrerinas.openheadunit.input.InputAction
+import com.andrerinas.openheadunit.input.InputActionCodec
+import com.andrerinas.openheadunit.input.KeyBindingPolicy
 import com.andrerinas.openheadunit.input.KeyCode
+import com.andrerinas.openheadunit.input.toInputAction
 import com.andrerinas.openheadunit.main.FavoriteAppsPolicy
 import com.andrerinas.openheadunit.main.FavoriteTarget
 import com.andrerinas.openheadunit.main.HomePagesPolicy
 import com.andrerinas.openheadunit.main.HomeSurfaceOpacityPolicy
 import com.andrerinas.openheadunit.main.HomeWidgetsPolicy
 import com.andrerinas.openheadunit.input.MediaKeyRoutingPolicy
+import com.andrerinas.openheadunit.location.SpeedVolumePolicy
 import com.andrerinas.openheadunit.view.PerformanceOverlayField
 import com.andrerinas.openheadunit.view.PerformanceOverlayPolicy
 import com.andrerinas.openheadunit.decoder.video.VideoFaultInjector
@@ -41,6 +46,7 @@ import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.NativeStrategy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApAddressRecord
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.SoftApAdvertisedEndpoint
 import com.andrerinas.openheadunit.connection.wifi.WifiLauncherMode
+import com.andrerinas.openheadunit.connection.wifi.HeadunitServerNetwork
 
 class Settings(private val context: Context) {
 
@@ -286,6 +292,17 @@ class Settings(private val context: Context) {
             prefs.edit().putBoolean("raise-projection-during-call", value).apply()
         }
 
+    /**
+     * Show the projection over the lock screen. While the unit is locked nothing reaches the phone:
+     * touches, keys and scroll are held back (see [com.andrerinas.openheadunit.input.LockedInputPolicy]),
+     * so the map and directions can be read but nothing can be opened. Off by default.
+     */
+    var showOverLockScreen: Boolean
+        get() = prefs.getBoolean("show-over-lock-screen", false)
+        set(value) {
+            prefs.edit().putBoolean("show-over-lock-screen", value).apply()
+        }
+
     var nightMode: NightMode
         get() {
             val value = prefs.getInt("night-mode", 0)
@@ -337,6 +354,36 @@ class Settings(private val context: Context) {
         set(codesMap) {
             val list: List<String> = codesMap.map { "${it.key}-${it.value}" }
             prefs.edit().putStringSet("key-codes", list.toSet()).apply()
+        }
+
+    /**
+     * What each physical key does (physical key code → action), stored as `"<physical>=<action>"`
+     * with [InputActionCodec]. Until it is first written, it is read from the older [keyCodes] map,
+     * so mappings learned before bindings existed keep working.
+     */
+    var keyBindings: Map<Int, InputAction>
+        get() {
+            val stored = prefs.getStringSet(KEY_BINDINGS, null)
+            if (stored == null) {
+                if (!prefs.contains("key-codes")) return emptyMap()
+                val migrated = KeyBindingPolicy.fromLegacy(keyCodes)
+                keyBindings = migrated
+                return migrated
+            }
+            val map = mutableMapOf<Int, InputAction>()
+            for (entry in stored) {
+                val separator = entry.indexOf('=')
+                if (separator <= 0) continue
+                val physical = entry.substring(0, separator).toIntOrNull() ?: continue
+                val action = InputActionCodec.decode(entry.substring(separator + 1))
+                if (action != InputAction.None) map[physical] = action
+            }
+            return map
+        }
+        set(bindings) {
+            val set = bindings.filterValues { it != InputAction.None }
+                .map { (physical, action) -> "$physical=${InputActionCodec.encode(action)}" }.toSet()
+            prefs.edit().putStringSet(KEY_BINDINGS, set).apply()
         }
 
     var exporterLogLevel: LogExporter.LogLevel
@@ -583,6 +630,21 @@ class Settings(private val context: Context) {
         get() = GestureEdgeZone.fromInt(prefs.getInt("gesture-edge-zone", GestureEdgeZone.NORMAL.value))
             ?: GestureEdgeZone.NORMAL
         set(value) { prefs.edit().putInt("gesture-edge-zone", value.value).apply() }
+
+    /**
+     * What a gesture does. Read from its `gesture-action-*` string once one was saved, and from the
+     * older Int value (or its default) until then.
+     */
+    fun gestureAction(slot: GestureSlot): InputAction {
+        prefs.getString(slot.key, null)?.let { return InputActionCodec.decode(it) }
+        val legacy = GestureAction.fromInt(prefs.getInt(slot.legacyKey, slot.legacyDefault.value))
+            ?: slot.legacyDefault
+        return legacy.toInputAction()
+    }
+
+    fun setGestureAction(slot: GestureSlot, action: InputAction) {
+        prefs.edit().putString(slot.key, InputActionCodec.encode(action)).apply()
+    }
 
     /** Removes the stored values so the defaults stay live. */
     fun resetGestureSettings() {
@@ -1362,6 +1424,23 @@ class Settings(private val context: Context) {
         )
         set(value) { prefs.edit().putInt("media-key-routing", value.value).apply() }
 
+    // Whether the hardware volume buttons go to the phone through Android Auto instead of changing
+    // this head unit's own volume. For a phone that keeps its audio (Audio Sink off, or playing to
+    // the car over Bluetooth), where the local volume controls nothing Android Auto plays. Off is
+    // the stored default, so an unset preference keeps the behaviour every existing install has.
+    // Speed-dependent volume sends its steps the same way.
+    var volumeKeysToPhone: Boolean
+        get() = prefs.getBoolean("volume-keys-to-phone", false)
+        set(value) { prefs.edit().putBoolean("volume-keys-to-phone", value).apply() }
+
+    // Speed-dependent volume from this head unit's GPS; see SpeedVolumePolicy. OFF is the stored
+    // zero value, so an unset preference leaves the volume alone.
+    var speedVolumeMode: SpeedVolumePolicy.Mode
+        get() = SpeedVolumePolicy.Mode.fromInt(
+            prefs.getInt("speed-volume-mode", SpeedVolumePolicy.Mode.OFF.value)
+        )
+        set(value) { prefs.edit().putInt("speed-volume-mode", value.value).apply() }
+
     var separateAudioStreams: Boolean
         get() = prefs.getBoolean("separate-audio-streams", false)
         set(value) { prefs.edit().putBoolean("separate-audio-streams", value).apply() }
@@ -1467,6 +1546,11 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean("auto-start-on-boot", false)
         set(value) { prefs.edit().putBoolean("auto-start-on-boot", value).apply() }
 
+    /** With [autoStartOnBoot], start only the service and leave the screen to the phone connecting. */
+    var autoStartOnBootInBackground: Boolean
+        get() = prefs.getBoolean("auto-start-on-boot-in-background", false)
+        set(value) { prefs.edit().putBoolean("auto-start-on-boot-in-background", value).apply() }
+
     var autoStartOnScreenOn: Boolean
         get() = prefs.getBoolean("auto-start-on-screen-on", false)
         set(value) { prefs.edit().putBoolean("auto-start-on-screen-on", value).apply() }
@@ -1482,6 +1566,11 @@ class Settings(private val context: Context) {
     var listenForUsbDevices: Boolean
         get() = prefs.getBoolean("listen-for-usb-devices", true)
         set(value) { prefs.edit().putBoolean("listen-for-usb-devices", value).apply() }
+
+    /** When true, the home screen presents USB connections as wireless (for USB wireless dongles). */
+    var usbWirelessDongle: Boolean
+        get() = prefs.getBoolean(KEY_USB_WIRELESS_DONGLE, false)
+        set(value) { prefs.edit().putBoolean(KEY_USB_WIRELESS_DONGLE, value).apply() }
 
     /** "Connect when plugged in": whether a plug-in switches the phone. Off, the plug-in opens the app. */
     var usbConnectOnPlugIn: Boolean
@@ -2028,9 +2117,12 @@ class Settings(private val context: Context) {
     companion object {
         const val PREFS_NAME = "settings"
 
+        const val KEY_BINDINGS = "key-bindings"
+
         private val GESTURE_KEYS = listOf(
             "left-two-finger-gesture", "right-two-finger-gesture", "long-press-two-finger-gesture",
             "left-tap-two-finger-gesture", "right-tap-two-finger-gesture", "down-two-finger-gesture",
+        ) + GestureSlot.values().map { it.key } + listOf(
             "gesture-edge-zone",
             "dim-opacity-percent", "night-overlay-text-size",
             "night-overlay-show-clock", "night-overlay-show-navigation", "night-overlay-show-track",
@@ -2227,6 +2319,7 @@ class Settings(private val context: Context) {
         private const val KEY_AUTO_START_ON_USB = "auto-start-on-usb"
         const val KEY_SCREEN_ORIENTATION = "screen-orientation"
         private const val KEY_LISTEN_FOR_USB_DEVICES = "listen-for-usb-devices"
+        private const val KEY_USB_WIRELESS_DONGLE = "usb-wireless-dongle"
         private const val KEY_AUTO_START_BT_MAC = "auto-start-bt-mac"
         private const val KEY_AUTO_START_BT_MACS = "auto-start-bt-macs"
 
@@ -2486,6 +2579,20 @@ class Settings(private val context: Context) {
         }
     }
 
+    /** The six two-finger gestures, with where each one's action is stored. */
+    enum class GestureSlot(val id: String, val key: String, val legacyKey: String, val legacyDefault: GestureAction) {
+        LEFT("left", "gesture-action-left", "left-two-finger-gesture", GestureAction.EXIT_DIALOG),
+        RIGHT("right", "gesture-action-right", "right-two-finger-gesture", GestureAction.TOGGLE_FULLSCREEN),
+        DOWN("down", "gesture-action-down", "down-two-finger-gesture", GestureAction.DISABLED),
+        LEFT_TAP("leftTap", "gesture-action-left-tap", "left-tap-two-finger-gesture", GestureAction.DIM_SCREEN),
+        RIGHT_TAP("rightTap", "gesture-action-right-tap", "right-tap-two-finger-gesture", GestureAction.NIGHT_OVERLAY),
+        LONG_PRESS("longPress", "gesture-action-long-press", "long-press-two-finger-gesture", GestureAction.DISABLED);
+
+        companion object {
+            fun fromId(id: String): GestureSlot? = values().firstOrNull { it.id == id }
+        }
+    }
+
     /** Width of the zone at each side where a two-finger gesture may start. */
     enum class GestureEdgeZone(val value: Int, val dp: Float) {
         NARROW(0, 48f),
@@ -2608,6 +2715,16 @@ class Settings(private val context: Context) {
     var autoEnableHotspot: Boolean
         get() = prefs.getBoolean("auto-enable-hotspot", false)
         set(value) { prefs.edit().putBoolean("auto-enable-hotspot", value).apply() }
+
+    /** Headunit Server (Auto) only; see [HeadunitServerNetwork]. */
+    var headunitServerNetwork: HeadunitServerNetwork
+        get() = HeadunitServerNetwork.byIdOrDefault(prefs.getInt("headunit-server-network", -1), autoEnableHotspot)
+        set(value) { prefs.edit().putInt("headunit-server-network", value.id).apply() }
+
+    /** On the phone's hotspot: scan for it by itself while the home is on screen and no WiFi is joined. */
+    var headunitServerAutoWifiScan: Boolean
+        get() = prefs.getBoolean("headunit-server-auto-wifi-scan", false)
+        set(value) { prefs.edit().putBoolean("headunit-server-auto-wifi-scan", value).apply() }
 
     var waitForWifiBeforeWifiDirect: Boolean
         get() = prefs.getBoolean("wait-for-wifi-before-wifi-direct", false)
@@ -2870,6 +2987,12 @@ class Settings(private val context: Context) {
     var nativeAaIgnoreExternalBt: Boolean
         get() = prefs.getBoolean("native-aa-ignore-external-bt", false)
         set(value) = prefs.edit().putBoolean("native-aa-ignore-external-bt", value).apply()
+
+    // Opt-in for dual-radio units whose Android data-service radio starts disabled. This only
+    // enables the selected Android adapter; it does not select an external-module transport.
+    var nativeAaEnableBluetooth: Boolean
+        get() = prefs.getBoolean("native-aa-enable-bluetooth", false)
+        set(value) = prefs.edit().putBoolean("native-aa-enable-bluetooth", value).apply()
 
     var autoKillOemApps: Boolean
         get() = prefs.getBoolean("auto-kill-oem-apps", false)

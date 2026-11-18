@@ -1041,6 +1041,7 @@ class DarkModeFragment : Fragment(), SensorEventListener {
             SystemSettings.System.getUriFor("car_mode"),
             false, carModeObserver
         )
+        updateSettingsList()
     }
 
     override fun onPause() {

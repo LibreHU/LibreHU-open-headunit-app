@@ -59,7 +59,7 @@ Captures sur l'émulateur Android 9 (1280×720, 160 dpi comme l'autoradio), sans
   `org.librehu.headunit.permission.NAVIGATION_UPDATE`, declaree par ce paquet (celle d'Open Headunit,
   `com.andrerinas.headunitrevived.permission.NAVIGATION_UPDATE`, n'est declaree par aucune appli : personne ne
   recevait ces diffusions). LibreHU Launcher l'affiche sur le tableau de bord.
-- **Numero de version** : `versionCode` = celui d'amont (122 depuis 4.0.0-beta2, 121 pour 4.0.0-beta1) + nombre de commits du depot. LibreHU Apps propose une
+- **Numero de version** : `versionCode` = celui d'amont (124 depuis 4.1.0-beta1, 122 pour 4.0.0-beta2, 121 pour 4.0.0-beta1) + nombre de commits du depot. LibreHU Apps propose une
   mise a jour quand le `versionCode` augmente ; celui d'amont ne bougeait pas d'un build du fork a l'autre, la mise a
   jour n'apparaissait donc pas. Le `versionName` reste celui d'amont suivi de `-<branche>` ; le commit est sur sa propre ligne de `release.txt`.
 - **CI** (`.github/workflows/librehu.yml`) : saveur `github` en release, publiee en pre-release continue
@@ -88,7 +88,7 @@ standard), que ce vieux `su` accepte aussi.
 
 ## Fichiers modifiés par rapport à l'amont
 
-Base : commit amont `ae74788d` (Open Headunit 4.0.0-beta2, 03/11/2026 ; bases précédentes `620af558`, `2018d8f0`, `4ee1d58f`),
+Base : commit amont `bf5ae8b6` (Open Headunit 4.1.0-beta1, 18/11/2026 ; bases précédentes `ae74788d`, `620af558`, `2018d8f0`, `4ee1d58f`),
 branche locale `librehu` publiée sur `main`. `git diff 620af558 HEAD --stat` donne la liste complète ; chaque modification du code est
 marquée `LibreHU fork:` en commentaire.
 
@@ -212,12 +212,21 @@ pas inclus dans ce depot public.
 
 ## Suivre Open Headunit
 ```
-git remote add upstream https://github.com/andreknieriem/headunit-revived.git   # deja fait dans ce clone
+git remote add upstream https://github.com/andreknieriem/open-headunit.git   # deja fait dans ce clone
 git fetch upstream && git merge upstream/main
 ```
 Les changements du fork sont petits et commentes « LibreHU fork » pour garder les fusions simples.
 
-Derniere fusion : 4.0.0-beta2 (fusionnee le 08/11/2026, 98 commits : relais Bluetooth ESP32, gestes a deux doigts et
+Derniere fusion : 4.1.0-beta1 (fusionnee le 18/11/2026, 57 commits, amont `bf5ae8b6` : 4.0.0 finale, option
+« Attendre en arriere-plan » au demarrage, affichage par-dessus l'ecran de verrouillage, actions communes aux gestes et
+aux touches (avec lancement d'une autre appli), boutons de volume envoyes au telephone au choix, volume qui monte avec
+la vitesse, adaptateurs AAWireless vus en 18D1:4EE1, option « dongle USB sans fil » de l'accueil, etat et recherche
+Wi-Fi sur l'accueil, Wi-Fi Direct ancien corrige, restauration d'une sauvegarde a l'accueil...). Conflits resolus :
+`versionCode` 124 + commits et `versionName` 4.1.0-beta1-<branche> ; testeur de touches de l'amont repris tel quel
+(sa banniere remplace la ligne de texte que le fork coloriait) ; chaines LibreHU et nouvelles chaines d'amont gardees
+des deux cotes (anglais, francais).
+
+Fusion precedente : 4.0.0-beta2 (fusionnee le 08/11/2026, 98 commits : relais Bluetooth ESP32, gestes a deux doigts et
 variateur, reconnexion USB apres une perte du lien, aide sur chaque reglage et reglages Bluetooth regroupes, socket ZJ /
 ZBT pour les modules Bluetooth externes, libsu et ADB sous l'API 19…). Conflits resolus en gardant les ajouts
 LibreHU : `versionCode` 122 + commits, `AapMessageHandlerType` garde son `aapControl` en parametre (PR #1156) a cote du

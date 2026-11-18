@@ -443,7 +443,7 @@ object HotspotManager {
     }
 
     /** Whether a soft AP is running right now, by framework state or, failing that, by interface. */
-    private fun isApUp(context: Context): Boolean = when (SoftApStateReader.read(context)) {
+    fun isApUp(context: Context): Boolean = when (SoftApStateReader.read(context)) {
         SoftApState.ENABLED -> true
         SoftApState.NOT_ENABLED -> false
         // Nothing was learned, so fall back to what an access point looks like from outside.
@@ -643,6 +643,9 @@ object HotspotManager {
             val wm = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
             val method = wm.javaClass.getMethod("setWifiApEnabled", android.net.wifi.WifiConfiguration::class.java, Boolean::class.javaPrimitiveType)
             return method.invoke(wm, null, enabled) as Boolean
-        } catch (_: Exception) { return false }
+        } catch (e: Exception) {
+            AppLog.e("HotspotManager: legacy WifiManager path failed", e)
+            return false
+        }
     }
 }

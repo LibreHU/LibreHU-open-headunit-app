@@ -119,8 +119,8 @@ android {
         applicationId = "org.librehu.headunit"
         minSdk = 16
         targetSdk = 36
-        versionCode = 122 + librehuCommitCount(rootDir)
-        versionName = "4.0.0-beta2-" + librehuBranch(rootDir)
+        versionCode = 124 + librehuCommitCount(rootDir)
+        versionName = "4.1.0-beta1-" + librehuBranch(rootDir)
         setProperty("archivesBaseName", "${applicationId}_${versionName}")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
