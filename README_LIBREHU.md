@@ -15,6 +15,12 @@ est publie avec ses APK.
 Captures sur l'émulateur Android 9 (1280×720, 160 dpi comme l'autoradio), sans autoradio branché : les valeurs du véhicule et de la MCU sont vides. Refaites-les avec l'action **Screenshots** de [LibreHU-OTA-app](https://github.com/LibreHU/LibreHU-OTA-app/tree/main/screenshots). Galerie : [librehu.github.io/screenshots/headunit.html](https://librehu.github.io/screenshots/headunit.html).
 
 ## Ce que change le fork
+- **Plus de plantage au branchement USB avant le premier déverrouillage** (23/11/2026, `1ac8659`) : l'activité
+  d'attache USB est « Direct Boot aware » ; quand la bascule en accessoire échouait avant le premier déverrouillage,
+  elle construisait le graphe d'objets (`AppComponent`, dont le `VideoDecoder` lit les réglages stockés dans le
+  stockage chiffré par identifiants) et le processus mourait (« SharedPreferences in credential encrypted storage are
+  not available until after user is unlocked »). `App.provideIfUnlocked()` rend null tant que l'utilisateur est
+  verrouillé ; l'activité et `ToastUtils` s'en servent.
 - **Appairage Bluetooth automatique d'un nouveau téléphone branché en USB** : Android Auto demande l'appairage par
   la session USB (service Bluetooth, message PairingRequest 0x8001) ; Open Headunit ne répondait pas, le téléphone ne
   s'appairait donc jamais et ne pouvait pas continuer sans fil au débranchement. Le fork reprend l'assistance
