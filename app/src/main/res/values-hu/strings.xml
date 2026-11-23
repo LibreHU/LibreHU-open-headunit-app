@@ -1902,7 +1902,8 @@
     <string name="librehu_follow_launcher_theme">A LibreHU launcher követése</string>
     <string name="librehu_follow_launcher_theme_description">A LibreHU launcher világos vagy sötét módja és kiemelőszíne, vele együtt változik</string>
     <string name="librehu_phone_notifications">Telefonértesítések a LibreHU-nak (kísérleti)</string>
-    <string name="librehu_phone_notifications_description">Bejelenti a telefonnak az értesítés- és telefonállapot-szolgáltatást; üzeneteik villogtatják a LibreHU előlapi LED-jeit. A következő csatlakozástól érvényes.</string>
+    <string name="librehu_phone_notifications_description">Az előlapi LED-ek villognak a telefon értesítéseinél. Kísérleti.</string>
+    <string name="librehu_phone_notifications_help">Bejelenti a telefonnak az értesítés- és telefonállapot-szolgáltatást; üzeneteik villogtatják a LibreHU előlapi LED-jeit. A következő csatlakozástól érvényes.</string>
     <string name="librehu_theme_from_launcher">LibreHU launcher</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Autó és gombok (LibreHU)</string>

@@ -1900,7 +1900,8 @@
     <string name="librehu_follow_launcher_theme">跟隨 LibreHU 啟動器</string>
     <string name="librehu_follow_launcher_theme_description">隨 LibreHU 啟動器一起切換淺色或深色模式以及強調色</string>
     <string name="librehu_phone_notifications">手機通知傳送到 LibreHU（實驗性）</string>
-    <string name="librehu_phone_notifications_description">向手機宣告通知服務和電話狀態服務；其訊息會讓 LibreHU 前面板 LED 閃爍。下次連線時生效。</string>
+    <string name="librehu_phone_notifications_description">手機通知時前面板 LED 閃爍。實驗性。</string>
+    <string name="librehu_phone_notifications_help">向手機宣告通知服務和電話狀態服務；其訊息會讓 LibreHU 前面板 LED 閃爍。下次連線時生效。</string>
     <string name="librehu_theme_from_launcher">LibreHU 啟動器</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">車輛與按鍵（LibreHU）</string>

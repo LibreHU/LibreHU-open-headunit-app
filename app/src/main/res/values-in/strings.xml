@@ -1949,7 +1949,8 @@
     <string name="librehu_follow_launcher_theme">Ikuti launcher LibreHU</string>
     <string name="librehu_follow_launcher_theme_description">Terang atau gelap dan warna aksen launcher LibreHU, berubah bersamanya</string>
     <string name="librehu_phone_notifications">Notifikasi ponsel ke LibreHU (eksperimental)</string>
-    <string name="librehu_phone_notifications_description">Mengumumkan layanan notifikasi dan status ponsel ke ponsel; pesannya membuat LED depan LibreHU berkedip. Berlaku pada koneksi berikutnya.</string>
+    <string name="librehu_phone_notifications_description">LED depan berkedip saat ada notifikasi ponsel. Eksperimental.</string>
+    <string name="librehu_phone_notifications_help">Mengumumkan layanan notifikasi dan status ponsel ke ponsel; pesannya membuat LED depan LibreHU berkedip. Berlaku pada koneksi berikutnya.</string>
     <string name="librehu_theme_from_launcher">Launcher LibreHU</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Mobil dan tombol (LibreHU)</string>

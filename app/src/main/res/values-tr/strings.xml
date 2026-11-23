@@ -1897,7 +1897,8 @@
     <string name="librehu_follow_launcher_theme">LibreHU başlatıcısını izle</string>
     <string name="librehu_follow_launcher_theme_description">LibreHU başlatıcısının açık ya da koyu modu ve vurgu rengi, onunla birlikte değişir</string>
     <string name="librehu_phone_notifications">Telefon bildirimleri LibreHU\'ya (deneysel)</string>
-    <string name="librehu_phone_notifications_description">Telefona bildirim ve telefon durumu hizmetlerini bildirir; mesajları LibreHU ön LED\'lerini yakıp söndürür. Bir sonraki bağlantıda geçerli olur.</string>
+    <string name="librehu_phone_notifications_description">Ön LED\'ler telefon bildirimlerinde yanıp söner. Deneysel.</string>
+    <string name="librehu_phone_notifications_help">Telefona bildirim ve telefon durumu hizmetlerini bildirir; mesajları LibreHU ön LED\'lerini yakıp söndürür. Bir sonraki bağlantıda geçerli olur.</string>
     <string name="librehu_theme_from_launcher">LibreHU başlatıcısı</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Araç ve tuşlar (LibreHU)</string>

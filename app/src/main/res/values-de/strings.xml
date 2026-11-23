@@ -1905,7 +1905,8 @@
     <string name="librehu_follow_launcher_theme">Dem LibreHU-Launcher folgen</string>
     <string name="librehu_follow_launcher_theme_description">Hell oder dunkel und Akzentfarbe des LibreHU-Launchers, wechseln mit ihm</string>
     <string name="librehu_phone_notifications">Telefonbenachrichtigungen an LibreHU (experimentell)</string>
-    <string name="librehu_phone_notifications_description">Meldet dem Telefon die Dienste Benachrichtigungen und Telefonstatus an; ihre Nachrichten lassen die Front-LEDs von LibreHU blinken. Gilt ab der nächsten Verbindung.</string>
+    <string name="librehu_phone_notifications_description">Front-LEDs blinken bei Telefonbenachrichtigungen. Experimentell.</string>
+    <string name="librehu_phone_notifications_help">Meldet dem Telefon die Dienste Benachrichtigungen und Telefonstatus an; ihre Nachrichten lassen die Front-LEDs von LibreHU blinken. Gilt ab der nächsten Verbindung.</string>
     <string name="librehu_theme_from_launcher">LibreHU-Launcher</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Auto und Tasten (LibreHU)</string>

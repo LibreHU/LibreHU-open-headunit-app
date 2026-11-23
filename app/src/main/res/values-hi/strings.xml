@@ -1948,7 +1948,8 @@
     <string name="librehu_follow_launcher_theme">LibreHU लॉन्चर का अनुसरण करें</string>
     <string name="librehu_follow_launcher_theme_description">LibreHU लॉन्चर का लाइट या डार्क मोड और एक्सेंट रंग, उसके साथ बदलता है</string>
     <string name="librehu_phone_notifications">फ़ोन की सूचनाएँ LibreHU को (प्रायोगिक)</string>
-    <string name="librehu_phone_notifications_description">फ़ोन को सूचना और फ़ोन स्थिति सेवाओं की घोषणा करता है; उनके संदेश LibreHU की सामने की LED को टिमटिमाते हैं। अगले कनेक्शन से लागू।</string>
+    <string name="librehu_phone_notifications_description">फ़ोन की सूचनाओं पर सामने की LED टिमटिमाती हैं। प्रायोगिक।</string>
+    <string name="librehu_phone_notifications_help">फ़ोन को सूचना और फ़ोन स्थिति सेवाओं की घोषणा करता है; उनके संदेश LibreHU की सामने की LED को टिमटिमाते हैं। अगले कनेक्शन से लागू।</string>
     <string name="librehu_theme_from_launcher">LibreHU लॉन्चर</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">कार और बटन (LibreHU)</string>

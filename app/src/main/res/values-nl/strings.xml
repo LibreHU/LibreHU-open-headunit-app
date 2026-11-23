@@ -1906,7 +1906,8 @@
     <string name="librehu_follow_launcher_theme">LibreHU-launcher volgen</string>
     <string name="librehu_follow_launcher_theme_description">Licht of donker en accentkleur van de LibreHU-launcher, wisselen mee</string>
     <string name="librehu_phone_notifications">Telefoonmeldingen naar LibreHU (experimenteel)</string>
-    <string name="librehu_phone_notifications_description">Meldt de diensten meldingen en telefoonstatus aan bij de telefoon; hun berichten laten de front-leds van LibreHU knipperen. Geldt vanaf de volgende verbinding.</string>
+    <string name="librehu_phone_notifications_description">Front-leds knipperen bij telefoonmeldingen. Experimenteel.</string>
+    <string name="librehu_phone_notifications_help">Meldt de diensten meldingen en telefoonstatus aan bij de telefoon; hun berichten laten de front-leds van LibreHU knipperen. Geldt vanaf de volgende verbinding.</string>
     <string name="librehu_theme_from_launcher">LibreHU-launcher</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Auto en knoppen (LibreHU)</string>

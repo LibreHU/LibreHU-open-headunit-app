@@ -1887,7 +1887,8 @@
     <string name="librehu_follow_launcher_theme">LibreHU ლაუნჩერის მიყოლა</string>
     <string name="librehu_follow_launcher_theme_description">LibreHU ლაუნჩერის ნათელი ან მუქი რეჟიმი და აქცენტის ფერი, მასთან ერთად იცვლება</string>
     <string name="librehu_phone_notifications">ტელეფონის შეტყობინებები LibreHU-ში (ექსპერიმენტული)</string>
-    <string name="librehu_phone_notifications_description">ტელეფონს აცნობებს შეტყობინებებისა და ტელეფონის მდგომარეობის სერვისებს; მათი შეტყობინებები აციმციმებს LibreHU-ის წინა LED-ებს. მოქმედებს შემდეგი დაკავშირებიდან.</string>
+    <string name="librehu_phone_notifications_description">წინა LED-ები ციმციმებს ტელეფონის შეტყობინებებზე. ექსპერიმენტული.</string>
+    <string name="librehu_phone_notifications_help">ტელეფონს აცნობებს შეტყობინებებისა და ტელეფონის მდგომარეობის სერვისებს; მათი შეტყობინებები აციმციმებს LibreHU-ის წინა LED-ებს. მოქმედებს შემდეგი დაკავშირებიდან.</string>
     <string name="librehu_theme_from_launcher">LibreHU ლაუნჩერი</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">მანქანა და ღილაკები (LibreHU)</string>

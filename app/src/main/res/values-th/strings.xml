@@ -1955,7 +1955,8 @@
     <string name="librehu_follow_launcher_theme">ตามลอนเชอร์ LibreHU</string>
     <string name="librehu_follow_launcher_theme_description">โหมดสว่างหรือมืดและสีเน้นของลอนเชอร์ LibreHU เปลี่ยนไปพร้อมกับลอนเชอร์</string>
     <string name="librehu_phone_notifications">การแจ้งเตือนของโทรศัพท์ไปยัง LibreHU (ทดลอง)</string>
-    <string name="librehu_phone_notifications_description">ประกาศบริการการแจ้งเตือนและสถานะโทรศัพท์ให้โทรศัพท์ทราบ ข้อความเหล่านั้นทำให้ไฟ LED ด้านหน้าของ LibreHU กะพริบ มีผลในการเชื่อมต่อครั้งถัดไป</string>
+    <string name="librehu_phone_notifications_description">ไฟ LED ด้านหน้ากะพริบเมื่อมีการแจ้งเตือนจากโทรศัพท์ (ทดลอง)</string>
+    <string name="librehu_phone_notifications_help">ประกาศบริการการแจ้งเตือนและสถานะโทรศัพท์ให้โทรศัพท์ทราบ ข้อความเหล่านั้นทำให้ไฟ LED ด้านหน้าของ LibreHU กะพริบ มีผลในการเชื่อมต่อครั้งถัดไป</string>
     <string name="librehu_theme_from_launcher">ลอนเชอร์ LibreHU</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">รถและปุ่ม (LibreHU)</string>

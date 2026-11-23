@@ -1902,7 +1902,8 @@
     <string name="librehu_follow_launcher_theme">Řídit se launcherem LibreHU</string>
     <string name="librehu_follow_launcher_theme_description">Světlý nebo tmavý režim a barva zvýraznění launcheru LibreHU, mění se spolu s ním</string>
     <string name="librehu_phone_notifications">Oznámení telefonu do LibreHU (experimentální)</string>
-    <string name="librehu_phone_notifications_description">Ohlásí telefonu služby oznámení a stavu telefonu; jejich zprávy rozblikají přední LED LibreHU. Platí od příštího připojení.</string>
+    <string name="librehu_phone_notifications_description">Přední LED blikají při oznámeních telefonu. Experimentální.</string>
+    <string name="librehu_phone_notifications_help">Ohlásí telefonu služby oznámení a stavu telefonu; jejich zprávy rozblikají přední LED LibreHU. Platí od příštího připojení.</string>
     <string name="librehu_theme_from_launcher">Launcher LibreHU</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Auto a tlačítka (LibreHU)</string>

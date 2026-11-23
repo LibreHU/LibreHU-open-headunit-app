@@ -1900,7 +1900,8 @@
     <string name="librehu_follow_launcher_theme">Urmează launcherul LibreHU</string>
     <string name="librehu_follow_launcher_theme_description">Luminos sau întunecat și culoarea de accent a launcherului LibreHU, se schimbă odată cu el</string>
     <string name="librehu_phone_notifications">Notificările telefonului către LibreHU (experimental)</string>
-    <string name="librehu_phone_notifications_description">Anunță telefonului serviciile de notificări și stare a telefonului; mesajele lor fac LED-urile frontale LibreHU să clipească. Se aplică de la următoarea conectare.</string>
+    <string name="librehu_phone_notifications_description">LED-urile frontale clipesc la notificările telefonului. Experimental.</string>
+    <string name="librehu_phone_notifications_help">Anunță telefonului serviciile de notificări și stare a telefonului; mesajele lor fac LED-urile frontale LibreHU să clipească. Se aplică de la următoarea conectare.</string>
     <string name="librehu_theme_from_launcher">Launcherul LibreHU</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Mașină și butoane (LibreHU)</string>

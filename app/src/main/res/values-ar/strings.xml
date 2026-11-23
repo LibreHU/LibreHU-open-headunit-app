@@ -1903,7 +1903,8 @@
     <string name="librehu_follow_launcher_theme">اتّباع مشغّل LibreHU</string>
     <string name="librehu_follow_launcher_theme_description">الوضع الفاتح أو الداكن ولون التمييز لمشغّل LibreHU، يتغيّران معه</string>
     <string name="librehu_phone_notifications">إشعارات الهاتف إلى LibreHU (تجريبي)</string>
-    <string name="librehu_phone_notifications_description">يعلن للهاتف عن خدمتي الإشعارات وحالة الهاتف؛ رسائلهما تجعل مصابيح LED الأمامية في LibreHU تومض. يُطبَّق عند الاتصال التالي.</string>
+    <string name="librehu_phone_notifications_description">تومض مصابيح LED الأمامية عند إشعارات الهاتف. تجريبي.</string>
+    <string name="librehu_phone_notifications_help">يعلن للهاتف عن خدمتي الإشعارات وحالة الهاتف؛ رسائلهما تجعل مصابيح LED الأمامية في LibreHU تومض. يُطبَّق عند الاتصال التالي.</string>
     <string name="librehu_theme_from_launcher">مشغّل LibreHU</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">السيارة والأزرار (LibreHU)</string>

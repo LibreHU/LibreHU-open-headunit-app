@@ -2405,6 +2405,7 @@ class SettingsFragment : Fragment() {
             stableId = "librehuPhoneNotifications",
             nameResId = R.string.librehu_phone_notifications,
             descriptionResId = R.string.librehu_phone_notifications_description,
+            helpResId = R.string.librehu_phone_notifications_help,
             isChecked = settings.librehuPhoneNotifications,
             onCheckedChanged = { isChecked ->
                 settings.librehuPhoneNotifications = isChecked
