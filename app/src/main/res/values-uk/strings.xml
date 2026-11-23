@@ -1904,6 +1904,8 @@
     <!-- Fork LibreHU -->
     <string name="librehu_follow_launcher_theme">Як у лаунчері LibreHU</string>
     <string name="librehu_follow_launcher_theme_description">Світла чи темна тема та акцентний колір лаунчера LibreHU, змінюються разом із ним</string>
+    <string name="librehu_phone_notifications">Сповіщення телефона до LibreHU (експериментально)</string>
+    <string name="librehu_phone_notifications_description">Повідомляє телефону про служби сповіщень і стану телефона; їхні повідомлення змушують блимати передні світлодіоди LibreHU. Діє з наступного підключення.</string>
     <string name="librehu_theme_from_launcher">Лаунчер LibreHU</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Авто й кнопки (LibreHU)</string>

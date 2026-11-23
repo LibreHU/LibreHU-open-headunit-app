@@ -1968,6 +1968,8 @@
     <!-- LibreHU fork -->
     <string name="librehu_follow_launcher_theme">Follow the LibreHU launcher</string>
     <string name="librehu_follow_launcher_theme_description">Light or dark and accent colour of the LibreHU launcher, changed with it</string>
+    <string name="librehu_phone_notifications">Phone notifications to LibreHU (experimental)</string>
+    <string name="librehu_phone_notifications_description">Announces the phone\'s notification and phone status services; their messages make the LibreHU front LEDs blink. Applies at the next connection.</string>
     <string name="librehu_theme_from_launcher">LibreHU launcher</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Car and keys (LibreHU)</string>

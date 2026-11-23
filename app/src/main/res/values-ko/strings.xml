@@ -1895,6 +1895,8 @@
     <!-- Fork LibreHU -->
     <string name="librehu_follow_launcher_theme">LibreHU 런처 따르기</string>
     <string name="librehu_follow_launcher_theme_description">LibreHU 런처의 라이트·다크 모드와 강조 색상을 런처와 함께 바꿉니다</string>
+    <string name="librehu_phone_notifications">휴대폰 알림을 LibreHU로 (실험적)</string>
+    <string name="librehu_phone_notifications_description">휴대폰에 알림 및 전화 상태 서비스를 알립니다. 해당 메시지로 LibreHU 전면 LED가 깜박입니다. 다음 연결부터 적용됩니다.</string>
     <string name="librehu_theme_from_launcher">LibreHU 런처</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">차량 및 버튼 (LibreHU)</string>

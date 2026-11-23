@@ -1626,6 +1626,15 @@ class Settings(private val context: Context) {
         get() = prefs.getBoolean(KEY_LIBREHU_FOLLOW_LAUNCHER_THEME, true)
         set(value) { prefs.edit().putBoolean(KEY_LIBREHU_FOLLOW_LAUNCHER_THEME, value).apply() }
 
+    /**
+     * LibreHU fork (experimental): the phone's notification and phone status services announced, their messages
+     * told to LibreHU-service for the front LED blink (see LibreHuPhoneNotifications). Off by default: what the phone
+     * sends on them is not documented.
+     */
+    var librehuPhoneNotifications: Boolean
+        get() = prefs.getBoolean("librehu-phone-notifications", false)
+        set(value) { prefs.edit().putBoolean("librehu-phone-notifications", value).apply() }
+
     /** LibreHU fork: version of the LibreHU preset already applied (see LibreHuDefaults). */
     var librehuPresetVersion: Int
         get() = prefs.getInt("librehu-preset-version", 0)

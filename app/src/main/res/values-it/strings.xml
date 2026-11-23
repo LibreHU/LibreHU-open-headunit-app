@@ -1903,6 +1903,8 @@
     <!-- Fork LibreHU -->
     <string name="librehu_follow_launcher_theme">Segui il launcher LibreHU</string>
     <string name="librehu_follow_launcher_theme_description">Chiaro o scuro e colore di accento del launcher LibreHU, cambiati insieme a lui</string>
+    <string name="librehu_phone_notifications">Notifiche del telefono a LibreHU (sperimentale)</string>
+    <string name="librehu_phone_notifications_description">Annuncia al telefono i servizi notifiche e stato del telefono; i loro messaggi fanno lampeggiare i LED frontali di LibreHU. Vale dalla prossima connessione.</string>
     <string name="librehu_theme_from_launcher">Launcher LibreHU</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Auto e tasti (LibreHU)</string>

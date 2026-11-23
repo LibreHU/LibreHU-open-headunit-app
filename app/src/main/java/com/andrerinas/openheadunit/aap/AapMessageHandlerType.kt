@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import com.andrerinas.openheadunit.aap.protocol.Channel
 import com.andrerinas.openheadunit.decoder.audio.MicRecorder
+import com.andrerinas.openheadunit.librehu.LibreHuPhoneNotifications
 import com.andrerinas.openheadunit.aap.protocol.proto.MediaPlayback
 import com.andrerinas.openheadunit.utils.AppLog
 import com.andrerinas.openheadunit.utils.Settings
@@ -60,6 +61,9 @@ internal class AapMessageHandlerType(
     }
 
     private val dispatchMonitor = TransportDispatchMonitor()
+
+    // LibreHU fork (experimental): the phone's notification and phone status channels, only open when announced.
+    private val phoneNotifications = LibreHuPhoneNotifications(context)
 
     override fun onDroppedMediaData(channel: Int) {
         // Reassembly rejection is retired at LAST or a replacement FIRST, synchronously
@@ -142,6 +146,13 @@ internal class AapMessageHandlerType(
             if (aapNavigation.process(message)) {
                 return
             }
+        }
+
+        // 4b. LibreHU fork (experimental): notifications and phone status, for LibreHU-service's front LEDs.
+        // Payload messages only (>31): the channel open goes on to AapControl as on every channel.
+        if (msgType > 31 && phoneNotifications.handles(message.channel)) {
+            phoneNotifications.process(message)
+            return
         }
 
         // 5. Control Message Fallback

@@ -1903,6 +1903,8 @@
     <!-- Fork LibreHU -->
     <string name="librehu_follow_launcher_theme">LibreHU ランチャーに合わせる</string>
     <string name="librehu_follow_launcher_theme_description">LibreHU ランチャーのライト／ダークとアクセントカラーに、ランチャーと一緒に切り替わります</string>
+    <string name="librehu_phone_notifications">スマートフォンの通知を LibreHU へ（実験的）</string>
+    <string name="librehu_phone_notifications_description">通知サービスと電話状態サービスをスマートフォンに知らせます。そのメッセージで LibreHU の前面 LED が点滅します。次回の接続から有効です。</string>
     <string name="librehu_theme_from_launcher">LibreHU ランチャー</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">車とボタン（LibreHU）</string>

@@ -1899,6 +1899,8 @@
     <!-- Fork LibreHU -->
     <string name="librehu_follow_launcher_theme">跟随 LibreHU 启动器</string>
     <string name="librehu_follow_launcher_theme_description">随 LibreHU 启动器一起切换浅色或深色模式以及强调色</string>
+    <string name="librehu_phone_notifications">手机通知发送到 LibreHU（实验性）</string>
+    <string name="librehu_phone_notifications_description">向手机声明通知服务和电话状态服务；其消息会让 LibreHU 前面板 LED 闪烁。下次连接时生效。</string>
     <string name="librehu_theme_from_launcher">LibreHU 启动器</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">车辆与按键（LibreHU）</string>

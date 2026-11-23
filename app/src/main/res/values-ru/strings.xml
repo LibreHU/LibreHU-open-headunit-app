@@ -1900,6 +1900,8 @@ Open Headunit предоставляется «как есть» без каки
     <!-- Fork LibreHU -->
     <string name="librehu_follow_launcher_theme">Как в лаунчере LibreHU</string>
     <string name="librehu_follow_launcher_theme_description">Светлая или тёмная тема и акцентный цвет лаунчера LibreHU, меняются вместе с ним</string>
+    <string name="librehu_phone_notifications">Уведомления телефона в LibreHU (экспериментально)</string>
+    <string name="librehu_phone_notifications_description">Сообщает телефону о службах уведомлений и состояния телефона; их сообщения заставляют мигать передние светодиоды LibreHU. Действует со следующего подключения.</string>
     <string name="librehu_theme_from_launcher">Лаунчер LibreHU</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Автомобиль и кнопки (LibreHU)</string>

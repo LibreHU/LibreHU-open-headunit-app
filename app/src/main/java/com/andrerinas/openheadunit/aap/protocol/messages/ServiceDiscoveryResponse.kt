@@ -306,6 +306,20 @@ internal class ServiceDiscoveryResponse(context: Context, audioConfig: AudioSess
             }.build()
             services.add(navigationStatus)
 
+            // LibreHU fork (experimental): the phone's notifications and phone status, for LibreHU-service's front
+            // LED blink (LibreHuPhoneNotifications). Announced only when the user turned it on.
+            if (settings.librehuPhoneNotifications) {
+                services.add(Control.Service.newBuilder().also { service ->
+                    service.id = Channel.ID_NOTI
+                    service.genericNotificationService = Control.Service.GenericNotificationService.newBuilder().build()
+                }.build())
+                services.add(Control.Service.newBuilder().also { service ->
+                    service.id = Channel.ID_PHONE
+                    service.phoneStatusService = Control.Service.PhoneStatusService.newBuilder().build()
+                }.build())
+                AppLog.i("[ServiceDiscovery] LibreHU: announcing the notification and phone status services")
+            }
+
             val sessionConfig = (if (settings.hideClock) 0x01 else 0) or
                 (if (settings.hidePhoneSignal) 0x02 else 0) or
                 (if (settings.hideBatteryLevel) 0x04 else 0)

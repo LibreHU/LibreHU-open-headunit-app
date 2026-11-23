@@ -2400,6 +2400,18 @@ class SettingsFragment : Fragment() {
             ))
         }
 
+        // LibreHU fork (experimental): the phone's notifications to LibreHU-service (front LED blink).
+        items.add(SettingItem.ToggleSettingEntry(
+            stableId = "librehuPhoneNotifications",
+            nameResId = R.string.librehu_phone_notifications,
+            descriptionResId = R.string.librehu_phone_notifications_description,
+            isChecked = settings.librehuPhoneNotifications,
+            onCheckedChanged = { isChecked ->
+                settings.librehuPhoneNotifications = isChecked
+                updateSettingsList()
+            }
+        ))
+
         items.add(SettingItem.ToggleSettingEntry(
             stableId = "showNavigationNotifications",
             nameResId = R.string.show_navigation_notifications,

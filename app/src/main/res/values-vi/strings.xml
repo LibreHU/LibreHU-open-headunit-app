@@ -1903,6 +1903,8 @@
     <!-- Fork LibreHU -->
     <string name="librehu_follow_launcher_theme">Theo launcher LibreHU</string>
     <string name="librehu_follow_launcher_theme_description">Chế độ sáng hoặc tối và màu nhấn của launcher LibreHU, thay đổi cùng với nó</string>
+    <string name="librehu_phone_notifications">Thông báo điện thoại tới LibreHU (thử nghiệm)</string>
+    <string name="librehu_phone_notifications_description">Khai báo với điện thoại các dịch vụ thông báo và trạng thái điện thoại; tin nhắn của chúng làm đèn LED mặt trước LibreHU nhấp nháy. Áp dụng từ lần kết nối tiếp theo.</string>
     <string name="librehu_theme_from_launcher">Launcher LibreHU</string>
     <string name="librehu_category">LibreHU</string>
     <string name="librehu_car_settings">Xe và nút bấm (LibreHU)</string>
