@@ -29,7 +29,8 @@ object ToastUtils {
 
     private fun isToastEnabled(context: Context): Boolean {
         return try {
-            App.provide(context).settings.showToastMessages
+            // Before the first unlock the object graph cannot be built (Settings are credential-encrypted).
+            App.provideIfUnlocked(context)?.settings?.showToastMessages ?: true
         } catch (_: Exception) {
             true
         }

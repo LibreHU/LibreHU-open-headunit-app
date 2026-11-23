@@ -253,5 +253,18 @@ class App : Application(), Application.ActivityLifecycleCallbacks {
         fun provide(context: Context): AppComponent {
             return get(context).component
         }
+
+        /** False before the first unlock, while credential-encrypted storage is out of reach. */
+        fun isUserUnlocked(context: Context): Boolean =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.N ||
+                (context.getSystemService(Context.USER_SERVICE) as? UserManager)?.isUserUnlocked != false
+
+        /**
+         * The object graph, or null before the first unlock: building it reads Settings, which live in
+         * credential-encrypted storage, and throws there. For code that Direct Boot can reach (the USB
+         * attach activity, toasts it shows).
+         */
+        fun provideIfUnlocked(context: Context): AppComponent? =
+            if (isUserUnlocked(context)) provide(context) else null
     }
 }

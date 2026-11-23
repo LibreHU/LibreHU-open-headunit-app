@@ -249,7 +249,9 @@ class UsbAttachedActivity : Activity() {
                     ToastUtils.showToast(this, getString(R.string.success), Toast.LENGTH_SHORT)
                 } else {
                     ToastUtils.showToast(this, getString(R.string.failed), Toast.LENGTH_SHORT)
-                    if (!App.provide(this).commManager.isConnected) ConnectionStageTracker.clear()
+                    // LibreHU: a failed switch before the first unlock used to build the object graph
+                    // here and crash on credential-encrypted storage; no session can run while locked.
+                    if (App.provideIfUnlocked(this)?.commManager?.isConnected != true) ConnectionStageTracker.clear()
                 }
                 finish()
             }
