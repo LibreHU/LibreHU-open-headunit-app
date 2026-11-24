@@ -1747,6 +1747,7 @@
     <string name="bt_manufacturer_devices_message">L\'unità ha salvato questi dispositivi nel proprio elenco Bluetooth:\n\n%1$s\n\nAndroid non li elenca come associati. Qui non si possono selezionare per i trigger Bluetooth di Android né per riattivare il telefono. Questo elenco salvato non indica se sono collegati né se è disponibile una connessione Android Auto.</string>
     <string name="bt_manufacturer_devices_title">Dispositivi associati tramite l\'unità</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct su questa unità è bloccato e solo un riavvio del Wi-Fi lo sblocca. Tocca per riavviare il Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android non consente a questa app di creare la rete Wi-Fi Direct perché non può usare la posizione. Tocca e consenti la posizione sempre.</string>
     <string name="hct_aa_bluetooth_busy">Il Bluetooth è occupato. Android Auto non riavvierà una chiamata o una connessione in corso.</string>
     <string name="hct_aa_handoff_unavailable">L\'unità non ha fornito una connessione Android Auto. Open Headunit ha interrotto questo tentativo.</string>
     <string name="hct_aa_no_paired_phone">Nessun telefono salvato nell\'elenco Bluetooth dell\'unità. Associa il telefono con l\'app Bluetooth dell\'unità, poi selezionalo qui.</string>

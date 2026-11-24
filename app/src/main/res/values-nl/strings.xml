@@ -1749,6 +1749,7 @@
     <string name="bt_manufacturer_devices_message">De headunit heeft deze apparaten opgeslagen in zijn eigen Bluetooth-lijst:\n\n%1$s\n\nAndroid toont ze niet als gekoppeld. Je kunt ze hier niet kiezen voor Bluetooth-triggers van Android of om de telefoon te wekken. Deze opgeslagen lijst zegt niet of ze verbonden zijn of of er een Android Auto-verbinding beschikbaar is.</string>
     <string name="bt_manufacturer_devices_title">Apparaten gekoppeld via de headunit</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct op deze headunit is vastgelopen en komt alleen vrij na een herstart van wifi. Tik om wifi te herstarten.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android laat deze app het wifi-direct-netwerk niet maken, omdat ze de locatie niet mag gebruiken. Tik en sta locatie altijd toe.</string>
     <string name="hct_aa_bluetooth_busy">Bluetooth is bezig. Android Auto start een actief gesprek of een actieve verbinding niet opnieuw.</string>
     <string name="hct_aa_handoff_unavailable">De headunit heeft geen Android Auto-verbinding geleverd. Open Headunit heeft deze poging gestopt.</string>
     <string name="hct_aa_no_paired_phone">Geen opgeslagen telefoon gevonden in de Bluetooth-lijst van de headunit. Koppel je telefoon via de Bluetooth-app van de headunit en kies hem dan hier.</string>

@@ -1792,6 +1792,7 @@
     <string name="bt_manufacturer_devices_message">Head unit menyimpan perangkat ini di daftar Bluetooth miliknya sendiri:\n\n%1$s\n\nAndroid tidak menampilkannya sebagai perangkat terpasang. Perangkat ini tidak dapat dipilih di sini untuk pemicu Bluetooth Android atau membangunkan ponsel. Daftar tersimpan ini tidak menunjukkan apakah perangkat tersambung atau apakah koneksi Android Auto tersedia.</string>
     <string name="bt_manufacturer_devices_title">Perangkat yang dipasangkan lewat head unit</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct di unit ini macet dan hanya bisa dibebaskan dengan memulai ulang Wi-Fi. Ketuk untuk memulai ulang Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android tidak mengizinkan aplikasi ini membuat jaringan Wi-Fi Direct karena tidak boleh memakai lokasi. Ketuk dan izinkan lokasi sepanjang waktu.</string>
     <string name="hct_aa_bluetooth_busy">Bluetooth sedang sibuk. Android Auto tidak akan memulai ulang panggilan atau koneksi yang sedang aktif.</string>
     <string name="hct_aa_handoff_unavailable">Head unit belum menyediakan koneksi Android Auto. Open Headunit telah menghentikan percobaan ini.</string>
     <string name="hct_aa_no_paired_phone">Tidak ada ponsel tersimpan di daftar Bluetooth head unit. Pasangkan ponsel Anda lewat aplikasi Bluetooth head unit, lalu pilih di sini.</string>

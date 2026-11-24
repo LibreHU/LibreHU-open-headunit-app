@@ -1746,6 +1746,7 @@
     <string name="bt_manufacturer_devices_message">Unitatea auto a salvat aceste dispozitive în propria listă Bluetooth:\n\n%1$s\n\nAndroid nu le afișează ca asociate. Aici nu pot fi selectate pentru declanșatoarele Bluetooth Android sau pentru trezirea telefonului. Această listă salvată nu arată dacă dispozitivele sunt conectate sau dacă este disponibilă o conexiune Android Auto.</string>
     <string name="bt_manufacturer_devices_android_unavailable">Unitatea auto a salvat aceste dispozitive în propria listă Bluetooth:\n\n%1$s\n\nLista Bluetooth Android nu este disponibilă momentan. Această listă salvată nu poate fi folosită singură pentru declanșatoarele Bluetooth Android sau pentru trezirea telefonului. Nu arată dacă dispozitivele sunt conectate sau dacă este disponibilă o conexiune Android Auto.</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct de pe această unitate este blocat și doar repornirea Wi-Fi îl deblochează. Atingeți pentru a reporni Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android nu permite aplicației să creeze rețeaua Wi-Fi Direct, deoarece nu are acces la locație. Atinge și permite locația tot timpul.</string>
     <string name="wifi_restart_running">Se repornește Wi-Fi…</string>
     <string name="wifi_restart_failed">Wi-Fi nu a putut fi repornit. Opriți-l și porniți-l aici.</string>
     <string name="auto_restart_wifi_title">Repornește Wi-Fi când Wi-Fi Direct se blochează</string>

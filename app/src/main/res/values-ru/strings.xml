@@ -1747,6 +1747,7 @@ Open Headunit предоставляется «как есть» без каки
     <string name="bt_manufacturer_devices_message">Головное устройство сохранило эти устройства в собственном списке Bluetooth:\n\n%1$s\n\nAndroid не показывает их как сопряжённые. Здесь их нельзя выбрать для триггеров Bluetooth Android или для пробуждения телефона. Этот сохранённый список не показывает, подключены ли устройства и доступно ли подключение Android Auto.</string>
     <string name="bt_manufacturer_devices_android_unavailable">Головное устройство сохранило эти устройства в собственном списке Bluetooth:\n\n%1$s\n\nСписок Bluetooth Android сейчас недоступен. Один этот сохранённый список нельзя использовать для триггеров Bluetooth Android или пробуждения телефона. Он не показывает, подключены ли устройства и доступно ли подключение Android Auto.</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct на этом устройстве завис, и помогает только перезапуск Wi-Fi. Нажмите, чтобы перезапустить Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android не позволяет этому приложению создать сеть Wi-Fi Direct, так как ему запрещён доступ к местоположению. Нажмите и разрешите местоположение всегда.</string>
     <string name="wifi_restart_running">Перезапуск Wi-Fi…</string>
     <string name="wifi_restart_failed">Не удалось перезапустить Wi-Fi. Выключите и включите его здесь.</string>
     <string name="auto_restart_wifi_title">Перезапускать Wi-Fi при зависании Wi-Fi Direct</string>

@@ -1866,6 +1866,7 @@
     <string name="bt_manufacturer_devices_message">헤드유닛이 자체 블루투스 목록에 저장한 기기입니다.\n\n%1$s\n\nAndroid에는 페어링된 기기로 표시되지 않습니다. 여기서는 Android 블루투스 트리거나 휴대전화 깨우기용으로 선택할 수 없습니다. 이 저장 목록으로는 기기가 연결되어 있는지, Android Auto 연결이 가능한지 알 수 없습니다.</string>
     <string name="bt_manufacturer_devices_title">헤드유닛을 통해 페어링된 기기</string>
     <string name="connection_issue_banner_wifi_direct_stuck">이 헤드유닛의 Wi-Fi Direct가 멈췄으며 Wi-Fi를 다시 시작해야만 해제됩니다. Wi-Fi를 다시 시작하려면 탭하세요.</string>
+    <string name="connection_issue_banner_wifi_direct_location">이 앱은 위치를 사용할 수 없어 Android가 Wi-Fi Direct 네트워크 생성을 허용하지 않습니다. 탭하여 위치를 항상 허용하세요.</string>
     <string name="hct_aa_bluetooth_busy">블루투스가 사용 중입니다. Android Auto는 진행 중인 통화나 연결을 다시 시작하지 않습니다.</string>
     <string name="hct_aa_handoff_unavailable">헤드유닛이 Android Auto 연결을 제공하지 않았습니다. Open Headunit이 이번 시도를 중단했습니다.</string>
     <string name="hct_aa_no_paired_phone">헤드유닛의 블루투스 목록에 저장된 휴대전화가 없습니다. 헤드유닛의 블루투스 앱에서 휴대전화를 페어링한 다음 여기서 선택하세요.</string>

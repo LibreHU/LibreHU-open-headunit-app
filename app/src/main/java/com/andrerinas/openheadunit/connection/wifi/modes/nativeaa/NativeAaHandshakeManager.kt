@@ -24,6 +24,7 @@ import com.andrerinas.openheadunit.connection.wifi.direct.StoredP2pIdentity
 import com.andrerinas.openheadunit.aap.AapService
 
 import com.andrerinas.openheadunit.connection.wifi.direct.WifiBandCapability
+import com.andrerinas.openheadunit.connection.wifi.direct.WifiDirectLocationGate
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zjsocket.ZjSocketCarrier
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zjsocket.ZjSocketPolicy
 import com.andrerinas.openheadunit.connection.wifi.modes.nativeaa.zjsocket.ZjSocketProbe
@@ -2774,6 +2775,13 @@ class NativeAaHandshakeManager(
                         continue
                     }
 
+                    // LibreHU fork: with no network to hand over, because Android refuses this app the group for want
+                    // of location (WifiDirectLocationGate), a woken phone would join nothing: it is left alone.
+                    if (credentials == null && WifiDirectLocationGate.missing(context) != null) {
+                        AppLog.w("NativeAA: not waking ${device.name ?: "unnamed"} (${device.address}): no WiFi Direct " +
+                            "group can be made while this app may not use location.")
+                        break
+                    }
                     // Recheck after credential/listener waits, including jobs queued before Save.
                     if (!wakesPhone()) break
                     AppLog.i("NativeAA: Attempting active poke to device: ${device.name} (${device.address})...")

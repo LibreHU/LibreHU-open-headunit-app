@@ -51,6 +51,8 @@ object ConnectionIssueBannerPolicy {
      *   the refusal above is usually the symptom of, so it is keyed the same way.
      * - `WIFI_RADIO_OFF` is raised on the branch above both of those, where the radio is off and the
      *   platform refuses to switch it on, so no group is ever asked for. Same transport, same key.
+     * - `WIFI_DIRECT_LOCATION_DENIED` (LibreHU fork) is raised in the same manager where a Native AA group would be
+     *   asked for and Android 10 to 12 would refuse it for want of location. Same transport, same key.
      * - `HANDS_FREE_HELD_ELSEWHERE` is raised by the wake poke in `NativeAaHandshakeManager`, which
      *   only runs in Native AA but runs on both of its transports, so it is keyed to both.
      * - `HANDS_FREE_RECORD_REFUSED` is raised where that manager opens its listeners, which is the
@@ -86,6 +88,7 @@ object ConnectionIssueBannerPolicy {
                 ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED,
                 ConnectionIssue.WIFI_DIRECT_STACK_CYCLED,
                 ConnectionIssue.WIFI_DIRECT_STACK_STUCK,
+                ConnectionIssue.WIFI_DIRECT_LOCATION_DENIED,
                 ConnectionIssue.WIFI_RADIO_OFF,
                 ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED,
                 ConnectionIssue.HOME_WIFI_REJOINED_BESIDE_GROUP

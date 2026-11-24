@@ -1744,6 +1744,7 @@
     <string name="bt_manufacturer_devices_message">A fejegység ezeket az eszközöket mentette a saját Bluetooth-listájába:\n\n%1$s\n\nAz Android nem párosítottként listázza őket. Itt nem választhatók ki Android Bluetooth-indítókhoz vagy a telefon felébresztéséhez. Ez a mentett lista nem mutatja meg, hogy az eszközök csatlakoznak-e, illetve hogy elérhető-e Android Auto-kapcsolat.</string>
     <string name="bt_manufacturer_devices_title">A fejegységen keresztül párosított eszközök</string>
     <string name="connection_issue_banner_wifi_direct_stuck">A Wi-Fi Direct elakadt ezen az egységen, és csak a Wi-Fi újraindítása oldja fel. Érintse meg a Wi-Fi újraindításához.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Az Android nem engedi, hogy ez az alkalmazás létrehozza a Wi-Fi Direct hálózatot, mert nem használhatja a helyadatokat. Koppintson, és engedélyezze a helyadatokat mindig.</string>
     <string name="hct_aa_bluetooth_busy">A Bluetooth foglalt. Az Android Auto nem indítja újra a folyamatban lévő hívást vagy kapcsolatot.</string>
     <string name="hct_aa_handoff_unavailable">A fejegység nem biztosított Android Auto-kapcsolatot. Az Open Headunit leállította ezt a kísérletet.</string>
     <string name="hct_aa_no_paired_phone">A fejegység Bluetooth-listájában nem található mentett telefon. Párosítsa a telefonját a fejegység Bluetooth-alkalmazásával, majd válassza ki itt.</string>

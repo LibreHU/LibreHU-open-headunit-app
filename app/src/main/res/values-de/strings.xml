@@ -1752,6 +1752,7 @@
     <string name="bt_manufacturer_devices_message">Das Autoradio hat diese Geräte in seiner eigenen Bluetooth-Liste gespeichert:\n\n%1$s\n\nAndroid führt sie nicht als gekoppelt auf. Du kannst sie hier nicht für Android-Bluetooth-Auslöser oder das Wecken des Smartphones auswählen. Diese gespeicherte Liste zeigt nicht, ob die Geräte verbunden sind oder ob eine Android-Auto-Verbindung möglich ist.</string>
     <string name="bt_manufacturer_devices_title">Über das Autoradio gekoppelte Geräte</string>
     <string name="connection_issue_banner_wifi_direct_stuck">WiFi Direct hängt auf diesem Gerät, nur ein WLAN-Neustart löst das. Tippe, um WLAN neu zu starten.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android lässt diese App das WiFi-Direct-Netz nicht erstellen, weil sie den Standort nicht nutzen darf. Tippen und den Standort immer erlauben.</string>
     <string name="hct_aa_bluetooth_busy">Bluetooth ist belegt. Android Auto startet keinen laufenden Anruf und keine aktive Verbindung neu.</string>
     <string name="hct_aa_handoff_unavailable">Das Autoradio hat keine Android-Auto-Verbindung bereitgestellt. Open Headunit hat diesen Versuch abgebrochen.</string>
     <string name="hct_aa_no_paired_phone">In der Bluetooth-Liste des Autoradios wurde kein gespeichertes Smartphone gefunden. Koppele dein Smartphone in der Bluetooth-App des Autoradios und wähle es dann hier aus.</string>

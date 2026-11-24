@@ -2889,6 +2889,11 @@ class Settings(private val context: Context) {
         get() = prefs.getLong("connection-issue-stale-usb-accessory", 0L)
         set(value) = prefs.edit().putLong("connection-issue-stale-usb-accessory", value).apply()
 
+    /** LibreHU fork: [ConnectionIssue.WIFI_DIRECT_LOCATION_DENIED]. */
+    var connectionIssueWifiDirectLocationAtEpochMs: Long
+        get() = prefs.getLong("connection-issue-wifi-direct-location", 0L)
+        set(value) = prefs.edit().putLong("connection-issue-wifi-direct-location", value).apply()
+
     /**
      * When the user last dismissed the failure banner.
      *

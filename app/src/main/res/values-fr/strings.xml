@@ -1789,6 +1789,7 @@
     <string name="bt_manufacturer_devices_message">L\'autoradio a enregistré ces appareils dans sa propre liste Bluetooth :\n\n%1$s\n\nAndroid ne les répertorie pas comme associés. Vous ne pouvez pas les sélectionner ici pour les déclencheurs Bluetooth Android ni pour le réveil du téléphone. Cette liste enregistrée n\'indique pas si ces appareils sont connectés ni si une connexion Android Auto est disponible.</string>
     <string name="bt_manufacturer_devices_title">Appareils associés via l\'autoradio</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct est bloqué sur cet appareil et seul un redémarrage du Wi-Fi le libère. Appuyez pour redémarrer le Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android refuse à l\'application de créer le réseau Wi-Fi Direct, car elle n\'a pas accès à la position. Appuyez et autorisez la position tout le temps.</string>
     <string name="hct_aa_bluetooth_busy">Le Bluetooth est occupé. Android Auto ne redémarrera pas un appel ni une connexion en cours.</string>
     <string name="hct_aa_handoff_unavailable">L\'autoradio n\'a pas fourni de connexion Android Auto. Open Headunit a arrêté cette tentative.</string>
     <string name="hct_aa_no_paired_phone">Aucun téléphone enregistré dans la liste Bluetooth de l\'autoradio. Associez votre téléphone avec l\'application Bluetooth de l\'autoradio, puis sélectionnez-le ici.</string>

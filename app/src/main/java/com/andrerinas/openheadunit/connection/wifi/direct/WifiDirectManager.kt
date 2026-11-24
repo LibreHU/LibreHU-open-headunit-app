@@ -216,6 +216,8 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
      * at all. Reset by [stop] rather than by a bring-up, so one refusal is reported per mode.
      */
     private var lastGroupRefusalReportAtMs = 0L
+    /** LibreHU fork: last time [locationStopsGroup] said so. */
+    private var lastLocationRefusalReportAtMs = 0L
 
     /**
      * Set once a pinned 5 GHz channel has failed its whole retry budget on API 29+.
@@ -786,6 +788,7 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
         ConnectionIssues.clear(context, ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED)
         ConnectionIssues.clear(context, ConnectionIssue.WIFI_DIRECT_STACK_CYCLED)
         ConnectionIssues.clear(context, ConnectionIssue.WIFI_DIRECT_STACK_STUCK)
+        ConnectionIssues.clear(context, ConnectionIssue.WIFI_DIRECT_LOCATION_DENIED)
         ConnectionIssues.clear(context, ConnectionIssue.WIFI_RADIO_OFF)
         synchronized(wedgeLock) { groupCreateFailures.clear() }
     }
@@ -1713,6 +1716,27 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
      * and the nearest other mention of it in a reporter's log is a minute earlier in a different
      * component's output.
      */
+    /**
+     * LibreHU fork: no group is asked for, because Android would refuse it for want of location
+     * ([WifiDirectLocationGate]); said at most once per [GROUP_REFUSAL_REPORT_INTERVAL_MS] and shown on the banner.
+     * Returns true when the group must not be asked for.
+     */
+    private fun locationStopsGroup(): Boolean {
+        val missing = WifiDirectLocationGate.missing(context) ?: return false
+        ConnectionStageTracker.networkAbandoned()
+        val now = SystemClock.elapsedRealtime()
+        if (lastLocationRefusalReportAtMs == 0L || now - lastLocationRefusalReportAtMs >= GROUP_REFUSAL_REPORT_INTERVAL_MS) {
+            lastLocationRefusalReportAtMs = now
+            AppLog.e(
+                "WifiDirectManager: no WiFi Direct group asked for: this Android only makes one for an app holding " +
+                    "${missing.substringAfterLast('.')}, which this app lacks. Allow its location (all the time) in " +
+                    "Android's settings; nothing is retried until then."
+            )
+        }
+        ConnectionIssues.raise(context, ConnectionIssue.WIFI_DIRECT_LOCATION_DENIED)
+        return true
+    }
+
     private fun reportGroupRefusal(reasonStr: String) {
         // Before the throttle: every refusal ends the step, even one whose report is skipped.
         ConnectionStageTracker.networkAbandoned()
@@ -2377,6 +2401,12 @@ class WifiDirectManager(private val context: Context) : WifiP2pManager.Connectio
     private fun createQuietGroup(retryCount: Int) {
         val mgr = manager ?: run { releaseNativeCreateWindow("the P2P manager went away before the create"); return }
         val ch = channel ?: run { releaseNativeCreateWindow("the P2P channel went away before the create"); return }
+        // LibreHU fork: a request Android is sure to refuse is not made, nor retried, nor removed and made again.
+        if (locationStopsGroup()) {
+            isGroupCreatingOrCreated = false
+            releaseNativeCreateWindow("this app may not use location, which this Android requires for a group")
+            return
+        }
 
         // Read once per attempt rather than held in a field: the setting is written between runs on
         // a rig, and a group made after the write must be the one the write asked for.

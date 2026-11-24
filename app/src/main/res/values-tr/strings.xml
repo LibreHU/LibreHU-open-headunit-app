@@ -1743,6 +1743,7 @@
     <string name="bt_manufacturer_devices_message">Ana ünite bu cihazları kendi Bluetooth listesine kaydetti:\n\n%1$s\n\nAndroid bunları eşlenmiş olarak göstermiyor. Burada Android Bluetooth tetikleyicileri veya telefonu uyandırma için seçilemezler. Bu kayıtlı liste, cihazların bağlı olup olmadığını veya bir Android Auto bağlantısının kullanılabilir olup olmadığını göstermez.</string>
     <string name="bt_manufacturer_devices_android_unavailable">Ana ünite bu cihazları kendi Bluetooth listesine kaydetti:\n\n%1$s\n\nAndroid Bluetooth listesi şu anda kullanılamıyor. Bu kayıtlı liste tek başına Android Bluetooth tetikleyicileri veya telefonu uyandırma için kullanılamaz. Cihazların bağlı olup olmadığını veya bir Android Auto bağlantısının kullanılabilir olup olmadığını göstermez.</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Bu ünitede Wi-Fi Direct takıldı ve yalnızca Wi-Fi\'ı yeniden başlatmak onu serbest bırakır. Wi-Fi\'ı yeniden başlatmak için dokunun.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android, konum kullanamadığı için bu uygulamanın Wi-Fi Direct ağını kurmasına izin vermiyor. Dokunun ve konuma her zaman izin verin.</string>
     <string name="wifi_restart_running">Wi-Fi yeniden başlatılıyor…</string>
     <string name="wifi_restart_failed">Wi-Fi yeniden başlatılamadı. Buradan kapatıp açın.</string>
     <string name="auto_restart_wifi_title">Wi-Fi Direct takılınca Wi-Fi\'ı yeniden başlat</string>

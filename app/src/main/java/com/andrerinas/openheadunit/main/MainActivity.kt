@@ -1416,6 +1416,8 @@ class MainActivity : BaseActivity() {
                     R.string.connection_issue_banner_wifi_direct_cycled
                 ConnectionIssue.WIFI_DIRECT_STACK_STUCK ->
                     R.string.connection_issue_banner_wifi_direct_stuck
+                ConnectionIssue.WIFI_DIRECT_LOCATION_DENIED ->
+                    R.string.connection_issue_banner_wifi_direct_location
                 ConnectionIssue.WIFI_RADIO_OFF ->
                     R.string.connection_issue_banner_wifi_radio_off
                 ConnectionIssue.VIDEO_LINK_TOO_SLOW ->
@@ -1509,6 +1511,18 @@ class MainActivity : BaseActivity() {
             // The remedy is a WiFi restart: done here when root or local ADB allows, else the panel.
             ConnectionIssue.WIFI_DIRECT_STACK_STUCK -> {
                 restartWifiFromBanner()
+                return
+            }
+            // LibreHU fork: the remedy is this app's location permission, on its page in Android's settings.
+            ConnectionIssue.WIFI_DIRECT_LOCATION_DENIED -> {
+                try {
+                    startActivity(
+                        Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            .setData(android.net.Uri.fromParts("package", packageName, null))
+                    )
+                } catch (e: Exception) {
+                    AppLog.w("MainActivity: could not open this app's settings: ${e.message}")
+                }
                 return
             }
             // Auto-reconnect is a per-network switch in Android's own WiFi settings.

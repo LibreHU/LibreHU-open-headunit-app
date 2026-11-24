@@ -58,6 +58,13 @@ enum class ConnectionIssue {
      * [com.andrerinas.openheadunit.connection.wifi.direct.P2pStackWedgePolicy].
      */
     WIFI_DIRECT_STACK_STUCK,
+    /**
+     * LibreHU fork: Android 10 to 12 refuse this app a WiFi Direct group because it may not use location (or not
+     * in the background, where Native AA starts at boot): see
+     * [com.andrerinas.openheadunit.connection.wifi.direct.WifiDirectLocationGate]. No group is asked for while it
+     * stands. The user's lever is the app's location permission, allowed all the time.
+     */
+    WIFI_DIRECT_LOCATION_DENIED,
 
     /**
      * This unit's WiFi is off, and this Android will not let an app switch it on.
@@ -254,6 +261,7 @@ object ConnectionIssues {
                 ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED -> settings.connectionIssueWifiDirectRefusedAtEpochMs
                 ConnectionIssue.WIFI_DIRECT_STACK_CYCLED -> settings.connectionIssueWifiDirectCycledAtEpochMs
                 ConnectionIssue.WIFI_DIRECT_STACK_STUCK -> settings.connectionIssueWifiDirectStuckAtEpochMs
+                ConnectionIssue.WIFI_DIRECT_LOCATION_DENIED -> settings.connectionIssueWifiDirectLocationAtEpochMs
                 ConnectionIssue.WIFI_RADIO_OFF -> settings.connectionIssueWifiRadioOffAtEpochMs
                 ConnectionIssue.VIDEO_LINK_TOO_SLOW -> settings.connectionIssueVideoLinkTooSlowAtEpochMs
                 ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED -> settings.connectionIssueFiveGhzChannelRefusedAtEpochMs
@@ -278,6 +286,7 @@ object ConnectionIssues {
                     ConnectionIssue.WIFI_DIRECT_GROUP_REFUSED -> settings.connectionIssueWifiDirectRefusedAtEpochMs = atEpochMs
                     ConnectionIssue.WIFI_DIRECT_STACK_CYCLED -> settings.connectionIssueWifiDirectCycledAtEpochMs = atEpochMs
                     ConnectionIssue.WIFI_DIRECT_STACK_STUCK -> settings.connectionIssueWifiDirectStuckAtEpochMs = atEpochMs
+                    ConnectionIssue.WIFI_DIRECT_LOCATION_DENIED -> settings.connectionIssueWifiDirectLocationAtEpochMs = atEpochMs
                     ConnectionIssue.WIFI_RADIO_OFF -> settings.connectionIssueWifiRadioOffAtEpochMs = atEpochMs
                     ConnectionIssue.VIDEO_LINK_TOO_SLOW -> settings.connectionIssueVideoLinkTooSlowAtEpochMs = atEpochMs
                     ConnectionIssue.FIVE_GHZ_CHANNEL_REFUSED -> settings.connectionIssueFiveGhzChannelRefusedAtEpochMs = atEpochMs

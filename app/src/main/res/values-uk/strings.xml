@@ -1751,6 +1751,7 @@
     <string name="bt_manufacturer_devices_message">Головний пристрій зберіг ці пристрої у власному списку Bluetooth:\n\n%1$s\n\nAndroid не показує їх як з’єднані. Тут їх не можна вибрати для тригерів Bluetooth Android або для пробудження телефона. Цей збережений список не показує, чи підключені пристрої і чи доступне підключення Android Auto.</string>
     <string name="bt_manufacturer_devices_android_unavailable">Головний пристрій зберіг ці пристрої у власному списку Bluetooth:\n\n%1$s\n\nСписок Bluetooth Android зараз недоступний. Лише цей збережений список не можна використовувати для тригерів Bluetooth Android або пробудження телефона. Він не показує, чи підключені пристрої і чи доступне підключення Android Auto.</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct на цьому пристрої завис, і допомагає лише перезапуск Wi-Fi. Торкніться, щоб перезапустити Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android не дозволяє цій програмі створити мережу Wi-Fi Direct, бо їй заборонено доступ до геолокації. Торкніться й дозвольте геолокацію завжди.</string>
     <string name="wifi_restart_running">Перезапуск Wi-Fi…</string>
     <string name="wifi_restart_failed">Не вдалося перезапустити Wi-Fi. Вимкніть і ввімкніть його тут.</string>
     <string name="auto_restart_wifi_title">Перезапускати Wi-Fi, коли Wi-Fi Direct зависає</string>

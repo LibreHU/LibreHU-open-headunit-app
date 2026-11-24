@@ -1746,6 +1746,7 @@
     <string name="bt_manufacturer_devices_message">主机已将以下设备保存在自己的蓝牙列表中：\n\n%1$s\n\nAndroid 未将它们列为已配对设备。在此无法将它们选为 Android 蓝牙触发条件或用于唤醒手机。此已保存列表无法表明设备是否已连接，也无法表明 Android Auto 连接是否可用。</string>
     <string name="bt_manufacturer_devices_android_unavailable">主机已将以下设备保存在自己的蓝牙列表中：\n\n%1$s\n\nAndroid 蓝牙列表目前不可用。仅凭此已保存列表，无法用于 Android 蓝牙触发条件或唤醒手机。它也无法表明设备是否已连接，或 Android Auto 连接是否可用。</string>
     <string name="connection_issue_banner_wifi_direct_stuck">本机的 Wi-Fi Direct 已卡住，只有重启 WLAN 才能恢复。点按即可重启 WLAN。</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android 不允许此应用创建 WiFi 直连网络，因为它无权使用位置信息。点按并始终允许位置信息。</string>
     <string name="wifi_restart_running">正在重启 WLAN…</string>
     <string name="wifi_restart_failed">无法重启 WLAN。请在此关闭后再重新开启。</string>
     <string name="auto_restart_wifi_title">Wi-Fi Direct 卡住时重启 WLAN</string>

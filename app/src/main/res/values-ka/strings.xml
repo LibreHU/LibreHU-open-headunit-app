@@ -1730,6 +1730,7 @@
     <string name="bt_manufacturer_devices_message">მაგნიტოლამ ეს მოწყობილობები თავისსავე Bluetooth სიაში შეინახა:\n\n%1$s\n\nAndroid მათ დაწყვილებულად არ აჩვენებს. აქ მათი არჩევა Android-ის Bluetooth ტრიგერებისთვის ან ტელეფონის გასაღვიძებლად შეუძლებელია. ეს შენახული სია არ გვეუბნება, ისინი დაკავშირებულია თუ არა, ან Android Auto-თი დაკავშირება შესაძლებელია თუ არა.</string>
     <string name="bt_manufacturer_devices_title">მაგნიტოლის მეშვეობით დაწყვილებული მოწყობილობები</string>
     <string name="connection_issue_banner_wifi_direct_stuck">ამ მაგნიტოლაზე Wi-Fi Direct გაიჭედა და მხოლოდ Wi-Fi-ის გადატვირთვა ათავისუფლებს. შეეხეთ Wi-Fi-ის გადასატვირთად.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android არ აძლევს აპს Wi-Fi Direct ქსელის შექმნის უფლებას, რადგან მას მდებარეობაზე წვდომა არ აქვს. შეეხეთ და ყოველთვის დაუშვით მდებარეობა.</string>
     <string name="hct_aa_bluetooth_busy">Bluetooth დაკავებულია. Android Auto არ გადატვირთავს მიმდინარე ზარს ან კავშირს.</string>
     <string name="hct_aa_handoff_unavailable">მაგნიტოლამ Android Auto-ს კავშირი არ უზრუნველყო. Open Headunit-მა ეს მცდელობა შეწყვიტა.</string>
     <string name="hct_aa_no_paired_phone">მაგნიტოლის Bluetooth სიაში შენახული ტელეფონი ვერ მოიძებნა. დააწყვილეთ ტელეფონი მაგნიტოლის Bluetooth აპით და აირჩიეთ აქ.</string>

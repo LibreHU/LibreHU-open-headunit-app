@@ -1750,6 +1750,7 @@
     <string name="bt_manufacturer_devices_message">Đầu phát đã lưu các thiết bị này trong danh sách Bluetooth riêng:\n\n%1$s\n\nAndroid không liệt kê chúng là đã ghép nối. Tại đây không thể chọn chúng cho trình kích hoạt Bluetooth của Android hoặc đánh thức điện thoại. Danh sách đã lưu này không cho biết thiết bị có đang kết nối hay không, hoặc có kết nối Android Auto hay không.</string>
     <string name="bt_manufacturer_devices_android_unavailable">Đầu phát đã lưu các thiết bị này trong danh sách Bluetooth riêng:\n\n%1$s\n\nHiện không có danh sách Bluetooth của Android. Chỉ riêng danh sách đã lưu này không thể dùng cho trình kích hoạt Bluetooth của Android hoặc đánh thức điện thoại. Danh sách không cho biết thiết bị có đang kết nối hay không, hoặc có kết nối Android Auto hay không.</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct trên thiết bị này bị treo và chỉ khởi động lại Wi-Fi mới giải phóng được. Nhấn để khởi động lại Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android không cho ứng dụng này tạo mạng Wi-Fi Direct vì ứng dụng không được dùng vị trí. Chạm và cho phép vị trí mọi lúc.</string>
     <string name="wifi_restart_running">Đang khởi động lại Wi-Fi…</string>
     <string name="wifi_restart_failed">Không thể khởi động lại Wi-Fi. Hãy tắt rồi bật lại tại đây.</string>
     <string name="auto_restart_wifi_title">Khởi động lại Wi-Fi khi Wi-Fi Direct bị treo</string>

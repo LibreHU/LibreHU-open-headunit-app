@@ -1797,6 +1797,7 @@
     <string name="bt_manufacturer_devices_message">A unidade guardou estes dispositivos na sua própria lista Bluetooth:\n\n%1$s\n\nO Android não os apresenta como emparelhados. Aqui, não podem ser selecionados para acionadores Bluetooth do Android nem para acordar o telemóvel. Esta lista guardada não indica se estão ligados nem se existe uma ligação do Android Auto disponível.</string>
     <string name="bt_manufacturer_devices_title">Dispositivos emparelhados através da unidade</string>
     <string name="connection_issue_banner_wifi_direct_stuck">O Wi-Fi Direct desta unidade bloqueou e só um reinício do Wi-Fi o liberta. Toque para reiniciar o Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">O Android não deixa esta app criar a rede Wi-Fi Direct porque não pode usar a localização. Toque e permita a localização sempre.</string>
     <string name="hct_aa_bluetooth_busy">O Bluetooth está ocupado. O Android Auto não vai reiniciar uma chamada ou ligação ativa.</string>
     <string name="hct_aa_handoff_unavailable">A unidade não forneceu uma ligação do Android Auto. O Open Headunit interrompeu esta tentativa.</string>
     <string name="hct_aa_no_paired_phone">Não há nenhum telemóvel guardado na lista Bluetooth da unidade. Emparelhe o telemóvel através da aplicação Bluetooth da unidade e selecione-o aqui.</string>

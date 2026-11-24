@@ -1744,6 +1744,7 @@
     <string name="bt_manufacturer_devices_message">Autorádio uložilo tato zařízení do vlastního seznamu Bluetooth:\n\n%1$s\n\nAndroid je neuvádí jako spárovaná. Nelze je zde vybrat pro spouštěče Bluetooth v Androidu ani pro probuzení telefonu. Tento uložený seznam neříká, zda jsou zařízení připojená ani zda je dostupné připojení Android Auto.</string>
     <string name="bt_manufacturer_devices_title">Zařízení spárovaná přes autorádio</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct na této jednotce uvázl a uvolní ho jen restart Wi-Fi. Klepnutím restartujte Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android nedovolí této aplikaci vytvořit síť Wi-Fi Direct, protože nesmí používat polohu. Klepněte a povolte polohu vždy.</string>
     <string name="hct_aa_bluetooth_busy">Bluetooth je zaneprázdněný. Android Auto nerestartuje probíhající hovor ani aktivní připojení.</string>
     <string name="hct_aa_handoff_unavailable">Autorádio neposkytlo připojení Android Auto. Open Headunit tento pokus zastavila.</string>
     <string name="hct_aa_no_paired_phone">V seznamu Bluetooth autorádia nebyl nalezen žádný uložený telefon. Spárujte telefon v aplikaci Bluetooth autorádia a poté ho zde vyberte.</string>

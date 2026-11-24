@@ -1745,6 +1745,7 @@
     <string name="bt_manufacturer_devices_message">A central salvou estes dispositivos na própria lista de Bluetooth:\n\n%1$s\n\nO Android não os lista como pareados. Aqui, eles não podem ser selecionados para gatilhos de Bluetooth do Android nem para ativar o celular. Essa lista salva não indica se eles estão conectados nem se há uma conexão do Android Auto disponível.</string>
     <string name="bt_manufacturer_devices_title">Dispositivos pareados pela central</string>
     <string name="connection_issue_banner_wifi_direct_stuck">O Wi-Fi Direct desta central travou e só reiniciar o Wi-Fi resolve. Toque para reiniciar o Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">O Android não deixa este app criar a rede Wi-Fi Direct porque ele não pode usar a localização. Toque e permita a localização o tempo todo.</string>
     <string name="hct_aa_bluetooth_busy">O Bluetooth está ocupado. O Android Auto não vai reiniciar uma chamada ou conexão ativa.</string>
     <string name="hct_aa_handoff_unavailable">A central não forneceu uma conexão do Android Auto. O Open Headunit interrompeu esta tentativa.</string>
     <string name="hct_aa_no_paired_phone">Nenhum celular salvo na lista de Bluetooth da central. Pareie o celular pelo app de Bluetooth da central e selecione-o aqui.</string>

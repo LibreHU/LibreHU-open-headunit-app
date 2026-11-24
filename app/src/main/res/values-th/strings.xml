@@ -1801,6 +1801,7 @@
     <string name="bt_manufacturer_devices_message">เฮดยูนิตบันทึกอุปกรณ์เหล่านี้ไว้ในรายการ Bluetooth ของตัวเอง:\n\n%1$s\n\nAndroid ไม่แสดงอุปกรณ์เหล่านี้ว่าจับคู่แล้ว จึงเลือกที่นี่สำหรับทริกเกอร์ Bluetooth ของ Android หรือการปลุกโทรศัพท์ไม่ได้ รายการที่บันทึกนี้ไม่ได้บอกว่าอุปกรณ์เชื่อมต่ออยู่หรือไม่ หรือมีการเชื่อมต่อ Android Auto ให้ใช้หรือไม่</string>
     <string name="bt_manufacturer_devices_android_unavailable">เฮดยูนิตบันทึกอุปกรณ์เหล่านี้ไว้ในรายการ Bluetooth ของตัวเอง:\n\n%1$s\n\nขณะนี้ใช้รายการ Bluetooth ของ Android ไม่ได้ รายการที่บันทึกนี้อย่างเดียวใช้กับทริกเกอร์ Bluetooth ของ Android หรือการปลุกโทรศัพท์ไม่ได้ และไม่ได้บอกว่าอุปกรณ์เชื่อมต่ออยู่หรือไม่ หรือมีการเชื่อมต่อ Android Auto ให้ใช้หรือไม่</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct ในยูนิตนี้ค้างอยู่ และต้องรีสตาร์ท Wi-Fi เท่านั้นจึงจะหลุดจากอาการค้าง แตะเพื่อรีสตาร์ท Wi-Fi</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android ไม่ให้แอปนี้สร้างเครือข่าย Wi-Fi Direct เพราะแอปไม่ได้รับอนุญาตให้ใช้ตำแหน่ง แตะแล้วอนุญาตตำแหน่งตลอดเวลา</string>
     <string name="wifi_restart_running">กำลังรีสตาร์ท Wi-Fi…</string>
     <string name="wifi_restart_failed">รีสตาร์ท Wi-Fi ไม่ได้ ปิดแล้วเปิดใหม่ที่นี่</string>
     <string name="auto_restart_wifi_title">รีสตาร์ท Wi-Fi เมื่อ Wi-Fi Direct ค้าง</string>

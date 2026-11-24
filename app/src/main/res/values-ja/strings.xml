@@ -1747,6 +1747,7 @@
     <string name="bt_manufacturer_devices_message">ヘッドユニットが独自のBluetoothリストに保存したデバイスです。\n\n%1$s\n\nAndroidではペア設定済みとして表示されていません。ここでは、AndroidのBluetoothトリガーやスマートフォンのスリープ解除用に選択できません。この保存リストでは、接続中かどうか、Android Autoに接続できるかどうかは分かりません。</string>
     <string name="bt_manufacturer_devices_title">ヘッドユニットでペア設定したデバイス</string>
     <string name="connection_issue_banner_wifi_direct_stuck">このヘッドユニットのWi-Fi Directが停止しており、Wi-Fiを再起動しないと解除できません。タップしてWi-Fiを再起動します。</string>
+    <string name="connection_issue_banner_wifi_direct_location">このアプリは位置情報を使用できないため、Android が Wi-Fi Direct ネットワークの作成を許可しません。タップして位置情報を常に許可してください。</string>
     <string name="hct_aa_bluetooth_busy">Bluetoothが使用中です。Android Autoは、通話中または接続中の状態を再起動しません。</string>
     <string name="hct_aa_handoff_unavailable">ヘッドユニットがAndroid Autoの接続を提供しませんでした。Open Headunitはこの試行を中止しました。</string>
     <string name="hct_aa_no_paired_phone">ヘッドユニットのBluetoothリストに保存されたスマートフォンがありません。ヘッドユニットのBluetoothアプリでスマートフォンをペア設定してから、ここで選択してください。</string>

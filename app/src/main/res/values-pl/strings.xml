@@ -1750,6 +1750,7 @@
     <string name="bt_manufacturer_devices_message">Stacja zapisała te urządzenia na własnej liście Bluetooth:\n\n%1$s\n\nAndroid nie pokazuje ich jako sparowanych. Nie można ich tu wybrać do wyzwalaczy Bluetooth w Androidzie ani do wybudzania telefonu. Ta zapisana lista nie pokazuje, czy urządzenia są połączone ani czy połączenie z Android Auto jest dostępne.</string>
     <string name="bt_manufacturer_devices_title">Urządzenia sparowane przez stację</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct na tej stacji się zawiesiło i odblokuje je tylko ponowne uruchomienie Wi-Fi. Dotknij, aby uruchomić Wi-Fi ponownie.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android nie pozwala tej aplikacji utworzyć sieci Wi-Fi Direct, bo nie ma dostępu do lokalizacji. Dotknij i zezwól na lokalizację zawsze.</string>
     <string name="hct_aa_bluetooth_busy">Bluetooth jest zajęty. Android Auto nie uruchomi ponownie trwającej rozmowy ani połączenia.</string>
     <string name="hct_aa_handoff_unavailable">Stacja nie udostępniła połączenia z Android Auto. Open Headunit przerwał tę próbę.</string>
     <string name="hct_aa_no_paired_phone">Na liście Bluetooth stacji nie ma zapisanego telefonu. Sparuj telefon w aplikacji Bluetooth stacji, a potem wybierz go tutaj.</string>

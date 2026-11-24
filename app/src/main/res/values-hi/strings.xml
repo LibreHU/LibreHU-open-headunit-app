@@ -1790,6 +1790,7 @@
     <string name="bt_manufacturer_devices_message">हेड यूनिट ने ये डिवाइस अपनी ब्लूटूथ सूची में सेव किए हैं:\n\n%1$s\n\nAndroid इन्हें पेयर किए हुए डिवाइस के रूप में नहीं दिखाता। यहाँ इन्हें Android ब्लूटूथ ट्रिगर या फ़ोन को जगाने के लिए नहीं चुना जा सकता। इस सेव की गई सूची से यह पता नहीं चलता कि ये डिवाइस जुड़े हैं या Android Auto कनेक्शन उपलब्ध है।</string>
     <string name="bt_manufacturer_devices_title">हेड यूनिट से पेयर किए गए डिवाइस</string>
     <string name="connection_issue_banner_wifi_direct_stuck">इस यूनिट पर वाई-फ़ाई डायरेक्ट अटका हुआ है और सिर्फ़ वाई-फ़ाई रीस्टार्ट करने से ही छूटेगा। वाई-फ़ाई रीस्टार्ट करने के लिए टैप करें।</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android इस ऐप को Wi-Fi Direct नेटवर्क बनाने नहीं देता, क्योंकि इसे लोकेशन की अनुमति नहीं है। टैप करें और लोकेशन हमेशा के लिए अनुमति दें।</string>
     <string name="hct_aa_bluetooth_busy">ब्लूटूथ व्यस्त है। Android Auto चालू कॉल या कनेक्शन को रीस्टार्ट नहीं करेगा।</string>
     <string name="hct_aa_handoff_unavailable">हेड यूनिट ने Android Auto कनेक्शन नहीं दिया। Open Headunit ने यह कोशिश रोक दी है।</string>
     <string name="hct_aa_no_paired_phone">हेड यूनिट की ब्लूटूथ सूची में कोई सेव किया हुआ फ़ोन नहीं मिला। हेड यूनिट के ब्लूटूथ ऐप से अपना फ़ोन पेयर करें, फिर उसे यहाँ चुनें।</string>

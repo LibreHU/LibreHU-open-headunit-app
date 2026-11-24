@@ -1758,6 +1758,7 @@
     <string name="bt_manufacturer_devices_message">La unidad central guardó estos dispositivos en su propia lista de Bluetooth:\n\n%1$s\n\nAndroid no los muestra como vinculados. Aquí no se pueden elegir para los activadores de Bluetooth de Android ni para activar el móvil. Esta lista guardada no indica si los dispositivos están conectados ni si hay una conexión de Android Auto disponible.</string>
     <string name="bt_manufacturer_devices_title">Dispositivos vinculados desde la unidad central</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct está atascado en esta unidad y solo se libera reiniciando el Wi-Fi. Toca para reiniciarlo.</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android no deja que esta app cree la red Wi-Fi Direct porque no puede usar la ubicación. Toca y permite la ubicación todo el tiempo.</string>
     <string name="hct_aa_bluetooth_busy">El Bluetooth está ocupado. Android Auto no reiniciará una llamada ni una conexión activa.</string>
     <string name="hct_aa_handoff_unavailable">La unidad central no proporcionó una conexión de Android Auto. Open Headunit detuvo este intento.</string>
     <string name="hct_aa_no_paired_phone">No se encontró ningún móvil guardado en la lista de Bluetooth de la unidad central. Vincula tu móvil desde la app de Bluetooth de la unidad y selecciónalo aquí.</string>

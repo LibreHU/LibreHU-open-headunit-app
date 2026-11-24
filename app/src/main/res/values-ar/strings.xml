@@ -1745,6 +1745,7 @@
     <string name="bt_manufacturer_devices_message">حفظت الوحدة الرئيسية هذه الأجهزة في قائمة Bluetooth الخاصة بها:\n\n%1$s\n\nلا يعرضها Android كأجهزة مقترنة. لا يمكن اختيارها هنا لمشغّلات Bluetooth في Android أو لإيقاظ الهاتف. لا تُبيّن هذه القائمة المحفوظة ما إذا كانت الأجهزة متصلة أو ما إذا كان اتصال Android Auto متاحًا.</string>
     <string name="bt_manufacturer_devices_title">الأجهزة المقترنة عبر الوحدة الرئيسية</string>
     <string name="connection_issue_banner_wifi_direct_stuck">Wi-Fi Direct معطّل على هذه الوحدة، ولا يحرّره إلا إعادة تشغيل Wi-Fi. انقر لإعادة تشغيل Wi-Fi.</string>
+    <string name="connection_issue_banner_wifi_direct_location">لا يسمح Android لهذا التطبيق بإنشاء شبكة Wi-Fi Direct لأنه لا يملك إذن الموقع. انقر واسمح بالموقع طوال الوقت.</string>
     <string name="hct_aa_bluetooth_busy">Bluetooth مشغول. لن يعيد Android Auto تشغيل مكالمة أو اتصال نشط.</string>
     <string name="hct_aa_handoff_unavailable">لم توفّر الوحدة الرئيسية اتصال Android Auto. أوقف Open Headunit هذه المحاولة.</string>
     <string name="hct_aa_no_paired_phone">لم يُعثر على هاتف محفوظ في قائمة Bluetooth بالوحدة الرئيسية. اقرن هاتفك من تطبيق Bluetooth في الوحدة الرئيسية، ثم اختره هنا.</string>

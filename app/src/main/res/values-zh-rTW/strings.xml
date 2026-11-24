@@ -1746,6 +1746,7 @@
     <string name="bt_manufacturer_devices_message">主機已將下列裝置儲存在自己的藍牙清單中：\n\n%1$s\n\nAndroid 並未將它們列為已配對。在此無法將它們選為 Android 藍牙觸發條件，也無法用來喚醒手機。這份儲存的清單無法顯示裝置是否已連線，也無法顯示 Android Auto 連線是否可用。</string>
     <string name="bt_manufacturer_devices_android_unavailable">主機已將下列裝置儲存在自己的藍牙清單中：\n\n%1$s\n\nAndroid 藍牙清單目前無法使用。光憑這份儲存的清單，無法用於 Android 藍牙觸發條件或喚醒手機。它也無法顯示裝置是否已連線，或 Android Auto 連線是否可用。</string>
     <string name="connection_issue_banner_wifi_direct_stuck">本機的 Wi-Fi Direct 已卡住，只有重新啟動 Wi-Fi 才能解除。輕觸即可重新啟動 Wi-Fi。</string>
+    <string name="connection_issue_banner_wifi_direct_location">Android 不允許此應用程式建立 Wi-Fi Direct 網路，因為它無權使用位置資訊。輕觸並一律允許位置資訊。</string>
     <string name="wifi_restart_running">正在重新啟動 Wi-Fi…</string>
     <string name="wifi_restart_failed">無法重新啟動 Wi-Fi。請在此關閉後再重新開啟。</string>
     <string name="auto_restart_wifi_title">Wi-Fi Direct 卡住時重新啟動 Wi-Fi</string>

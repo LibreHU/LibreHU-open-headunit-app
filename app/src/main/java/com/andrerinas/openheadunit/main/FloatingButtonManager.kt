@@ -33,6 +33,10 @@ object FloatingButtonManager {
     }
 
     fun update(context: Context) {
+        // LibreHU fork: before the first unlock there is no overlay to show and no Settings to read (credential-
+        // encrypted storage): App.provide() would build the object graph and take the process down. Reached from
+        // the foreground callback of the Direct Boot aware USB attach activity, and from the boot receiver.
+        if (!App.isUserUnlocked(context)) return
         val settings = App.provide(context).settings
         val enabled = settings.enableFloatingButton
         val permissionGranted = hasOverlayPermission(context)
